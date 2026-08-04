@@ -186,8 +186,8 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
       {/* Section Title & Subtitle */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-emerald-900/30 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-cyan-400 font-black text-xs uppercase tracking-widest">
-            <Zap className="w-4 h-4 text-cyan-400" />
+          <div className="flex items-center gap-2 text-emerald-400 font-black text-xs uppercase tracking-widest">
+            <Zap className="w-4 h-4 text-emerald-400" />
             Catálogo Oficial Free Fire & Juegos LATAM
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight mt-1">
@@ -208,7 +208,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               onClick={() => setGraphicStyle('pinxtore')}
               className={`px-3 py-1.5 rounded-lg transition-all flex-1 text-center cursor-pointer ${
                 graphicStyle === 'pinxtore'
-                  ? 'bg-cyan-500 text-black font-black shadow-[0_0_10px_rgba(6,182,212,0.5)]'
+                  ? 'bg-emerald-500 text-black font-black shadow-[0_0_10px_rgba(6,182,212,0.5)]'
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
@@ -232,7 +232,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               placeholder="Buscar código o diamantes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/10 text-white placeholder-white/30 text-xs font-bold focus:outline-none focus:border-cyan-500 transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-black border border-white/10 text-white placeholder-white/30 text-xs font-bold focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
         </div>
@@ -244,7 +244,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           onClick={() => setSelectedCategory('all')}
           className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all cursor-pointer flex items-center gap-1.5 min-h-[42px] ${
             selectedCategory === 'all'
-              ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
               : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 hover:text-white'
           }`}
         >
@@ -255,8 +255,8 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           onClick={() => setSelectedCategory('diamonds')}
           className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] ${
             selectedCategory === 'diamonds'
-              ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-900/40'
+              ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              : 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-900/40'
           }`}
         >
           <span>🔥 Free Fire (LATAM)</span>
@@ -278,11 +278,11 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           onClick={() => setSelectedCategory('passes')}
           className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] ${
             selectedCategory === 'passes'
-              ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+              ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
               : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 hover:text-white'
           }`}
         >
-          <Trophy className="w-4 h-4 text-cyan-400" />
+          <Trophy className="w-4 h-4 text-emerald-400" />
           <span>🎯 Pases de Nivel</span>
         </button>
 
@@ -300,7 +300,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
       </div>
 
       {/* Grid of Product Cards */}
-      <div id="catalog-products-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredProducts.map((product) => {
           const isGoldStyle = product.isGoldPromo || product.category === 'memberships';
           const isQuickEditing = quickPriceId === product.id;
@@ -310,7 +310,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               <div
                 key={product.id}
                 id={`product-card-${product.id}`}
-                className="relative p-0.5 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 shadow-[0_0_20px_rgba(251,191,36,0.25)] group hover:scale-[1.01] transition-transform"
+                className="relative p-0.5 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 shadow-[0_0_20px_rgba(251,191,36,0.25)] group hover:scale-105 transition-transform"
               >
                 <div className="bg-[#07090e] rounded-[14px] p-5 text-white space-y-4 flex flex-col justify-between h-full">
                   {/* Card Header Top Labels & Admin Edit Button */}
@@ -440,13 +440,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               className={`bg-[#030914] border transition-all duration-300 rounded-2xl p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden ${
                 isAdmin
                   ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)]'
-                  : 'border-cyan-500/20 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
+                  : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
               }`}
             >
               {/* Badge Overlay or Admin Quick Edit Button */}
               <div className="flex items-center justify-between mb-1">
                 {product.badgeText ? (
-                  <span className="bg-cyan-500 text-black font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded shadow">
+                  <span className="bg-emerald-500 text-black font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded shadow">
                     {product.badgeText}
                   </span>
                 ) : (
@@ -468,10 +468,10 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               <div className="space-y-3">
                 {/* Product Name Title */}
                 <div className="text-center pt-1">
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tight group-hover:text-cyan-400 transition-colors">
+                  <h3 className="text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 transition-colors">
                     {product.name}
                   </h3>
-                  <p className="text-[10px] text-cyan-400/80 font-black uppercase tracking-widest mt-0.5">
+                  <p className="text-[10px] text-emerald-400/80 font-black uppercase tracking-widest mt-0.5">
                     DIAMANTES FREE FIRE
                   </p>
                 </div>
@@ -495,9 +495,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               </div>
 
               {/* Price & Action Button */}
-              <div className="pt-4 mt-3 border-t border-cyan-900/30 space-y-3">
+              <div className="pt-4 mt-3 border-t border-emerald-900/30 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-cyan-400/70 font-bold uppercase">Precio</span>
+                  <span className="text-xs text-emerald-400/70 font-bold uppercase">Precio</span>
 
                   {isAdmin && isQuickEditing ? (
                     <div className="flex items-center gap-1">
@@ -565,7 +565,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   <button
                     id={`btn-buy-${product.id}`}
                     onClick={() => onSelectProduct(product)}
-                    className="w-full py-3 bg-[#00c3eb] hover:bg-[#00d8ff] text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(0,195,235,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3 sm:py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <ShoppingCart className="w-4 h-4 text-black" />
                     <span>Comprar</span>
@@ -589,7 +589,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               setSearchQuery('');
               setSelectedCategory('all');
             }}
-            className="px-4 py-2 bg-cyan-500 text-black font-black uppercase text-xs rounded-xl cursor-pointer"
+            className="px-4 py-2 bg-emerald-500 text-black font-black uppercase text-xs rounded-xl cursor-pointer"
           >
             Restablecer Filtros
           </button>

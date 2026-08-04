@@ -64,9 +64,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setActiveTab('catalog')} 
             className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer group shrink-0"
           >
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-105 transition-transform">
-              <span className="text-black font-black text-base sm:text-xl leading-none">T</span>
-            </div>
+            <img 
+              src="/logo.jpeg" 
+              alt="TunTun Store Logo" 
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-105 transition-transform"
+            />
             <div>
               <span className="text-lg sm:text-2xl font-black tracking-tighter text-white">
                 TUNTUN<span className="text-emerald-500 italic">STORE</span>

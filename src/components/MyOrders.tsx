@@ -251,7 +251,7 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
 
                   <button
                     onClick={() => onOpenWhatsAppSupport(order)}
-                    className="w-full sm:w-auto px-4 sm:px-5 py-3 rounded-xl bg-emerald-500 text-black font-black uppercase text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-4 sm:px-5 py-3.5 min-h-[44px] rounded-xl bg-emerald-500 text-black font-black uppercase text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4 shrink-0" />
                     <span>Consultar WhatsApp (Pedido #{order.id})</span>

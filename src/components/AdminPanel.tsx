@@ -179,7 +179,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   return (
-    <section id="admin-panel-section" className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
+    <section id="admin-panel-section" className="py-8 px-4 sm:px-6 lg:px-8 max-w-full mx-auto space-y-8">
       
 
 
@@ -423,29 +423,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   {/* Action Buttons */}
                   <div className="pt-2 border-t border-white/10">
                     <span className="text-[10px] text-zinc-400 font-bold uppercase block mb-1.5">Acción de Estado:</span>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        onClick={() => onUpdateOrderStatus(order.id, 'En proceso')}
-                        className="py-2.5 px-1 rounded-xl bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 border border-sky-500/30 text-[10px] font-black uppercase text-center cursor-pointer transition-colors"
+                    <div className="flex">
+                      <select
+                        value={order.status}
+                        onChange={(e) => onUpdateOrderStatus(order.id, e.target.value as OrderStatus)}
+                        className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 border border-white/10 text-white text-xs font-black uppercase transition-colors focus:outline-none focus:border-emerald-500 cursor-pointer"
                       >
-                        🔵 En Proceso
-                      </button>
-                      <button
-                        onClick={() => onUpdateOrderStatus(order.id, 'Completado')}
-                        className={`py-2.5 px-1 rounded-xl text-[10px] font-black uppercase text-center cursor-pointer transition-colors shadow-sm ${
-                          order.isWalletTopUp
-                            ? 'bg-amber-400 text-black font-extrabold hover:bg-amber-300'
-                            : 'bg-emerald-500 text-black hover:bg-emerald-400'
-                        }`}
-                      >
-                        {order.isWalletTopUp ? `⚡ Acreditar` : '🟢 Completado'}
-                      </button>
-                      <button
-                        onClick={() => onUpdateOrderStatus(order.id, 'Cancelado')}
-                        className="py-2.5 px-1 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 text-[10px] font-black uppercase text-center cursor-pointer transition-colors"
-                      >
-                        🔴 Cancelar
-                      </button>
+                        <option value="Pendiente">🟡 Pendiente</option>
+                        <option value="En proceso">🔵 En Proceso</option>
+                        <option value="Completado">🟢 Completado / Acreditar</option>
+                        <option value="Cancelado">🔴 Cancelar</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -569,31 +557,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         {/* State Change Buttons for Admin */}
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => onUpdateOrderStatus(order.id, 'En proceso')}
-                              className="px-2 py-1 rounded bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 border border-sky-500/30 text-[10px] font-black uppercase transition-colors"
-                              title="Marcar En Proceso"
+                            <select
+                              value={order.status}
+                              onChange={(e) => onUpdateOrderStatus(order.id, e.target.value as OrderStatus)}
+                              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-[10px] font-black uppercase transition-colors focus:outline-none focus:border-emerald-500 cursor-pointer"
                             >
-                              En Proceso
-                            </button>
-                            <button
-                              onClick={() => onUpdateOrderStatus(order.id, 'Completado')}
-                              className={`px-2.5 py-1 rounded text-[10px] font-black uppercase transition-colors cursor-pointer ${
-                                order.isWalletTopUp
-                                  ? 'bg-amber-400 hover:bg-amber-300 text-black shadow-[0_0_10px_rgba(251,191,36,0.3)]'
-                                  : 'bg-emerald-500 text-black hover:bg-emerald-400'
-                              }`}
-                              title={order.isWalletTopUp ? 'Aprobar recarga y acreditar dinero a la billetera del usuario' : 'Marcar Completado'}
-                            >
-                              {order.isWalletTopUp ? `⚡ Acreditar $${order.priceUSD.toFixed(2)} USD` : 'Completado'}
-                            </button>
-                            <button
-                              onClick={() => onUpdateOrderStatus(order.id, 'Cancelado')}
-                              className="px-2 py-1 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-500/30 text-[10px] font-black transition-colors"
-                              title="Cancelar Orden"
-                            >
-                              X
-                            </button>
+                              <option value="Pendiente">🟡 Pendiente</option>
+                              <option value="En proceso">🔵 En Proceso</option>
+                              <option value="Completado">🟢 Completar / Acreditar</option>
+                              <option value="Cancelado">🔴 Cancelar</option>
+                            </select>
                           </div>
                         </td>
 
@@ -1178,7 +1151,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       )}
       {selectedReceiptUrl && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 p-5 rounded-2xl max-w-2xl w-full border border-zinc-800 space-y-4 text-white">
+          <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl max-w-4xl w-full border border-emerald-500/30 space-y-4 shadow-2xl text-white">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
               <span className="font-bold text-sm text-emerald-400 flex items-center gap-2">
                 <Eye className="w-4 h-4" /> Inspección de Comprobante Baucher
@@ -1191,8 +1164,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </button>
             </div>
 
-            <div className="bg-black p-2 rounded-xl max-h-[65vh] flex items-center justify-center overflow-hidden">
-              <img src={selectedReceiptUrl} alt="Baucher Full" className="max-h-[60vh] object-contain" />
+            <div className="bg-black p-2 rounded-xl max-h-[85vh] flex items-center justify-center overflow-hidden">
+              <img src={selectedReceiptUrl} alt="Baucher Full" className="max-h-[80vh] object-contain" />
             </div>
 
             <div className="flex items-center justify-between text-xs pt-2">

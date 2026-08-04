@@ -215,11 +215,13 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                 <div className="relative">
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     id="input-player-id"
                     placeholder="Ejemplo: 284910293"
                     value={playerId}
                     onChange={(e) => setPlayerId(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black border border-white/20 text-white font-black text-base focus:border-emerald-500 focus:outline-none transition-all placeholder:font-normal placeholder:text-zinc-600"
+                    className="w-full px-4 py-3 sm:py-4 rounded-xl bg-black border border-white/20 text-white font-black text-base focus:border-emerald-500 focus:outline-none transition-all placeholder:font-normal placeholder:text-zinc-600"
                   />
                   <div className="absolute right-3 top-3 text-[10px] text-emerald-400 font-black uppercase bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded">
                     Free Fire ID
