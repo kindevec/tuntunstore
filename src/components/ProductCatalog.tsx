@@ -202,29 +202,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
         {/* Graphic Toggle & Search input */}
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          {/* Style selector for cards */}
-          <div className="flex items-center bg-black/80 p-1 rounded-xl border border-white/10 text-xs font-bold w-full sm:w-auto">
-            <button
-              onClick={() => setGraphicStyle('pinxtore')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex-1 text-center cursor-pointer ${
-                graphicStyle === 'pinxtore'
-                  ? 'bg-emerald-500 text-black font-black shadow-[0_0_10px_rgba(6,182,212,0.5)]'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              💎 Pinxtore Style
-            </button>
-            <button
-              onClick={() => setGraphicStyle('mascot')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex-1 text-center cursor-pointer ${
-                graphicStyle === 'mascot'
-                  ? 'bg-emerald-500 text-black font-black shadow-[0_0_10px_rgba(16,185,129,0.5)]'
-                  : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              🪵 Cofre Mascota
-            </button>
-          </div>
+          {/* Desktop Search input (Toggles removed) */}
 
           <div className="w-full sm:w-72">
             <input
@@ -476,12 +454,22 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   </p>
                 </div>
 
-                {/* Card Artwork Graphic */}
-                <DiamondChestGraphic
-                  amount={product.diamonds}
-                  bonus={product.bonusDiamonds}
-                  type={graphicStyle}
-                />
+                {/* Card Artwork Graphic - Using Custom Diamond Image */}
+                <div className="flex items-center justify-center py-4">
+                  <div className="relative group-hover:scale-110 transition-transform duration-500">
+                    <div className="absolute inset-0 bg-emerald-500/20 blur-[20px] rounded-full animate-pulse" />
+                    <img 
+                      src="/diamante.png" 
+                      alt="Diamante" 
+                      className="w-28 h-28 sm:w-32 sm:h-32 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(16,185,129,0.6)]"
+                    />
+                    {product.bonusDiamonds > 0 && (
+                      <div className="absolute -top-1 -right-2 bg-amber-400 text-black font-black text-[10px] sm:text-xs px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
+                        +{product.bonusDiamonds}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* Subtitle Details */}
                 <div className="text-center space-y-1">
