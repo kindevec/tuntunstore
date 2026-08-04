@@ -109,134 +109,137 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
       </div>
 
       {/* Orders List */}
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-6 sm:space-y-8">
         {filteredOrders.length > 0 ? (
           filteredOrders.map((order) => (
             <div
               key={order.id}
               id={`order-card-${order.id}`}
-              className="bg-zinc-900/60 border border-emerald-500/20 rounded-2xl overflow-hidden shadow-xl"
+              className="bg-[#0b0c10] border border-zinc-800 hover:border-emerald-500/40 rounded-2xl overflow-hidden shadow-2xl transition-all relative group"
             >
+              {/* Subtle top glow line */}
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent group-hover:via-emerald-400 transition-colors" />
+
               {/* Order Card Top Bar */}
-              <div className="bg-black text-white p-3.5 sm:p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10">
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <span className="font-mono text-xs sm:text-sm font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30 shrink-0">
+              <div className="bg-[#111218] text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="font-mono text-xs sm:text-sm font-black text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 shrink-0">
                     #{order.id}
                   </span>
                   <div className="min-w-0">
-                    <span className="text-xs sm:text-sm font-black uppercase text-white block truncate">{order.productName}</span>
-                    <span className="text-[10px] font-bold text-zinc-400 block">{order.date}</span>
+                    <span className="text-sm sm:text-base font-black uppercase text-white block truncate">{order.productName}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-zinc-400 block">{order.date}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t border-white/10 sm:border-0">
+                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t border-zinc-800 sm:border-0">
                   {getStatusBadge(order.status)}
                   <span className="text-lg sm:text-xl font-black text-white shrink-0">${order.priceUSD.toFixed(2)} USD</span>
                 </div>
               </div>
 
               {/* Order Content */}
-              <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6">
+              <div className="p-4 sm:p-6 space-y-6">
                 
                 {/* Details Grid - Responsive 2 columns on mobile */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 text-xs">
-                  <div className="bg-black/50 p-2.5 sm:p-3.5 rounded-xl border border-white/10 col-span-2 sm:col-span-1">
-                    <span className="text-zinc-400 font-extrabold uppercase text-[9px] sm:text-[10px] block">ID del Jugador:</span>
-                    <div className="flex items-center justify-between mt-1 gap-1.5">
-                      <span className="font-mono font-black text-sm sm:text-base text-white truncate">{order.playerId}</span>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-xs">
+                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 col-span-2 sm:col-span-1 shadow-sm">
+                    <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">ID del Jugador:</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono font-black text-sm sm:text-base text-zinc-100 truncate">{order.playerId}</span>
                       <button
                         onClick={() => handleCopy(order.playerId)}
-                        className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-zinc-400 transition-colors shrink-0 cursor-pointer"
+                        className="p-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0 cursor-pointer"
                         title="Copiar ID"
                       >
-                        {copiedId === order.playerId ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedId === order.playerId ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
 
-                  <div className="bg-black/50 p-2.5 sm:p-3.5 rounded-xl border border-white/10">
-                    <span className="text-zinc-400 font-extrabold uppercase text-[9px] sm:text-[10px] block">Total Diamantes:</span>
-                    <span className="font-black text-sm sm:text-base text-emerald-400 mt-1 block">
+                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 shadow-sm">
+                    <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Total Diamantes:</span>
+                    <span className="font-black text-sm sm:text-base text-emerald-400 block">
                       {order.diamondsTotal.toLocaleString()} 💎
                     </span>
                   </div>
 
-                  <div className="bg-black/50 p-2.5 sm:p-3.5 rounded-xl border border-white/10">
-                    <span className="text-zinc-400 font-extrabold uppercase text-[9px] sm:text-[10px] block">Banco Utilizado:</span>
-                    <span className="font-black text-xs sm:text-sm text-white mt-1 block truncate">{order.bankName}</span>
+                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 shadow-sm">
+                    <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Banco Utilizado:</span>
+                    <span className="font-black text-sm text-zinc-100 block truncate">{order.bankName}</span>
                   </div>
 
-                  <div className="bg-black/50 p-2.5 sm:p-3.5 rounded-xl border border-white/10 col-span-2 sm:col-span-1 flex items-center justify-between">
+                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 col-span-2 sm:col-span-1 flex items-center justify-between shadow-sm">
                     <div className="min-w-0 pr-2">
-                      <span className="text-zinc-400 font-extrabold uppercase text-[9px] sm:text-[10px] block">Baucher Comprobante:</span>
-                      <span className="font-bold text-zinc-300 text-[10px] sm:text-[11px] truncate block">
+                      <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Comprobante:</span>
+                      <span className="font-bold text-zinc-300 text-xs truncate block">
                         {order.receiptFileName || 'Ver imagen'}
                       </span>
                     </div>
                     <button
                       onClick={() => setViewingReceiptUrl(order.receiptUrl)}
-                      className="p-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30 font-black text-xs flex items-center gap-1 cursor-pointer shrink-0"
+                      className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 font-black text-xs flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
                     >
-                      <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <ImageIcon className="w-4 h-4" />
                       <span>Ver</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Status Progress Timeline */}
-                <div className="bg-black/40 p-3 sm:p-4 rounded-xl border border-white/10 space-y-2.5 sm:space-y-3">
-                  <span className="text-[10px] sm:text-xs font-black text-emerald-400 uppercase tracking-widest block">
+                <div className="bg-[#111218] p-4 sm:p-5 rounded-xl border border-zinc-800 space-y-4">
+                  <span className="text-[10px] sm:text-xs font-black text-emerald-400/80 uppercase tracking-widest block">
                     Línea de Tiempo de Acreditación
                   </span>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     
                     {/* Step 1: Registered */}
-                    <div className="p-2.5 sm:p-3.5 rounded-xl bg-zinc-950 border border-emerald-500/30 flex items-start gap-2 sm:gap-2.5">
-                      <div className="p-1 rounded-full bg-emerald-500/20 text-emerald-400 mt-0.5 shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <div className="p-3 sm:p-4 rounded-xl bg-zinc-900 border border-emerald-500/30 flex items-start gap-3 shadow-inner">
+                      <div className="p-1.5 rounded-full bg-emerald-500/20 text-emerald-400 shrink-0">
+                        <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-black text-white text-xs uppercase">1. Pedido Registrado</p>
-                        <p className="text-[9px] sm:text-[10px] text-zinc-400 uppercase font-semibold">Comprobante recibido.</p>
+                        <p className="font-black text-zinc-100 text-xs uppercase mb-0.5">1. Pedido Registrado</p>
+                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Comprobante recibido.</p>
                       </div>
                     </div>
 
                     {/* Step 2: Processing */}
-                    <div className={`p-2.5 sm:p-3.5 rounded-xl border flex items-start gap-2 sm:gap-2.5 ${
+                    <div className={`p-3 sm:p-4 rounded-xl border flex items-start gap-3 shadow-inner ${
                       order.status === 'En proceso' || order.status === 'Completado'
-                        ? 'bg-zinc-950 border-emerald-500/40'
-                        : 'bg-zinc-950/40 border-white/5 opacity-40'
+                        ? 'bg-zinc-900 border-emerald-500/30'
+                        : 'bg-zinc-950 border-zinc-800/50 opacity-60'
                     }`}>
-                      <div className={`p-1 rounded-full mt-0.5 shrink-0 ${
+                      <div className={`p-1.5 rounded-full shrink-0 ${
                         order.status === 'En proceso'
                           ? 'bg-sky-500/20 text-sky-400 animate-pulse'
                           : order.status === 'Completado'
                           ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-white/10 text-zinc-500'
+                          : 'bg-zinc-800 text-zinc-500'
                       }`}>
-                        <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        <RefreshCw className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="font-black text-white text-xs uppercase">2. En Proceso</p>
-                        <p className="text-[9px] sm:text-[10px] text-zinc-400 uppercase font-semibold">Cargando diamantes al ID.</p>
+                        <p className={`font-black text-xs uppercase mb-0.5 ${order.status === 'En proceso' || order.status === 'Completado' ? 'text-zinc-100' : 'text-zinc-500'}`}>2. En Proceso</p>
+                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Cargando diamantes al ID.</p>
                       </div>
                     </div>
 
                     {/* Step 3: Completed */}
-                    <div className={`p-2.5 sm:p-3.5 rounded-xl border flex items-start gap-2 sm:gap-2.5 ${
+                    <div className={`p-3 sm:p-4 rounded-xl border flex items-start gap-3 shadow-inner ${
                       order.status === 'Completado'
-                        ? 'bg-emerald-500/10 border-emerald-500/50'
-                        : 'bg-zinc-950/40 border-white/5 opacity-40'
+                        ? 'bg-emerald-950/20 border-emerald-500/50'
+                        : 'bg-zinc-950 border-zinc-800/50 opacity-60'
                     }`}>
-                      <div className={`p-1 rounded-full mt-0.5 shrink-0 ${
-                        order.status === 'Completado' ? 'bg-emerald-500 text-black' : 'bg-white/10 text-zinc-500'
+                      <div className={`p-1.5 rounded-full shrink-0 ${
+                        order.status === 'Completado' ? 'bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-zinc-800 text-zinc-500'
                       }`}>
                         <DiamondIcon size="sm" variant={order.status === 'Completado' ? 'emerald' : 'gold'} />
                       </div>
                       <div>
-                        <p className="font-black text-white text-xs uppercase">3. Entregado</p>
-                        <p className="text-[9px] sm:text-[10px] text-zinc-400 uppercase font-semibold">Verifica en tu juego.</p>
+                        <p className={`font-black text-xs uppercase mb-0.5 ${order.status === 'Completado' ? 'text-zinc-100' : 'text-zinc-500'}`}>3. Entregado</p>
+                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Verifica en tu juego.</p>
                       </div>
                     </div>
 
@@ -244,14 +247,15 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                 </div>
 
                 {/* Footer Action Bar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-                  <span className="text-[11px] sm:text-xs text-zinc-400 uppercase font-semibold text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-zinc-800">
+                  <span className="text-xs text-zinc-400 uppercase font-bold text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-emerald-500/70" />
                     ¿Dudas con este pedido? Contacta a soporte por WhatsApp.
                   </span>
 
                   <button
                     onClick={() => onOpenWhatsAppSupport(order)}
-                    className="w-full sm:w-auto px-4 sm:px-5 py-3.5 min-h-[44px] rounded-xl bg-emerald-500 text-black font-black uppercase text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-500 text-black font-black uppercase text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 hover:scale-[1.02] transition-all cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4 shrink-0" />
                     <span>Consultar WhatsApp (Pedido #{order.id})</span>
