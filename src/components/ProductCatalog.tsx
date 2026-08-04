@@ -415,7 +415,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             <div
               key={product.id}
               id={`product-card-${product.id}`}
-              className={`bg-[#030914] border transition-all duration-300 rounded-2xl p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden ${
+              className={`bg-[#030914] border transition-all duration-300 rounded-2xl p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 ${
                 isAdmin
                   ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)]'
                   : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
@@ -454,15 +454,24 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   </p>
                 </div>
 
-                {/* Card Artwork Graphic - Using Custom Diamond Image */}
+                {/* Card Artwork Graphic - Using Custom Diamond Image with Hover Swap */}
                 <div className="flex items-center justify-center py-4">
                   <div className="relative group-hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-emerald-500/20 blur-[25px] rounded-full animate-pulse" />
+                    <div className="absolute inset-0 bg-emerald-500/20 blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 transition-colors" />
+                    
+                    {/* Base Image */}
                     <img 
                       src="/diamante.png" 
                       alt="Diamante" 
-                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain relative z-10 drop-shadow-[0_0_25px_rgba(16,185,129,0.7)]"
+                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain relative z-10 drop-shadow-[0_0_25px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0"
                     />
+                    {/* Hover Image */}
+                    <img 
+                      src="/diamante-2.png" 
+                      alt="Diamante 2" 
+                      className="absolute top-0 left-0 w-36 h-36 sm:w-44 sm:h-44 object-contain z-10 drop-shadow-[0_0_35px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    />
+
                     {product.bonusDiamonds > 0 && (
                       <div className="absolute -top-2 -right-4 bg-amber-400 text-black font-black text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
                         +{product.bonusDiamonds}
