@@ -457,14 +457,14 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 {/* Card Artwork Graphic - Using Custom Diamond Image */}
                 <div className="flex items-center justify-center py-4">
                   <div className="relative group-hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-emerald-500/20 blur-[20px] rounded-full animate-pulse" />
+                    <div className="absolute inset-0 bg-emerald-500/20 blur-[25px] rounded-full animate-pulse" />
                     <img 
                       src="/diamante.png" 
                       alt="Diamante" 
-                      className="w-28 h-28 sm:w-32 sm:h-32 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(16,185,129,0.6)]"
+                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain relative z-10 drop-shadow-[0_0_25px_rgba(16,185,129,0.7)]"
                     />
                     {product.bonusDiamonds > 0 && (
-                      <div className="absolute -top-1 -right-2 bg-amber-400 text-black font-black text-[10px] sm:text-xs px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
+                      <div className="absolute -top-2 -right-4 bg-amber-400 text-black font-black text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
                         +{product.bonusDiamonds}
                       </div>
                     )}
