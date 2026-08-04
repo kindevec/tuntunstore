@@ -108,11 +108,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
           {/* Official TunTun Mascot Brand Header */}
           <div className="flex items-center gap-3.5 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 via-emerald-600 to-black p-0.5 shadow-[0_0_20px_rgba(16,185,129,0.35)] shrink-0">
-              <div className="w-full h-full bg-black rounded-[14px] flex flex-col items-center justify-center p-1 relative overflow-hidden text-center">
-                <div className="text-xl leading-none">🪵😎</div>
-              </div>
-            </div>
+            <img 
+              src="/logo-transparent.png" 
+              alt="TunTun Store Logo" 
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] shrink-0"
+            />
             <div>
               <h2 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-1.5">
                 <span>TunTun</span>
@@ -363,7 +363,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {/* Featured Banner Image */}
           <div className="relative rounded-2xl overflow-hidden mb-8 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] group">
             <img
-              src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80"
+              src="/logo.jpeg"
               alt="TunTun Store Gaming Center"
               className="w-full h-56 sm:h-64 object-cover object-center group-hover:scale-105 transition-transform duration-700"
             />
