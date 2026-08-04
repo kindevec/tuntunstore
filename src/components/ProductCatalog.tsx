@@ -16,6 +16,220 @@ interface ProductCatalogProps {
   onAddProduct?: (product: Omit<Product, 'id'>) => void;
 }
 
+const CyanProductCard: React.FC<{
+  product: Product;
+  isAdmin: boolean;
+  quickPriceId: string | null;
+  quickPriceValue: string;
+  setQuickPriceId: (id: string | null) => void;
+  setQuickPriceValue: (val: string) => void;
+  handleSaveQuickPrice: (p: Product) => void;
+  handleOpenEdit: (p: Product) => void;
+  onDeleteProduct?: (id: string) => void;
+  onSelectProduct: (p: Product) => void;
+}> = ({
+  product,
+  isAdmin,
+  quickPriceId,
+  quickPriceValue,
+  setQuickPriceId,
+  setQuickPriceValue,
+  handleSaveQuickPrice,
+  handleOpenEdit,
+  onDeleteProduct,
+  onSelectProduct,
+}) => {
+  const [isVisible, setIsVisible] = React.useState(false);
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    // Only apply the effect on mobile devices (width < 640px is tailwind's 'sm' breakpoint)
+    const isMobile = window.innerWidth < 640;
+    
+    if (!isMobile) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0.7, // 70% of the card must be visible to trigger
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const isQuickEditing = quickPriceId === product.id;
+  const activeClass = isVisible ? 'mobile-active' : '';
+
+  return (
+    <div
+      ref={cardRef}
+      id={`product-card-${product.id}`}
+      data-active={isVisible}
+      className={`bg-[#030914] border transition-all duration-500 rounded-2xl p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 data-[active=true]:scale-105 data-[active=true]:z-10 ${
+        isAdmin
+          ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)] data-[active=true]:border-amber-400'
+          : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] data-[active=true]:border-emerald-400 data-[active=true]:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
+      }`}
+    >
+      {/* Badge Overlay or Admin Quick Edit Button */}
+      <div className="flex items-center justify-between mb-1">
+        {product.badgeText ? (
+          <span className="bg-emerald-500 text-black font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded shadow">
+            {product.badgeText}
+          </span>
+        ) : (
+          <span></span>
+        )}
+
+        {isAdmin && (
+          <button
+            onClick={() => handleOpenEdit(product)}
+            className="bg-amber-400 text-black px-2 py-0.5 rounded-md font-black text-[10px] flex items-center gap-1 cursor-pointer hover:bg-amber-300 shadow uppercase relative z-50"
+            title="Editar producto"
+          >
+            <Edit className="w-3 h-3" />
+            <span>Editar</span>
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        {/* Product Name Title */}
+        <div className="text-center pt-1">
+          <h3 className="text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 group-data-[active=true]:text-emerald-400 transition-colors">
+            {product.name}
+          </h3>
+          <p className="text-[10px] text-emerald-400/80 font-black uppercase tracking-widest mt-0.5">
+            DIAMANTES FREE FIRE
+          </p>
+        </div>
+
+        {/* Card Artwork Graphic - Using Custom Diamond Image with Hover Swap */}
+        <div className="flex items-center justify-center py-4">
+          <div className="relative group-hover:scale-110 group-data-[active=true]:scale-110 transition-transform duration-500">
+            <div className="absolute inset-0 bg-emerald-500/20 blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 group-data-[active=true]:bg-emerald-400/30 transition-colors" />
+            
+            {/* Base Image */}
+            <img 
+              src="/diamante.png" 
+              alt="Diamante" 
+              className="w-36 h-36 sm:w-44 sm:h-44 object-contain relative z-10 drop-shadow-[0_0_25px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+            />
+            {/* Hover Image */}
+            <img 
+              src="/diamante-2.png" 
+              alt="Diamante 2" 
+              className="absolute top-0 left-0 w-36 h-36 sm:w-44 sm:h-44 object-contain z-10 drop-shadow-[0_0_35px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+            />
+
+            {product.bonusDiamonds > 0 && (
+              <div className="absolute -top-2 -right-4 bg-amber-400 text-black font-black text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
+                +{product.bonusDiamonds}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Subtitle Details */}
+        <div className="text-center space-y-1">
+          <p className="text-xs text-white/90 font-bold uppercase tracking-wide">
+            {product.diamonds} diamantes {product.bonusDiamonds ? `+ ${product.bonusDiamonds} bono` : ''}
+          </p>
+          <p className="text-[10px] text-zinc-400 font-semibold uppercase">
+            {product.description.split('•')[1] || 'Máximo por compra: 100 uds.'}
+          </p>
+        </div>
+      </div>
+
+      {/* Price & Action Button */}
+      <div className="pt-4 mt-3 border-t border-emerald-900/30 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-emerald-400/70 font-bold uppercase">Precio</span>
+
+          {isAdmin && isQuickEditing ? (
+            <div className="flex items-center gap-1">
+              <span className="text-emerald-400 font-bold">$</span>
+              <input
+                type="number"
+                step="0.01"
+                value={quickPriceValue}
+                onChange={(e) => setQuickPriceValue(e.target.value)}
+                className="w-20 px-2 py-1 bg-black border-2 border-emerald-400 text-emerald-300 rounded-lg text-sm font-black text-right focus:outline-none relative z-50"
+                autoFocus
+              />
+              <button
+                onClick={() => handleSaveQuickPrice(product)}
+                className="p-1 bg-emerald-500 text-black rounded-lg text-[10px] font-black hover:bg-emerald-400 cursor-pointer relative z-50"
+              >
+                ✓
+              </button>
+              <button
+                onClick={() => setQuickPriceId(null)}
+                className="p-1 bg-zinc-800 text-zinc-400 rounded-lg text-[10px] hover:text-white cursor-pointer relative z-50"
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-2xl sm:text-3xl font-black text-[#00e676] tracking-tight">
+                ${product.priceUSD.toFixed(2)} USD
+              </span>
+              {isAdmin && (
+                <button
+                  onClick={() => {
+                    setQuickPriceId(product.id);
+                    setQuickPriceValue(product.priceUSD.toString());
+                  }}
+                  className="text-[10px] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 px-2 py-0.5 rounded font-bold underline cursor-pointer relative z-50"
+                  title="Cambiar precio rápido"
+                >
+                  $ Edit
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {isAdmin ? (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => handleOpenEdit(product)}
+              className="py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow relative z-50"
+            >
+              <Edit className="w-3.5 h-3.5" />
+              <span>Editar</span>
+            </button>
+            <button
+              onClick={() => onDeleteProduct && onDeleteProduct(product.id)}
+              className="py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 relative z-50"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Eliminar</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            id={`btn-buy-${product.id}`}
+            onClick={() => onSelectProduct(product)}
+            className="w-full py-3 sm:py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer relative z-50"
+          >
+            <ShoppingCart className="w-4 h-4 text-black" />
+            <span>Comprar</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   products,
   onSelectProduct,
@@ -412,164 +626,19 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
           // Standard Cyan Pinxtore Style Card
           return (
-            <div
+            <CyanProductCard 
               key={product.id}
-              id={`product-card-${product.id}`}
-              className={`bg-[#030914] border transition-all duration-300 rounded-2xl p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 ${
-                isAdmin
-                  ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)]'
-                  : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
-              }`}
-            >
-              {/* Badge Overlay or Admin Quick Edit Button */}
-              <div className="flex items-center justify-between mb-1">
-                {product.badgeText ? (
-                  <span className="bg-emerald-500 text-black font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded shadow">
-                    {product.badgeText}
-                  </span>
-                ) : (
-                  <span></span>
-                )}
-
-                {isAdmin && (
-                  <button
-                    onClick={() => handleOpenEdit(product)}
-                    className="bg-amber-400 text-black px-2 py-0.5 rounded-md font-black text-[10px] flex items-center gap-1 cursor-pointer hover:bg-amber-300 shadow uppercase"
-                    title="Editar producto"
-                  >
-                    <Edit className="w-3 h-3" />
-                    <span>Editar</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                {/* Product Name Title */}
-                <div className="text-center pt-1">
-                  <h3 className="text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-[10px] text-emerald-400/80 font-black uppercase tracking-widest mt-0.5">
-                    DIAMANTES FREE FIRE
-                  </p>
-                </div>
-
-                {/* Card Artwork Graphic - Using Custom Diamond Image with Hover Swap */}
-                <div className="flex items-center justify-center py-4">
-                  <div className="relative group-hover:scale-110 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-emerald-500/20 blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 transition-colors" />
-                    
-                    {/* Base Image */}
-                    <img 
-                      src="/diamante.png" 
-                      alt="Diamante" 
-                      className="w-36 h-36 sm:w-44 sm:h-44 object-contain relative z-10 drop-shadow-[0_0_25px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0"
-                    />
-                    {/* Hover Image */}
-                    <img 
-                      src="/diamante-2.png" 
-                      alt="Diamante 2" 
-                      className="absolute top-0 left-0 w-36 h-36 sm:w-44 sm:h-44 object-contain z-10 drop-shadow-[0_0_35px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    />
-
-                    {product.bonusDiamonds > 0 && (
-                      <div className="absolute -top-2 -right-4 bg-amber-400 text-black font-black text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
-                        +{product.bonusDiamonds}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Subtitle Details */}
-                <div className="text-center space-y-1">
-                  <p className="text-xs text-white/90 font-bold uppercase tracking-wide">
-                    {product.diamonds} diamantes {product.bonusDiamonds ? `+ ${product.bonusDiamonds} bono` : ''}
-                  </p>
-                  <p className="text-[10px] text-zinc-400 font-semibold uppercase">
-                    {product.description.split('•')[1] || 'Máximo por compra: 100 uds.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Price & Action Button */}
-              <div className="pt-4 mt-3 border-t border-emerald-900/30 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-emerald-400/70 font-bold uppercase">Precio</span>
-
-                  {isAdmin && isQuickEditing ? (
-                    <div className="flex items-center gap-1">
-                      <span className="text-emerald-400 font-bold">$</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={quickPriceValue}
-                        onChange={(e) => setQuickPriceValue(e.target.value)}
-                        className="w-20 px-2 py-1 bg-black border-2 border-emerald-400 text-emerald-300 rounded-lg text-sm font-black text-right focus:outline-none"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => handleSaveQuickPrice(product)}
-                        className="p-1 bg-emerald-500 text-black rounded-lg text-[10px] font-black hover:bg-emerald-400 cursor-pointer"
-                      >
-                        ✓
-                      </button>
-                      <button
-                        onClick={() => setQuickPriceId(null)}
-                        className="p-1 bg-zinc-800 text-zinc-400 rounded-lg text-[10px] hover:text-white cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl sm:text-3xl font-black text-[#00e676] tracking-tight">
-                        ${product.priceUSD.toFixed(2)} USD
-                      </span>
-                      {isAdmin && (
-                        <button
-                          onClick={() => {
-                            setQuickPriceId(product.id);
-                            setQuickPriceValue(product.priceUSD.toString());
-                          }}
-                          className="text-[10px] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 px-2 py-0.5 rounded font-bold underline cursor-pointer"
-                          title="Cambiar precio rápido"
-                        >
-                          $ Edit
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {isAdmin ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => handleOpenEdit(product)}
-                      className="py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                      <span>Editar</span>
-                    </button>
-                    <button
-                      onClick={() => onDeleteProduct && onDeleteProduct(product.id)}
-                      className="py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Eliminar</span>
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    id={`btn-buy-${product.id}`}
-                    onClick={() => onSelectProduct(product)}
-                    className="w-full py-3 sm:py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <ShoppingCart className="w-4 h-4 text-black" />
-                    <span>Comprar</span>
-                  </button>
-                )}
-              </div>
-            </div>
+              product={product}
+              isAdmin={isAdmin}
+              quickPriceId={quickPriceId}
+              quickPriceValue={quickPriceValue}
+              setQuickPriceId={setQuickPriceId}
+              setQuickPriceValue={setQuickPriceValue}
+              handleSaveQuickPrice={handleSaveQuickPrice}
+              handleOpenEdit={handleOpenEdit}
+              onDeleteProduct={onDeleteProduct}
+              onSelectProduct={onSelectProduct}
+            />
           );
         })}
       </div>
