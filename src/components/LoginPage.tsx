@@ -361,11 +361,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
         <div className="relative z-10 my-auto max-w-lg mx-auto lg:mx-0 w-full">
           {/* Featured Banner Image */}
-          <div className="relative rounded-2xl overflow-hidden mb-8 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] group">
+          <div className="relative rounded-2xl overflow-hidden mb-8 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] group bg-black/40">
             <img
               src="/logo.jpeg"
               alt="TunTun Store Gaming Center"
-              className="w-full h-56 sm:h-64 object-cover object-center group-hover:scale-105 transition-transform duration-700"
+              className="w-full h-56 sm:h-64 object-contain object-center group-hover:scale-105 transition-transform duration-700 p-4"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white">
