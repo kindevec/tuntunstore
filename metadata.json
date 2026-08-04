@@ -1,0 +1,6 @@
+{
+  "name": "TunTun Store",
+  "description": "Plataforma de recargas de diamantes para videojuegos con panel de administración, catálogo de pases y tarjetas, comprobantes de pago y seguimiento en tiempo real.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
