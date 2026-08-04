@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-4">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-1.5 sm:gap-4">
           {/* Logo Brand */}
           <div 
             id="brand-logo" 
@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
             <img 
               src="/logo-transparent.png" 
               alt="TunTun Store Logo" 
-              className="w-12 h-12 sm:w-16 sm:h-16 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-110 transition-transform"
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-110 transition-transform"
             />
             <div>
               <span className="text-lg sm:text-2xl font-black tracking-tighter text-white">
