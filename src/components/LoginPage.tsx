@@ -106,8 +106,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <span>Volver a TunTun Store</span>
           </button>
 
-          {/* Official TunTun Mascot Brand Header */}
-          <div className="flex items-center gap-3.5 mb-8">
+          {/* Mobile Glowing Logo Showcase (Only visible on mobile) */}
+          <div className="relative flex justify-center w-full mb-10 lg:hidden mt-4">
+            {/* Outer animated ring */}
+            <div className="absolute inset-0 bg-emerald-500/20 blur-[40px] rounded-full animate-pulse" />
+            <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full p-1.5 bg-gradient-to-br from-emerald-400 via-black to-emerald-700 shadow-[0_0_50px_rgba(16,185,129,0.3)] group">
+              <img
+                src="/logo.jpeg"
+                alt="TunTun Store Identity"
+                className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-500"
+              />
+              {/* Badge */}
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black border border-emerald-500/50 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)]">
+                Oficial Store
+              </div>
+            </div>
+          </div>
+
+          {/* Official TunTun Mascot Brand Header (Desktop Only) */}
+          <div className="hidden lg:flex items-center gap-3.5 mb-8">
             <img 
               src="/logo-transparent.png" 
               alt="TunTun Store Logo" 
@@ -353,8 +370,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Emerald & Black Side Panel with Premium Brand Identity */}
-      <div className="w-full lg:w-1/2 bg-gradient-to-br from-[#020b06] via-[#05140b] to-[#010403] p-6 sm:p-10 lg:p-16 flex flex-col justify-between relative overflow-hidden border-t lg:border-t-0 lg:border-l border-emerald-500/20 min-h-screen">
+      {/* RIGHT COLUMN: Emerald & Black Side Panel with Premium Brand Identity (Hidden on Mobile) */}
+      <div className="hidden lg:flex w-full lg:w-1/2 bg-gradient-to-br from-[#020b06] via-[#05140b] to-[#010403] p-6 sm:p-10 lg:p-16 flex-col justify-between relative overflow-hidden border-t lg:border-t-0 lg:border-l border-emerald-500/20 min-h-screen">
         {/* Decorative light ambient glow */}
         <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[130px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-400/5 rounded-full blur-[150px] pointer-events-none" />
