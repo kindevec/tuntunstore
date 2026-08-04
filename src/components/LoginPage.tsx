@@ -96,7 +96,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       
       {/* LEFT COLUMN: Clean Form Panel (TunTun Emerald & Black Style) */}
       <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-10 lg:p-16 relative z-10 min-h-screen">
-        <div>
+        <div className="flex-1 flex flex-col justify-center w-full max-w-md mx-auto">
           {/* Top back button */}
           <button
             onClick={onBackToCatalog}
@@ -341,7 +341,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
         {/* Footer terms */}
-        <div className="mt-8 text-xs text-zinc-500 max-w-md pt-4 border-t border-zinc-900">
+        <div className="mt-8 text-xs text-zinc-500 w-full max-w-md mx-auto pt-4 border-t border-zinc-900 text-center">
           Al continuar, aceptas nuestros{' '}
           <a href="#" onClick={(e) => e.preventDefault()} className="text-zinc-400 hover:underline">
             Términos de Servicio
@@ -359,7 +359,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[130px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-400/5 rounded-full blur-[150px] pointer-events-none" />
 
-        <div className="relative z-10 my-auto w-full max-w-lg mx-auto lg:mx-0 flex flex-col items-center lg:items-start">
+        <div className="relative z-10 my-auto w-full max-w-lg mx-auto flex flex-col items-center justify-center">
           
           {/* Creative Logo Showcase */}
           <div className="relative flex justify-center w-full mb-10">
@@ -379,7 +379,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
 
           {/* Main Hero Title */}
-          <div className="text-center lg:text-left w-full">
+          <div className="text-center w-full">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
               Domina tu Juego con <span className="text-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.6)]">TunTun Store</span>
             </h2>
