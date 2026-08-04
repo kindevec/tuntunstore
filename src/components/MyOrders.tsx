@@ -115,13 +115,13 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
             <div
               key={order.id}
               id={`order-card-${order.id}`}
-              className="bg-[#0b0c10] border border-zinc-800 hover:border-emerald-500/40 rounded-2xl overflow-hidden shadow-2xl transition-all relative group"
+              className="bg-zinc-900 border border-zinc-800 hover:border-emerald-500/40 rounded-2xl overflow-hidden shadow-2xl transition-all relative group"
             >
               {/* Subtle top glow line */}
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent group-hover:via-emerald-400 transition-colors" />
 
               {/* Order Card Top Bar */}
-              <div className="bg-[#111218] text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800">
+              <div className="bg-zinc-800/50 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-700/50">
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="font-mono text-xs sm:text-sm font-black text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 shrink-0">
                     #{order.id}
@@ -143,7 +143,7 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                 
                 {/* Details Grid - Responsive 2 columns on mobile */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-xs">
-                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 col-span-2 sm:col-span-1 shadow-sm">
+                  <div className="bg-zinc-800 p-3 sm:p-4 rounded-xl border border-zinc-700/50 col-span-2 sm:col-span-1 shadow-sm">
                     <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">ID del Jugador:</span>
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono font-black text-sm sm:text-base text-zinc-100 truncate">{order.playerId}</span>
@@ -157,19 +157,19 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                     </div>
                   </div>
 
-                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 shadow-sm">
+                  <div className="bg-zinc-800 p-3 sm:p-4 rounded-xl border border-zinc-700/50 shadow-sm">
                     <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Total Diamantes:</span>
                     <span className="font-black text-sm sm:text-base text-emerald-400 block">
                       {order.diamondsTotal.toLocaleString()} 💎
                     </span>
                   </div>
 
-                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 shadow-sm">
+                  <div className="bg-zinc-800 p-3 sm:p-4 rounded-xl border border-zinc-700/50 shadow-sm">
                     <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Banco Utilizado:</span>
                     <span className="font-black text-sm text-zinc-100 block truncate">{order.bankName}</span>
                   </div>
 
-                  <div className="bg-[#171821] p-3 sm:p-4 rounded-xl border border-zinc-800 col-span-2 sm:col-span-1 flex items-center justify-between shadow-sm">
+                  <div className="bg-zinc-800 p-3 sm:p-4 rounded-xl border border-zinc-700/50 col-span-2 sm:col-span-1 flex items-center justify-between shadow-sm">
                     <div className="min-w-0 pr-2">
                       <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Comprobante:</span>
                       <span className="font-bold text-zinc-300 text-xs truncate block">
@@ -187,7 +187,7 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                 </div>
 
                 {/* Status Progress Timeline */}
-                <div className="bg-[#111218] p-4 sm:p-5 rounded-xl border border-zinc-800 space-y-4">
+                <div className="bg-zinc-800/50 p-4 sm:p-5 rounded-xl border border-zinc-700/50 space-y-4">
                   <span className="text-[10px] sm:text-xs font-black text-emerald-400/80 uppercase tracking-widest block">
                     Línea de Tiempo de Acreditación
                   </span>

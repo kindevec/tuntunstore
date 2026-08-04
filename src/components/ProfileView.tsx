@@ -180,13 +180,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-1 text-xs">
               {playerIdDefault && (
-                <span className="bg-black/60 px-3 py-1 rounded-xl border border-amber-500/30 text-amber-300 font-mono font-bold flex items-center gap-1.5">
+                <span className="bg-zinc-800/60 px-3 py-1 rounded-xl border border-amber-500/30 text-amber-300 font-mono font-bold flex items-center gap-1.5">
                   <Gamepad2 className="w-3.5 h-3.5 text-amber-400" />
                   ID FF: {playerIdDefault}
                 </span>
               )}
               {gamerTag && (
-                <span className="bg-black/60 px-3 py-1 rounded-xl border border-cyan-500/30 text-cyan-300 font-semibold flex items-center gap-1.5">
+                <span className="bg-zinc-800/60 px-3 py-1 rounded-xl border border-cyan-500/30 text-cyan-300 font-semibold flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
                   {gamerTag}
                 </span>
@@ -243,7 +243,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   placeholder="https://ejemplo.com/mi-foto-de-perfil.jpg"
                   value={customAvatarUrl}
                   onChange={(e) => setCustomAvatarUrl(e.target.value)}
-                  className="w-full mt-2 bg-black border border-emerald-500/40 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-400"
+                  className="w-full mt-2 bg-zinc-900 border border-emerald-500/40 rounded-xl px-4 py-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400"
                 />
               )}
             </div>
@@ -261,7 +261,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-400 font-semibold"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 font-semibold"
               />
             </div>
 
@@ -275,7 +275,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-400 font-semibold"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 font-semibold"
               />
             </div>
 
@@ -289,7 +289,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 placeholder="Ej: 284910293"
                 value={playerIdDefault}
                 onChange={(e) => setPlayerIdDefault(e.target.value)}
-                className="w-full bg-black border border-amber-500/40 rounded-xl px-4 py-3 text-sm text-amber-300 font-mono font-bold placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+                className="w-full bg-zinc-900 border border-amber-500/40 rounded-xl px-4 py-3 text-sm text-amber-300 font-mono font-bold placeholder-zinc-500 focus:outline-none focus:border-amber-400"
               />
               <p className="text-[11px] text-zinc-500 mt-1">Este ID se ingresará automáticamente en tus pedidos de diamantes.</p>
             </div>
@@ -304,7 +304,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 placeholder="Ej: ꧁⚡PRO_GAMER⚡꧂"
                 value={gamerTag}
                 onChange={(e) => setGamerTag(e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-cyan-300 font-semibold placeholder-zinc-600 focus:outline-none focus:border-cyan-400"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-cyan-300 font-semibold placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
@@ -318,7 +318,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 placeholder="Ej: 0990084680"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-400 font-semibold"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 font-semibold"
               />
             </div>
 
@@ -330,7 +330,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <select
                 value={preferredBank}
                 onChange={(e) => setPreferredBank(e.target.value)}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-400 font-semibold cursor-pointer"
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-emerald-400 font-semibold cursor-pointer"
               >
                 {PREFERRED_BANKS.map((b) => (
                   <option key={b} value={b}>
@@ -342,7 +342,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Account Security Info & Actions */}
-          <div className="p-4 bg-black/60 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-4 bg-zinc-900/60 rounded-2xl border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
               <div>
