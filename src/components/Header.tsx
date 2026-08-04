@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
             <img 
               src="/logo-transparent.png" 
               alt="TunTun Store Logo" 
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-105 transition-transform"
+              className="w-12 h-12 sm:w-16 sm:h-16 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] group-hover:scale-110 transition-transform"
             />
             <div>
               <span className="text-lg sm:text-2xl font-black tracking-tighter text-white">
