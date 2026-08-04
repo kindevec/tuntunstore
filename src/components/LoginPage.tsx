@@ -353,71 +353,61 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Emerald & Black Side Panel with Image Banner & Player Value Props */}
+      {/* RIGHT COLUMN: Emerald & Black Side Panel with Premium Brand Identity */}
       <div className="w-full lg:w-1/2 bg-gradient-to-br from-[#020b06] via-[#05140b] to-[#010403] p-6 sm:p-10 lg:p-16 flex flex-col justify-between relative overflow-hidden border-t lg:border-t-0 lg:border-l border-emerald-500/20 min-h-screen">
         {/* Decorative light ambient glow */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-400/5 rounded-full blur-[150px] pointer-events-none" />
 
-        <div className="relative z-10 my-auto max-w-lg mx-auto lg:mx-0 w-full">
-          {/* Featured Banner Image */}
-          <div className="relative rounded-2xl overflow-hidden mb-8 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] group bg-black/40">
-            <img
-              src="/logo.jpeg"
-              alt="TunTun Store Gaming Center"
-              className="w-full h-56 sm:h-64 object-contain object-center group-hover:scale-105 transition-transform duration-700 p-4"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white">
-              <span className="font-bold text-emerald-400 uppercase tracking-widest bg-black/80 backdrop-blur-md px-3 py-1 rounded-lg border border-emerald-500/40">
-                💎 Recargas & PINs
-              </span>
-              <span className="text-zinc-300 font-medium">TunTun Store 2026</span>
+        <div className="relative z-10 my-auto w-full max-w-lg mx-auto lg:mx-0 flex flex-col items-center lg:items-start">
+          
+          {/* Creative Logo Showcase */}
+          <div className="relative flex justify-center w-full mb-10">
+            {/* Outer animated ring */}
+            <div className="absolute inset-0 bg-emerald-500/20 blur-[40px] rounded-full animate-pulse" />
+            <div className="relative w-48 h-48 sm:w-60 sm:h-60 rounded-full p-1.5 bg-gradient-to-br from-emerald-400 via-black to-emerald-700 shadow-[0_0_50px_rgba(16,185,129,0.3)] group">
+              <img
+                src="/logo.jpeg"
+                alt="TunTun Store Identity"
+                className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-500"
+              />
+              {/* Badge */}
+              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black border border-emerald-500/50 text-emerald-400 text-[10px] sm:text-xs font-black uppercase tracking-widest px-5 py-2 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)]">
+                Oficial Store
+              </div>
             </div>
           </div>
 
           {/* Main Hero Title */}
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight mb-3">
-            ¡Los PINs y Recargas Gamer <span className="text-emerald-400">Más Accesibles</span>!
-          </h2>
-          <p className="text-sm text-zinc-300 leading-relaxed mb-8">
-            Obtén tus Diamantes de Free Fire, códigos de juegos y recargas directas por ID con soporte garantizado.
-          </p>
-
-          {/* Clean Un-encapsulated Feature List */}
-          <div className="space-y-4 mb-10">
-            <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
-                <Gem className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-semibold text-zinc-100">Los PINs más accesibles y económicos</span>
-            </div>
-
-            <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
-                <Zap className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-semibold text-zinc-100">Entrega instantánea por ID de Jugador</span>
-            </div>
-
-            <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
-                <Shield className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-semibold text-zinc-100">100% Garantizado con atención por WhatsApp</span>
-            </div>
+          <div className="text-center lg:text-left w-full">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+              Domina tu Juego con <span className="text-emerald-400 drop-shadow-[0_0_15px_rgba(16,185,129,0.6)]">TunTun Store</span>
+            </h2>
+            <p className="text-sm sm:text-base text-zinc-300 leading-relaxed mb-10">
+              La plataforma más rápida, automatizada y segura para obtener tus Diamantes de Free Fire, códigos y recargas directas por ID.
+            </p>
           </div>
 
-          {/* Metric Cards Grid at Bottom */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-zinc-950/80 backdrop-blur-md border border-emerald-500/20 rounded-2xl p-4 text-center">
-              <div className="text-xl sm:text-2xl font-black text-emerald-400 font-mono">+50,000</div>
-              <div className="text-xs text-zinc-400 font-medium mt-1">Recargas Exitosas</div>
+          {/* Metric Cards Grid at Bottom - Glassmorphism */}
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 w-full">
+            <div className="bg-black/40 backdrop-blur-xl border border-emerald-500/20 hover:border-emerald-500/40 transition-colors rounded-2xl p-5 sm:p-6 text-center shadow-[0_10_30px_rgba(0,0,0,0.5)] group">
+              <div className="flex justify-center mb-3">
+                <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:bg-emerald-500/20 transition-colors">
+                  <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">&lt; 2 min</div>
+              <div className="text-[10px] sm:text-xs text-emerald-400/80 font-bold uppercase tracking-widest mt-1.5">Entrega Flash</div>
             </div>
 
-            <div className="bg-zinc-950/80 backdrop-blur-md border border-emerald-500/20 rounded-2xl p-4 text-center">
-              <div className="text-xl sm:text-2xl font-black text-white font-mono">&lt; 2 min</div>
-              <div className="text-xs text-zinc-400 font-medium mt-1">Entrega Rápida</div>
+            <div className="bg-black/40 backdrop-blur-xl border border-emerald-500/20 hover:border-emerald-500/40 transition-colors rounded-2xl p-5 sm:p-6 text-center shadow-[0_10_30px_rgba(0,0,0,0.5)] group">
+              <div className="flex justify-center mb-3">
+                <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:bg-emerald-500/20 transition-colors">
+                  <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">100%</div>
+              <div className="text-[10px] sm:text-xs text-emerald-400/80 font-bold uppercase tracking-widest mt-1.5">Compra Segura</div>
             </div>
           </div>
         </div>
