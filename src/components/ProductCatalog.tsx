@@ -72,7 +72,7 @@ const CyanProductCard: React.FC<{
       ref={cardRef}
       id={`product-card-${product.id}`}
       data-active={isVisible}
-      className={`bg-[#030914] border transition-all duration-500 rounded-2xl p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 data-[active=true]:scale-105 data-[active=true]:z-10 ${
+      className={`bg-[#030914] border transition-all duration-500 rounded-2xl p-3 sm:p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 data-[active=true]:scale-105 data-[active=true]:z-10 ${
         isAdmin
           ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)] data-[active=true]:border-amber-400'
           : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] data-[active=true]:border-emerald-400 data-[active=true]:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
@@ -81,7 +81,7 @@ const CyanProductCard: React.FC<{
       {/* Badge Overlay or Admin Quick Edit Button */}
       <div className="flex items-center justify-between mb-1">
         {product.badgeText ? (
-          <span className="bg-emerald-500 text-black font-black uppercase text-[10px] tracking-wider px-2 py-0.5 rounded shadow">
+          <span className="bg-emerald-500 text-black font-black uppercase text-[9px] sm:text-[10px] tracking-wider px-1.5 sm:px-2 py-0.5 rounded shadow">
             {product.badgeText}
           </span>
         ) : (
@@ -100,37 +100,37 @@ const CyanProductCard: React.FC<{
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {/* Product Name Title */}
         <div className="text-center pt-1">
-          <h3 className="text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 group-data-[active=true]:text-emerald-400 transition-colors">
+          <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 group-data-[active=true]:text-emerald-400 transition-colors">
             {product.name}
           </h3>
-          <p className="text-[10px] text-emerald-400/80 font-black uppercase tracking-widest mt-0.5">
+          <p className="text-[9px] sm:text-[10px] text-emerald-400/80 font-black uppercase tracking-widest mt-0.5">
             DIAMANTES FREE FIRE
           </p>
         </div>
 
         {/* Card Artwork Graphic - Using Custom Diamond Image with Hover Swap */}
-        <div className="flex items-center justify-center py-4">
+        <div className="flex items-center justify-center py-2 sm:py-4">
           <div className="relative group-hover:scale-110 group-data-[active=true]:scale-110 transition-transform duration-500">
-            <div className="absolute inset-0 bg-emerald-500/20 blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 group-data-[active=true]:bg-emerald-400/30 transition-colors" />
+            <div className="absolute inset-0 bg-emerald-500/20 blur-[20px] sm:blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 group-data-[active=true]:bg-emerald-400/30 transition-colors" />
             
             {/* Base Image */}
             <img 
               src="/diamante.png" 
               alt="Diamante" 
-              className="w-36 h-36 sm:w-44 sm:h-44 object-contain relative z-10 drop-shadow-[0_0_25px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+              className="w-24 h-24 sm:w-44 sm:h-44 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(16,185,129,0.7)] sm:drop-shadow-[0_0_25px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
             />
             {/* Hover Image */}
             <img 
               src="/diamante-2.png" 
               alt="Diamante 2" 
-              className="absolute top-0 left-0 w-36 h-36 sm:w-44 sm:h-44 object-contain z-10 drop-shadow-[0_0_35px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+              className="absolute top-0 left-0 w-24 h-24 sm:w-44 sm:h-44 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] sm:drop-shadow-[0_0_35px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
             />
 
             {product.bonusDiamonds > 0 && (
-              <div className="absolute -top-2 -right-4 bg-amber-400 text-black font-black text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
+              <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-4 bg-amber-400 text-black font-black text-[10px] sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
                 +{product.bonusDiamonds}
               </div>
             )}
@@ -179,7 +179,7 @@ const CyanProductCard: React.FC<{
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-[#00e676] tracking-tight">
+              <span className="text-xl sm:text-3xl font-black text-[#00e676] tracking-tight">
                 ${product.priceUSD.toFixed(2)} USD
               </span>
               {isAdmin && (
@@ -492,7 +492,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
       </div>
 
       {/* Grid of Product Cards */}
-      <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
         {filteredProducts.map((product) => {
           const isGoldStyle = product.isGoldPromo || product.category === 'memberships';
           const isQuickEditing = quickPriceId === product.id;
@@ -504,7 +504,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 id={`product-card-${product.id}`}
                 className="relative p-0.5 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 shadow-[0_0_20px_rgba(251,191,36,0.25)] group hover:scale-105 transition-transform"
               >
-                <div className="bg-[#07090e] rounded-[14px] p-5 text-white space-y-4 flex flex-col justify-between h-full">
+                <div className="bg-[#07090e] rounded-[14px] p-3 sm:p-5 text-white space-y-3 sm:space-y-4 flex flex-col justify-between h-full">
                   {/* Card Header Top Labels & Admin Edit Button */}
                   <div className="flex items-center justify-between text-[10px] font-black uppercase text-amber-400/80">
                     <span className="bg-amber-950/80 border border-amber-500/30 px-2 py-0.5 rounded">FREE FIRE VIP</span>
@@ -522,9 +522,9 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     )}
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     <div className="text-center space-y-1">
-                      <h3 className="font-black text-2xl text-amber-400 uppercase tracking-tight">
+                      <h3 className="font-black text-xl sm:text-2xl text-amber-400 uppercase tracking-tight">
                         {product.name}
                       </h3>
                       <p className="text-[11px] text-amber-300/80 uppercase font-bold tracking-wider">
@@ -573,7 +573,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-3xl font-black text-amber-400">${product.priceUSD.toFixed(2)} USD</span>
+                          <span className="text-xl sm:text-3xl font-black text-amber-400">${product.priceUSD.toFixed(2)} USD</span>
                           {isAdmin && (
                             <button
                               onClick={() => {
