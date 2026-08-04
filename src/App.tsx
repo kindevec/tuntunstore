@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product, BankAccount, Order, UserProfile, OrderStatus, EmailAlertConfig, ProductCategory } from './types';
 import { 
   INITIAL_PRODUCTS, 
@@ -135,10 +135,81 @@ export default function App() {
   // Login Page State & Reason
   const [loginRedirectReason, setLoginRedirectReason] = useState<string | null>(null);
 
-  // Navigation State - Pages are independent
+  // Navigation State - Synced with Hash
   const [activeTab, setActiveTab] = useState<'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login'>('catalog');
   const [adminSubTab, setAdminSubTab] = useState<'orders' | 'catalog' | 'email' | 'wallets'>('orders');
   const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<ProductCategory | 'all'>('all');
+
+  // Routing Effect
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      const parts = hash.split('/');
+      let tab = (parts[0] || 'catalog') as any;
+      let subTab = parts[1] as any;
+
+      if (currentUser?.role === 'admin') {
+        if (tab === 'orders') {
+          tab = 'admin';
+          subTab = 'orders';
+          window.history.replaceState(null, '', '#admin/orders');
+        } else if (tab === 'wallet') {
+          tab = 'admin';
+          subTab = 'wallets';
+          window.history.replaceState(null, '', '#admin/wallets');
+        } else if (tab === 'profile') {
+          tab = 'admin';
+          window.history.replaceState(null, '', '#admin');
+        }
+      } else {
+        if (tab === 'orders') {
+          if (!currentUser) {
+            setLoginRedirectReason('Inicia sesión con Google para ver y realizar seguimiento a tus pedidos.');
+            tab = 'login';
+            window.location.hash = '#login';
+            return;
+          }
+        } else if (tab === 'wallet') {
+          if (!currentUser) {
+            setLoginRedirectReason('Inicia sesión con Google para acceder a tu Billetera Virtual y recargar saldo USD.');
+            tab = 'login';
+            window.location.hash = '#login';
+            return;
+          }
+        } else if (tab === 'profile') {
+          if (!currentUser) {
+            setLoginRedirectReason('Inicia sesión con Google para acceder a la página de tu perfil de usuario.');
+            tab = 'login';
+            window.location.hash = '#login';
+            return;
+          }
+        } else if (tab === 'admin') {
+          if (!currentUser) {
+            setLoginRedirectReason('Acceso reservado únicamente para Administradores de TunTun Store.');
+            tab = 'login';
+            window.location.hash = '#login';
+            return;
+          } else if (currentUser.role !== 'admin') {
+            setLoginRedirectReason('El Panel de Administración es exclusivo para el equipo de TunTun Store.');
+            tab = 'login';
+            window.location.hash = '#login';
+            return;
+          }
+        }
+      }
+
+      setActiveTab(tab);
+      if (subTab) {
+        setAdminSubTab(subTab);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    // Execute immediately to sync state on load
+    handleHashChange();
+
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [currentUser]);
 
   // Active Order Flow Modal
   const [selectedProductForOrder, setSelectedProductForOrder] = useState<Product | null>(null);
@@ -155,7 +226,7 @@ export default function App() {
 
   const openLoginWithReason = (reason: string) => {
     setLoginRedirectReason(reason);
-    setActiveTab('login');
+    window.location.hash = '#login';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -167,12 +238,12 @@ export default function App() {
     if (role === 'admin') {
       const adminUser = existingUser || DEFAULT_USER_ADMIN;
       updateCurrentActiveUser(adminUser);
-      setActiveTab('admin');
+      window.location.hash = '#admin';
       showToast(`⚡ Sesión iniciada como Administrador (${adminUser.email})`);
     } else {
       const clientUser = existingUser || DEFAULT_USER_CLIENT;
       updateCurrentActiveUser(clientUser);
-      setActiveTab('catalog');
+      window.location.hash = '#catalog';
       showToast(`👋 Sesión iniciada como ${clientUser.name}`);
     }
   };
@@ -181,7 +252,7 @@ export default function App() {
     const existing = registeredUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
     if (existing) {
       updateCurrentActiveUser(existing);
-      setActiveTab('catalog');
+      window.location.hash = '#catalog';
       showToast(`👋 Bienvenid@ de nuevo, ${existing.name}`);
       return;
     }
@@ -198,13 +269,13 @@ export default function App() {
     const updatedList = [...registeredUsers, newUser];
     saveUsersToStorage(updatedList);
     updateCurrentActiveUser(newUser);
-    setActiveTab('catalog');
+    window.location.hash = '#catalog';
     showToast(`🎉 ¡Cuenta creada con éxito! Bienvenido ${newUser.name}`);
   };
 
   const handleLogout = () => {
     updateCurrentActiveUser(null);
-    setActiveTab('catalog');
+    window.location.hash = '#catalog';
     showToast('Sesión cerrada correctamente');
   };
 
@@ -220,52 +291,8 @@ export default function App() {
     tab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
     subTab?: 'orders' | 'catalog' | 'email' | 'wallets'
   ) => {
-    if (subTab) {
-      setAdminSubTab(subTab);
-    }
-
-    if (currentUser?.role === 'admin') {
-      if (tab === 'orders') {
-        setAdminSubTab('orders');
-        setActiveTab('admin');
-        return;
-      }
-      if (tab === 'wallet') {
-        setAdminSubTab('wallets');
-        setActiveTab('admin');
-        return;
-      }
-      if (tab === 'profile') {
-        setActiveTab('admin');
-        return;
-      }
-    } else {
-      if (tab === 'orders') {
-        if (!currentUser) {
-          openLoginWithReason('Inicia sesión con Google para ver y realizar seguimiento a tus pedidos.');
-          return;
-        }
-      } else if (tab === 'wallet') {
-        if (!currentUser) {
-          openLoginWithReason('Inicia sesión con Google para acceder a tu Billetera Virtual y recargar saldo USD.');
-          return;
-        }
-      } else if (tab === 'profile') {
-        if (!currentUser) {
-          openLoginWithReason('Inicia sesión con Google para acceder a la página de tu perfil de usuario.');
-          return;
-        }
-      } else if (tab === 'admin') {
-        if (!currentUser) {
-          openLoginWithReason('Acceso reservado únicamente para Administradores de TunTun Store.');
-          return;
-        } else if (currentUser.role !== 'admin') {
-          openLoginWithReason('El Panel de Administración es exclusivo para el equipo de TunTun Store.');
-          return;
-        }
-      }
-    }
-    setActiveTab(tab);
+    const newHash = subTab ? `#${tab}/${subTab}` : `#${tab}`;
+    window.location.hash = newHash;
   };
 
   // Protected Product Purchase Selection
@@ -355,7 +382,7 @@ export default function App() {
 
     saveOrdersToStorage([newOrder, ...orders]);
     setSelectedProductForOrder(null);
-    setActiveTab('orders');
+    window.location.hash = '#orders';
 
     if (isPaidWithWallet) {
       showToast(`⚡ ¡Pedido #${newId} pagado con Saldo Billetera! Tu recarga de diamantes está en proceso.`);
@@ -441,7 +468,7 @@ export default function App() {
           onLogout={handleLogout}
           onOpenLoginModal={() => {
             setLoginRedirectReason(null);
-            setActiveTab('login');
+            window.location.hash = '#login';
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           activeTab={activeTab}
@@ -485,12 +512,12 @@ export default function App() {
             onLoginGoogle={handleLoginGoogle}
             onLoginSuccess={(user) => {
               updateCurrentActiveUser(user);
-              setActiveTab('catalog');
+              window.location.hash = '#catalog';
               showToast(`👋 Bienvenid@ de nuevo, ${user.name}`);
             }}
             onRegisterUser={handleRegisterUser}
             redirectReason={loginRedirectReason}
-            onBackToCatalog={() => setActiveTab('catalog')}
+            onBackToCatalog={() => window.location.hash = '#catalog'}
             registeredUsers={registeredUsers}
           />
         )}
@@ -503,7 +530,7 @@ export default function App() {
             userOrders={orders.filter((o) => o.userEmail === currentUser.email)}
             onTopUpInstant={handleTopUpInstant}
             onSubmitTopUpOrder={handleSubmitTopUpOrder}
-            onNavigateToCatalog={() => setActiveTab('catalog')}
+            onNavigateToCatalog={() => window.location.hash = '#catalog'}
           />
         )}
 
@@ -528,7 +555,7 @@ export default function App() {
             currentUser={currentUser}
             onSaveProfile={handleSaveProfile}
             onLogout={handleLogout}
-            onNavigateToWallet={() => setActiveTab('wallet')}
+            onNavigateToWallet={() => window.location.hash = '#wallet'}
           />
         )}
 
@@ -540,7 +567,7 @@ export default function App() {
             emailConfig={emailConfig}
             registeredUsers={registeredUsers}
             activeSubTab={adminSubTab}
-            onSubTabChange={setAdminSubTab}
+            onSubTabChange={(subTab) => window.location.hash = `#admin/${subTab}`}
             onUpdateOrderStatus={handleUpdateOrderStatus}
             onAddProduct={handleAddProduct}
             onUpdateProduct={handleUpdateProduct}
