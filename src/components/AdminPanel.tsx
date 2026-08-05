@@ -767,8 +767,120 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </form>
           )}
 
-          {/* Current Catalog Table */}
-          <div className="bg-zinc-900/60 rounded-2xl border border-white/10 shadow-xl overflow-hidden">
+          {/* Mobile Catalog Cards (Visible on mobile/tablet) */}
+          <div className="grid grid-cols-1 gap-3.5 md:hidden">
+            {products.map((p) => {
+              const isEditingInline = editingInlinePriceId === p.id;
+              return (
+                <div key={p.id} className="bg-zinc-900/90 rounded-2xl border border-white/10 p-4 space-y-3 shadow-lg flex flex-col">
+                  <div className="flex items-start justify-between border-b border-white/10 pb-3">
+                    <div className="flex items-center gap-3">
+                      <DiamondIcon size="md" variant={p.isGoldPromo || p.category === 'memberships' ? 'gold' : 'emerald'} />
+                      <div>
+                        <p className="font-extrabold text-white text-base">{p.name}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <span className="text-[10px] text-zinc-400 font-bold uppercase">{p.category}</span>
+                          {p.badgeText && (
+                            <span className="text-[9px] text-amber-400 font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/30">
+                              {p.badgeText}
+                            </span>
+                          )}
+                          {p.isGoldPromo && (
+                            <span className="bg-amber-400/10 text-amber-300 text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-amber-400/30">
+                              DORADO
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-zinc-950/80 p-2.5 rounded-xl border border-white/5">
+                      <span className="text-[10px] text-zinc-400 font-bold uppercase block">Diamantes:</span>
+                      <p className="font-black text-emerald-400 text-sm mt-0.5">
+                        {p.diamonds.toLocaleString()} 💎 {p.bonusDiamonds ? `(+${p.bonusDiamonds})` : ''}
+                      </p>
+                    </div>
+
+                    <div className="bg-zinc-950/80 p-2.5 rounded-xl border border-white/5 flex flex-col justify-center">
+                      <span className="text-[10px] text-zinc-400 font-bold uppercase block">Precio USD:</span>
+                      {isEditingInline ? (
+                         <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-amber-400 font-bold">$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={inlinePriceValue}
+                              onChange={(e) => setInlinePriceValue(e.target.value)}
+                              className="w-full px-2 py-1 rounded-lg bg-black border-2 border-amber-400 text-amber-300 font-black text-xs text-right focus:outline-none"
+                              autoFocus
+                            />
+                         </div>
+                      ) : (
+                        <p className="font-black text-white text-sm mt-0.5">${p.priceUSD.toFixed(2)} USD</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+                      {isEditingInline ? (
+                        <div className="flex items-center gap-2 w-full">
+                          <button
+                            onClick={() => {
+                              const val = parseFloat(inlinePriceValue);
+                              if (!isNaN(val) && val >= 0) {
+                                onUpdateProduct({ ...p, priceUSD: val });
+                              }
+                              setEditingInlinePriceId(null);
+                            }}
+                            className="flex-1 py-2.5 bg-emerald-500 text-black text-xs font-black rounded-lg cursor-pointer hover:bg-emerald-400 uppercase"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={() => setEditingInlinePriceId(null)}
+                            className="px-4 py-2.5 bg-zinc-800 text-zinc-400 text-xs font-bold rounded-lg cursor-pointer hover:text-white uppercase"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingInlinePriceId(p.id);
+                              setInlinePriceValue(p.priceUSD.toString());
+                            }}
+                            className="flex-1 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-extrabold text-[11px] uppercase transition-colors"
+                          >
+                            Precio
+                          </button>
+
+                          <button
+                            onClick={() => startEditProduct(p)}
+                            className="flex-1 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold flex items-center justify-center gap-1.5 text-[11px] uppercase transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5 stroke-[2.5]" /> Edit
+                          </button>
+
+                          <button
+                            onClick={() => onDeleteProduct(p.id)}
+                            className="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-black border border-rose-500/30 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Current Catalog Table (Hidden on mobile) */}
+          <div className="hidden md:block bg-zinc-900/60 rounded-2xl border border-white/10 shadow-xl overflow-hidden">
             <table className="w-full text-left text-xs">
               <thead className="bg-black text-emerald-400 uppercase font-black text-[10px] tracking-widest border-b border-white/10">
                 <tr>
@@ -1030,7 +1142,105 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               <span className="text-xs text-zinc-400 font-bold">{registeredUsers.length} Usuarios</span>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Mobile Wallet Cards */}
+            <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
+              {registeredUsers.map((u) => {
+                const customVal = userCustomAmounts[u.email] || '';
+                return (
+                  <div key={u.uid} className="bg-zinc-950/80 rounded-2xl border border-white/10 p-4 space-y-4 shadow-lg">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={u.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
+                          alt={u.name}
+                          className="w-10 h-10 rounded-full object-cover border border-amber-500/30 shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-bold text-white text-base truncate">{u.name}</p>
+                          <span className="text-[10px] text-zinc-400 font-mono block truncate">{u.email}</span>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase shrink-0 ${
+                          u.role === 'admin'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        }`}>
+                        {u.role}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5">
+                      <div>
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase block">ID FF:</span>
+                        <span className="font-mono font-bold text-zinc-300">{u.playerIdDefault || 'N/A'}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase block">Saldo Actual:</span>
+                        <span className="text-lg font-black text-amber-400">
+                          ${(u.walletBalanceUSD || 0).toFixed(2)} USD
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                      <span className="text-[10px] text-zinc-400 font-bold uppercase block">Recarga Rápida:</span>
+                      <div className="flex items-center gap-2">
+                        {[5, 10, 20, 50].map((amt) => (
+                          <button
+                            key={amt}
+                            onClick={() => onUpdateUserWalletBalance && onUpdateUserWalletBalance(u.email, amt)}
+                            className="flex-1 py-1.5 bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 rounded-lg text-xs font-black uppercase cursor-pointer transition-all"
+                          >
+                            +${amt}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                        <input
+                          type="number"
+                          placeholder="Monto custom ($)"
+                          value={customVal}
+                          onChange={(e) =>
+                            setUserCustomAmounts({ ...userCustomAmounts, [u.email]: e.target.value })
+                          }
+                          className="flex-1 px-3 py-2.5 rounded-xl bg-black border border-white/10 text-white font-bold text-xs focus:outline-none focus:border-amber-400"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              const num = parseFloat(customVal);
+                              if (num > 0 && onUpdateUserWalletBalance) {
+                                onUpdateUserWalletBalance(u.email, num);
+                                setUserCustomAmounts({ ...userCustomAmounts, [u.email]: '' });
+                              }
+                            }}
+                            className="flex-1 sm:flex-none px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-black text-xs font-black rounded-xl uppercase cursor-pointer transition-colors"
+                          >
+                            Sumar
+                          </button>
+                          <button
+                            onClick={() => {
+                              const num = parseFloat(customVal);
+                              if (num >= 0 && onUpdateUserWalletBalance) {
+                                onUpdateUserWalletBalance(u.email, num, true);
+                                setUserCustomAmounts({ ...userCustomAmounts, [u.email]: '' });
+                              }
+                            }}
+                            className="flex-1 sm:flex-none px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-black rounded-xl uppercase cursor-pointer transition-colors"
+                          >
+                            Fijar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Wallets Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-black/50 text-zinc-400 font-black uppercase tracking-wider text-[10px] border-b border-white/10">
