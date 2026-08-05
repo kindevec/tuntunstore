@@ -41,7 +41,8 @@ export const WalletView: React.FC<WalletViewProps> = ({
   const [topUpType, setTopUpType] = useState<'instant' | 'bank'>('instant');
   const [selectedAmount, setSelectedAmount] = useState<number>(10);
   const [customAmount, setCustomAmount] = useState<string>('');
-  const [selectedBank, setSelectedBank] = useState<BankAccount>(bankAccounts[0]);
+  const [selectedBankId, setSelectedBankId] = useState<string>('');
+  const selectedBank = bankAccounts.find(b => b.id === selectedBankId) || bankAccounts[0];
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const [receiptFile, setReceiptFile] = useState<File | undefined>(undefined);
   const [receiptFileName, setReceiptFileName] = useState<string>('');
@@ -69,7 +70,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
   const handleBankTopUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (finalAmount <= 0 || !receiptImage) return;
+    if (finalAmount <= 0 || !receiptImage || !selectedBank) return;
 
     const now = new Date();
     const dateStr = now.toISOString().replace('T', ' ').substring(0, 16);
@@ -341,13 +342,11 @@ export const WalletView: React.FC<WalletViewProps> = ({
                     2. Selecciona el Banco de Depósito
                   </label>
                   <select
-                    value={selectedBank.id}
-                    onChange={(e) => {
-                      const found = bankAccounts.find((b) => b.id === e.target.value);
-                      if (found) setSelectedBank(found);
-                    }}
+                    value={selectedBankId || (bankAccounts[0]?.id || '')}
+                    onChange={(e) => setSelectedBankId(e.target.value)}
                     className="w-full bg-zinc-700 border border-zinc-600 rounded-xl px-4 py-3 text-xs text-white font-bold focus:outline-none focus:border-emerald-400 cursor-pointer"
                   >
+                    {bankAccounts.length === 0 && <option value="">Cargando bancos...</option>}
                     {bankAccounts.map((b) => (
                       <option key={b.id} value={b.id}>
                         {b.bankName} - {b.accountType} ({b.accountNumber})
@@ -438,29 +437,35 @@ export const WalletView: React.FC<WalletViewProps> = ({
                 Datos Bancarios Oficiales TunTun Store
               </h3>
 
-              <div className="space-y-3 text-xs">
-                <div className="p-3 bg-zinc-800 rounded-xl border border-zinc-600/50 space-y-1">
-                  <span className="text-[10px] font-black uppercase text-emerald-400 block">{selectedBank.bankName}</span>
-                  <div className="flex items-center justify-between font-mono text-white font-bold text-sm">
-                    <span>{selectedBank.accountNumber}</span>
-                    <button
-                      onClick={() => handleCopy(selectedBank.accountNumber, 'cuenta')}
-                      className="text-zinc-400 hover:text-white p-1"
-                    >
-                      {copiedField === 'cuenta' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    </button>
+              {selectedBank ? (
+                <div className="space-y-3 text-xs">
+                  <div className="p-3 bg-zinc-800 rounded-xl border border-zinc-600/50 space-y-1">
+                    <span className="text-[10px] font-black uppercase text-emerald-400 block">{selectedBank.bankName}</span>
+                    <div className="flex items-center justify-between font-mono text-white font-bold text-sm">
+                      <span>{selectedBank.accountNumber}</span>
+                      <button
+                        onClick={() => handleCopy(selectedBank.accountNumber, 'cuenta')}
+                        className="text-zinc-400 hover:text-white p-1"
+                      >
+                        {copiedField === 'cuenta' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-zinc-400">{selectedBank.accountType} • {selectedBank.accountHolder}</p>
+                    <p className="text-[10px] text-zinc-500 font-mono">C.I.: {selectedBank.idNumber}</p>
                   </div>
-                  <p className="text-[11px] text-zinc-400">{selectedBank.accountType} • {selectedBank.accountHolder}</p>
-                  <p className="text-[10px] text-zinc-500 font-mono">C.I.: {selectedBank.idNumber}</p>
-                </div>
 
-                <div className="p-3 bg-zinc-800/60 rounded-xl border border-zinc-700 space-y-1 text-zinc-300 text-[11px]">
-                  <p className="font-bold text-white flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Aprobación Garantizada
-                  </p>
-                  <p>Una vez verificado tu depósito bancario, el monto cargado figurará en tu Billetera USD de inmediato.</p>
+                  <div className="p-3 bg-zinc-800/60 rounded-xl border border-zinc-700 space-y-1 text-zinc-300 text-[11px]">
+                    <p className="font-bold text-white flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Aprobación Garantizada
+                    </p>
+                    <p>Una vez verificado tu depósito bancario, el monto cargado figurará en tu Billetera USD de inmediato.</p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="p-4 text-center text-xs text-zinc-500 font-bold uppercase animate-pulse">
+                  Cargando cuentas bancarias...
+                </div>
+              )}
             </div>
           </div>
 
