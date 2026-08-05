@@ -143,7 +143,7 @@ const CyanProductCard: React.FC<{
             {product.diamonds} diamantes {product.bonusDiamonds ? `+ ${product.bonusDiamonds} bono` : ''}
           </p>
           <p className="text-[10px] text-zinc-400 font-semibold uppercase">
-            {product.description.split('•')[1] || 'Máximo por compra: 100 uds.'}
+            {(product.description || '').split(' ')[1] || 'Máximo por compra: 100 uds.'}
           </p>
         </div>
       </div>
@@ -321,7 +321,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     const matchesSearch =
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.diamonds.toString().includes(searchQuery) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase());
+      (p.description || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
 
@@ -538,7 +538,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     </div>
 
                     <p className="text-xs text-zinc-300 leading-relaxed text-center font-medium">
-                      {product.description}
+                      {product.description || 'Máximo 100 UDS.'}
                     </p>
                   </div>
 
