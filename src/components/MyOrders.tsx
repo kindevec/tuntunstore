@@ -46,29 +46,29 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
     switch (status) {
       case 'Pendiente':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-amber-500/10 text-amber-500 border border-amber-500/30 shrink-0">
-            <Clock className="w-3.5 h-3.5 text-amber-500 animate-spin" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-black/20 text-amber-300 border border-amber-300/30 shrink-0">
+            <Clock className="w-3.5 h-3.5 text-amber-300 animate-spin" />
             Pendiente
           </span>
         );
       case 'En proceso':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-sky-500/10 text-sky-400 border border-sky-500/30 shrink-0">
-            <RefreshCw className="w-3.5 h-3.5 text-sky-400 animate-spin" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-black/20 text-sky-200 border border-sky-200/30 shrink-0">
+            <RefreshCw className="w-3.5 h-3.5 text-sky-200 animate-spin" />
             En proceso
           </span>
         );
       case 'Completado':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-black/20 text-white border border-white/30 shrink-0">
+            <CheckCircle2 className="w-3.5 h-3.5 text-white" />
             Completado 💎
           </span>
         );
       case 'Cancelado':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-rose-500/10 text-rose-400 border border-rose-500/30 shrink-0">
-            <XCircle className="w-3.5 h-3.5 text-rose-400" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-extrabold bg-black/20 text-rose-200 border border-rose-200/30 shrink-0">
+            <XCircle className="w-3.5 h-3.5 text-rose-200" />
             Cancelado
           </span>
         );
@@ -121,18 +121,18 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent group-hover:via-emerald-400 transition-colors" />
 
               {/* Order Card Top Bar */}
-              <div className="bg-zinc-700/50 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-600/50">
+              <div className="bg-emerald-600 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-700">
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="font-mono text-xs sm:text-sm font-black text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20 shrink-0">
+                  <span className="font-mono text-xs sm:text-sm font-black text-white bg-black/20 px-3 py-1.5 rounded-lg border border-white/20 shrink-0">
                     #{order.id}
                   </span>
                   <div className="min-w-0">
                     <span className="text-sm sm:text-base font-black uppercase text-white block truncate">{order.productName}</span>
-                    <span className="text-[10px] sm:text-xs font-bold text-zinc-400 block">{order.date}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-emerald-100 block">{order.date}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t border-zinc-800 sm:border-0">
+                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t border-emerald-700/50 sm:border-0">
                   {getStatusBadge(order.status)}
                   <span className="text-lg sm:text-xl font-black text-white shrink-0">${order.priceUSD.toFixed(2)} USD</span>
                 </div>
