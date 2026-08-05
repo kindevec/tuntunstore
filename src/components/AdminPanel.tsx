@@ -589,10 +589,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* TAB 2: GESTIÓN DE CATÁLOGO (CRUD) */}
       {activeTab === 'catalog' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-extrabold text-zinc-900">Catálogo de Productos (CRUD)</h2>
-              <p className="text-xs text-zinc-600">Añade, modifica o elimina denominaciones de diamantes, pases o tarjetas sin tocar código.</p>
+          {/* Catalog Header */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-zinc-800 p-5 rounded-2xl border border-zinc-700/50">
+            <div className="space-y-1">
+              <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-emerald-400" />
+                Catálogo de Productos
+              </h2>
+              <p className="text-xs text-zinc-400 font-semibold">Añade, modifica o elimina denominaciones de diamantes, pases o membresías.</p>
             </div>
 
             <button
@@ -611,20 +615,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   badgeText: '',
                 });
               }}
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer"
+              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer uppercase tracking-wide"
             >
-              <Plus className="w-4 h-4" />
-              <span>Añadir Nuevo Producto</span>
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>Nuevo Producto</span>
             </button>
           </div>
 
           {/* Product CRUD Form Modal/Section */}
           {isAddingProduct && (
-            <form id="admin-product-form" onSubmit={handleSaveProduct} className="bg-zinc-800 text-white p-6 rounded-2xl border-2 border-zinc-700 shadow-2xl space-y-4">
+            <form id="admin-product-form" onSubmit={handleSaveProduct} className="bg-zinc-800 text-white p-5 sm:p-6 rounded-2xl border border-zinc-700/50 shadow-2xl space-y-5">
               <div className="flex items-center justify-between border-b border-zinc-700/50 pb-3">
-                <h3 className="text-base font-black text-amber-300 flex items-center gap-2">
-                  <Edit className="w-5 h-5 text-amber-400" />
-                  {editingProductId ? `Editar Producto: ${productForm.name || 'Sin Nombre'}` : 'Crear Nuevo Producto en Catálogo'}
+                <h3 className="text-sm sm:text-base font-black text-amber-300 flex items-center gap-2">
+                  <Edit className="w-5 h-5 text-amber-400 shrink-0" />
+                  <span className="truncate">{editingProductId ? `Editar: ${productForm.name || 'Producto'}` : 'Crear Nuevo Producto'}</span>
                 </h3>
                 <button
                   type="button"
@@ -632,28 +636,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     setIsAddingProduct(false);
                     setEditingProductId(null);
                   }}
-                  className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold rounded-lg cursor-pointer"
+                  className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs font-bold rounded-lg cursor-pointer shrink-0 transition-colors"
                 >
-                  ✕ Cerrar
+                  ✕
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Nombre del Producto</label>
+                  <label className="block text-zinc-400 mb-1.5 font-bold uppercase text-[10px] tracking-wide">Nombre del Producto</label>
                   <input
                     type="text"
                     required
                     placeholder="Ej: 572 Diamantes"
                     value={productForm.name}
                     onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
+                    className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
 
-                <div className="bg-amber-500/10 p-2 rounded-xl border border-amber-500/30">
-                  <label className="block text-amber-300 mb-1 font-black uppercase tracking-wider text-[11px] flex items-center gap-1">
-                    💲 Precio USD ($) <span className="text-[10px] text-amber-400/80 font-normal">(Editable)</span>
+                <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/30">
+                  <label className="block text-amber-300 mb-1.5 font-black uppercase tracking-wider text-[10px]">
+                    💲 Precio USD ($)
                   </label>
                   <input
                     type="number"
@@ -661,37 +665,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     required
                     value={productForm.priceUSD}
                     onChange={(e) => setProductForm({ ...productForm, priceUSD: parseFloat(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-900 border-2 border-amber-400/50 text-amber-300 font-extrabold text-sm text-right focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                    className="w-full p-3 rounded-xl bg-zinc-900 border-2 border-amber-400/40 text-amber-300 font-extrabold text-sm text-right focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Cantidad Diamantes</label>
+                  <label className="block text-zinc-400 mb-1.5 font-bold uppercase text-[10px] tracking-wide">Cantidad Diamantes</label>
                   <input
                     type="number"
                     required
                     value={productForm.diamonds}
                     onChange={(e) => setProductForm({ ...productForm, diamonds: parseInt(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
+                    className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Bono Diamantes Extra</label>
+                  <label className="block text-zinc-400 mb-1.5 font-bold uppercase text-[10px] tracking-wide">Bono Diamantes Extra</label>
                   <input
                     type="number"
                     value={productForm.bonusDiamonds}
                     onChange={(e) => setProductForm({ ...productForm, bonusDiamonds: parseInt(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
+                    className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Categoría</label>
+                  <label className="block text-zinc-400 mb-1.5 font-bold uppercase text-[10px] tracking-wide">Categoría</label>
                   <select
                     value={productForm.category}
                     onChange={(e) => setProductForm({ ...productForm, category: e.target.value as any })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
+                    className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
                   >
                     <option value="diamonds">Diamantes Directos</option>
                     <option value="memberships">Membresías VIP (Dorado 🟡)</option>
@@ -701,132 +705,136 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Texto de Badge Overlay</label>
+                  <label className="block text-zinc-400 mb-1.5 font-bold uppercase text-[10px] tracking-wide">Texto de Badge</label>
                   <input
                     type="text"
                     placeholder="Ej: MÁS VENDIDO ⚡"
                     value={productForm.badgeText}
                     onChange={(e) => setProductForm({ ...productForm, badgeText: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
+                    className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-zinc-300 mb-1 font-bold text-xs">Descripción</label>
+                <label className="block text-zinc-400 mb-1.5 font-bold text-[10px] uppercase tracking-wide">Descripción</label>
                 <input
                   type="text"
                   placeholder="Descripción rápida del producto..."
                   value={productForm.description}
                   onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs font-semibold"
+                  className="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-600 text-white text-xs font-semibold focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 text-xs text-zinc-300 pt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-4 text-xs text-zinc-300 pt-2">
+                <label className="flex items-center gap-2.5 cursor-pointer bg-zinc-900/50 px-4 py-2.5 rounded-xl border border-zinc-700/50 hover:border-amber-400/30 transition-colors">
                   <input
                     type="checkbox"
                     checked={productForm.isGoldPromo}
                     onChange={(e) => setProductForm({ ...productForm, isGoldPromo: e.target.checked })}
                     className="w-4 h-4 rounded text-amber-500"
                   />
-                  <span>Estilo Dorado Especial (Promociones / Membresías VIP)</span>
+                  <span className="font-bold">Estilo Dorado (VIP)</span>
                 </label>
 
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2.5 cursor-pointer bg-zinc-900/50 px-4 py-2.5 rounded-xl border border-zinc-700/50 hover:border-emerald-400/30 transition-colors">
                   <input
                     type="checkbox"
                     checked={productForm.isPopular}
                     onChange={(e) => setProductForm({ ...productForm, isPopular: e.target.checked })}
                     className="w-4 h-4 rounded text-emerald-500"
                   />
-                  <span>Destacar como "Más Vendido"</span>
+                  <span className="font-bold">Destacar como "Más Vendido"</span>
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-700/50">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-zinc-700/50">
                 <button
                   type="button"
                   onClick={() => {
                     setIsAddingProduct(false);
                     setEditingProductId(null);
                   }}
-                  className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white font-bold text-xs cursor-pointer"
+                  className="px-5 py-3 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-zinc-300 font-bold text-xs cursor-pointer transition-colors text-center"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center gap-2 cursor-pointer shadow-lg uppercase transition-all"
+                  className="px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg uppercase transition-all"
                 >
                   <Save className="w-4 h-4 fill-current" />
-                  <span>{editingProductId ? 'Guardar Cambios de Producto' : 'Crear Producto'}</span>
+                  <span>{editingProductId ? 'Guardar Cambios' : 'Crear Producto'}</span>
                 </button>
               </div>
             </form>
           )}
 
           {/* Mobile Catalog Cards (Visible on mobile/tablet) */}
-          <div className="grid grid-cols-1 gap-3.5 md:hidden">
+          <div className="grid grid-cols-1 gap-4 md:hidden">
             {products.map((p) => {
               const isEditingInline = editingInlinePriceId === p.id;
               return (
-                <div key={p.id} className="bg-zinc-800 rounded-2xl border border-zinc-700/50 p-4 space-y-3 shadow-lg flex flex-col">
-                  <div className="flex items-start justify-between border-b border-zinc-700/50 pb-3">
-                    <div className="flex items-center gap-3">
+                <div key={p.id} className="bg-zinc-800 rounded-2xl border border-zinc-700/50 overflow-hidden shadow-lg">
+                  {/* Card Header */}
+                  <div className="bg-emerald-600 px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <DiamondIcon size="md" variant={p.isGoldPromo || p.category === 'memberships' ? 'gold' : 'emerald'} />
-                      <div>
-                        <p className="font-extrabold text-white text-base">{p.name}</p>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className="text-[10px] text-zinc-400 font-bold uppercase">{p.category}</span>
-                          {p.badgeText && (
-                            <span className="text-[9px] text-amber-400 font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/30">
-                              {p.badgeText}
-                            </span>
-                          )}
-                          {p.isGoldPromo && (
-                            <span className="bg-amber-400/10 text-amber-300 text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-amber-400/30">
-                              DORADO
-                            </span>
-                          )}
-                        </div>
+                      <div className="min-w-0">
+                        <p className="font-black text-white text-sm truncate">{p.name}</p>
+                        <span className="text-[10px] text-emerald-100/80 font-bold uppercase">{p.category}</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-700/50">
-                      <span className="text-[10px] text-zinc-400 font-bold uppercase block">Diamantes:</span>
-                      <p className="font-black text-emerald-400 text-sm mt-0.5">
-                        {p.diamonds.toLocaleString()} 💎 {p.bonusDiamonds ? `(+${p.bonusDiamonds})` : ''}
-                      </p>
-                    </div>
-
-                    <div className="bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-700/50 flex flex-col justify-center">
-                      <span className="text-[10px] text-zinc-400 font-bold uppercase block">Precio USD:</span>
-                      {isEditingInline ? (
-                         <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-amber-400 font-bold">$</span>
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={inlinePriceValue}
-                              onChange={(e) => setInlinePriceValue(e.target.value)}
-                              className="w-full px-2 py-1 rounded-lg bg-zinc-900 border-2 border-amber-400/50 text-amber-300 font-black text-xs text-right focus:outline-none focus:border-amber-400"
-                              autoFocus
-                            />
-                         </div>
-                      ) : (
-                        <p className="font-black text-white text-sm mt-0.5">${p.priceUSD.toFixed(2)} USD</p>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {p.badgeText && (
+                        <span className="text-[9px] text-white font-bold bg-white/20 px-2 py-0.5 rounded-full">
+                          {p.badgeText}
+                        </span>
+                      )}
+                      {p.isGoldPromo && (
+                        <span className="bg-amber-400 text-black text-[9px] font-black uppercase px-2 py-0.5 rounded-full">
+                          VIP
+                        </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="pt-2 border-t border-zinc-700/50 flex items-center justify-between gap-2">
+                  {/* Card Body */}
+                  <div className="p-4 space-y-3">
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-zinc-900/60 p-3 rounded-xl border border-zinc-700/40 text-center">
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase block mb-1">Diamantes</span>
+                        <p className="font-black text-emerald-400 text-base">
+                          {p.diamonds.toLocaleString()}
+                        </p>
+                        {p.bonusDiamonds > 0 && (
+                          <span className="text-[10px] text-emerald-300/70 font-bold">+{p.bonusDiamonds} bonus</span>
+                        )}
+                      </div>
+
+                      <div className="bg-zinc-900/60 p-3 rounded-xl border border-zinc-700/40 text-center">
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase block mb-1">Precio USD</span>
+                        {isEditingInline ? (
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={inlinePriceValue}
+                            onChange={(e) => setInlinePriceValue(e.target.value)}
+                            className="w-full px-2 py-1.5 rounded-lg bg-zinc-800 border-2 border-amber-400 text-amber-300 font-black text-sm text-center focus:outline-none"
+                            autoFocus
+                          />
+                        ) : (
+                          <p className="font-black text-white text-base">${p.priceUSD.toFixed(2)}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-3 gap-2 pt-1">
                       {isEditingInline ? (
-                        <div className="flex items-center gap-2 w-full">
+                        <>
                           <button
                             onClick={() => {
                               const val = parseFloat(inlinePriceValue);
@@ -835,17 +843,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               }
                               setEditingInlinePriceId(null);
                             }}
-                            className="flex-1 py-2.5 bg-emerald-500 text-black text-xs font-black rounded-lg cursor-pointer hover:bg-emerald-400 uppercase"
+                            className="col-span-2 py-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black rounded-xl cursor-pointer uppercase transition-colors text-center"
                           >
-                            Guardar
+                            ✓ Guardar Precio
                           </button>
                           <button
                             onClick={() => setEditingInlinePriceId(null)}
-                            className="px-4 py-2.5 bg-zinc-800 text-zinc-400 text-xs font-bold rounded-lg cursor-pointer hover:text-white uppercase"
+                            className="py-3 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs font-bold rounded-xl cursor-pointer transition-colors text-center"
                           >
                             ✕
                           </button>
-                        </div>
+                        </>
                       ) : (
                         <>
                           <button
@@ -853,33 +861,34 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               setEditingInlinePriceId(p.id);
                               setInlinePriceValue(p.priceUSD.toString());
                             }}
-                            className="flex-1 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-extrabold text-[11px] uppercase transition-colors"
+                            className="py-3 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-amber-400 font-black text-xs uppercase transition-colors cursor-pointer text-center"
                           >
-                            Precio
+                            💲 Precio
                           </button>
 
                           <button
                             onClick={() => startEditProduct(p)}
-                            className="flex-1 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold flex items-center justify-center gap-1.5 text-[11px] uppercase transition-colors"
+                            className="py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase transition-colors cursor-pointer text-center"
                           >
-                            <Edit className="w-3.5 h-3.5 stroke-[2.5]" /> Edit
+                            ✏️ Editar
                           </button>
 
                           <button
                             onClick={() => onDeleteProduct(p.id)}
-                            className="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-black border border-rose-500/30 transition-colors cursor-pointer"
+                            className="py-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-black text-xs border border-rose-500/30 transition-colors cursor-pointer text-center uppercase"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            🗑️
                           </button>
                         </>
                       )}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Current Catalog Table (Hidden on mobile) */}
+          {/* Desktop Catalog Table */}
           <div className="hidden md:block bg-zinc-800 rounded-2xl border border-zinc-700/50 shadow-xl overflow-hidden">
             <table className="w-full text-left text-xs">
               <thead className="bg-zinc-900/80 text-emerald-400 uppercase font-black text-[10px] tracking-widest border-b border-zinc-700">
@@ -888,34 +897,41 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <th className="p-4">Categoría</th>
                   <th className="p-4">Diamantes</th>
                   <th className="p-4">Precio USD ($)</th>
-                  <th className="p-4">Especial / Dorado</th>
+                  <th className="p-4">Tipo</th>
                   <th className="p-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-zinc-700/50">
                 {products.map((p) => {
                   const isEditingInline = editingInlinePriceId === p.id;
                   return (
-                    <tr key={p.id} className="hover:bg-white/5 transition-colors">
-                      <td className="p-4 font-black uppercase text-white flex items-center gap-2">
-                        <DiamondIcon size="sm" variant={p.isGoldPromo || p.category === 'memberships' ? 'gold' : 'emerald'} />
-                        <div>
-                          <p className="font-extrabold text-white text-sm">{p.name}</p>
-                          {p.badgeText && (
-                            <span className="text-[9px] text-amber-400 font-bold bg-amber-400/10 px-1.5 py-0.2 rounded border border-amber-400/30 inline-block mt-0.5">
-                              {p.badgeText}
-                            </span>
-                          )}
+                    <tr key={p.id} className="hover:bg-zinc-700/20 transition-colors">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <DiamondIcon size="sm" variant={p.isGoldPromo || p.category === 'memberships' ? 'gold' : 'emerald'} />
+                          <div>
+                            <p className="font-extrabold text-white text-sm">{p.name}</p>
+                            {p.badgeText && (
+                              <span className="text-[9px] text-amber-400 font-bold bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/30 inline-block mt-0.5">
+                                {p.badgeText}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
 
-                      <td className="p-4 capitalize text-zinc-400 font-bold uppercase">{p.category}</td>
-
-                      <td className="p-4 font-black text-emerald-400">
-                        {p.diamonds.toLocaleString()} 💎 {p.bonusDiamonds ? `(+${p.bonusDiamonds})` : ''}
+                      <td className="p-4">
+                        <span className="text-zinc-300 font-bold uppercase text-[11px]">{p.category}</span>
                       </td>
 
-                      <td className="p-4 font-black">
+                      <td className="p-4">
+                        <span className="font-black text-emerald-400">{p.diamonds.toLocaleString()} 💎</span>
+                        {p.bonusDiamonds > 0 && (
+                          <span className="text-emerald-300/60 font-bold text-[10px] ml-1">(+{p.bonusDiamonds})</span>
+                        )}
+                      </td>
+
+                      <td className="p-4">
                         {isEditingInline ? (
                           <div className="flex items-center gap-1.5">
                             <span className="text-amber-400 font-bold">$</span>
@@ -924,7 +940,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               step="0.01"
                               value={inlinePriceValue}
                               onChange={(e) => setInlinePriceValue(e.target.value)}
-                              className="w-20 px-2 py-1 rounded-lg bg-black border-2 border-amber-400 text-amber-300 font-black text-xs text-right focus:outline-none"
+                              className="w-20 px-2 py-1.5 rounded-lg bg-zinc-900 border-2 border-amber-400 text-amber-300 font-black text-xs text-right focus:outline-none"
                               autoFocus
                             />
                             <button
@@ -935,32 +951,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                                 }
                                 setEditingInlinePriceId(null);
                               }}
-                              className="px-2 py-1 bg-emerald-500 text-black text-[10px] font-black rounded-lg cursor-pointer hover:bg-emerald-400"
-                              title="Guardar nuevo precio"
+                              className="px-2.5 py-1.5 bg-emerald-500 text-black text-[10px] font-black rounded-lg cursor-pointer hover:bg-emerald-400 transition-colors"
                             >
-                              Guardar
+                              ✓
                             </button>
                             <button
                               onClick={() => setEditingInlinePriceId(null)}
-                              className="px-1.5 py-1 bg-zinc-800 text-zinc-400 text-[10px] font-bold rounded-lg cursor-pointer hover:text-white"
+                              className="px-2 py-1.5 bg-zinc-700 text-zinc-400 text-[10px] font-bold rounded-lg cursor-pointer hover:text-white transition-colors"
                             >
                               ✕
                             </button>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-emerald-300 font-black bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-500/30">
-                              ${p.priceUSD.toFixed(2)} USD
+                            <span className="text-sm text-white font-black">
+                              ${p.priceUSD.toFixed(2)}
                             </span>
                             <button
                               onClick={() => {
                                 setEditingInlinePriceId(p.id);
                                 setInlinePriceValue(p.priceUSD.toString());
                               }}
-                              className="text-[10px] text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer"
-                              title="Editar precio rápido"
+                              className="text-[10px] text-amber-400 hover:text-amber-300 font-bold cursor-pointer bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20 hover:border-amber-400/40 transition-colors"
                             >
-                              Cambiar Precio
+                              Cambiar
                             </button>
                           </div>
                         )}
@@ -968,11 +982,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                       <td className="p-4">
                         {p.isGoldPromo ? (
-                          <span className="bg-amber-400/10 text-amber-300 text-[10px] font-black uppercase px-2 py-0.5 rounded border border-amber-400/30">
-                            🟡 DORADO PROMO
+                          <span className="bg-amber-400/15 text-amber-300 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg border border-amber-400/30">
+                            🟡 DORADO
                           </span>
                         ) : (
-                          <span className="text-zinc-600">-</span>
+                          <span className="text-zinc-600 text-[10px]">Estándar</span>
                         )}
                       </td>
 
@@ -980,16 +994,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => startEditProduct(p)}
-                            className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-extrabold flex items-center gap-1.5 shadow-md cursor-pointer transition-all text-xs"
-                            title="Editar todos los campos del producto"
+                            className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black flex items-center gap-1.5 cursor-pointer transition-all text-xs uppercase"
                           >
                             <Edit className="w-3.5 h-3.5 stroke-[2.5]" />
-                            <span>Editar</span>
+                            Editar
                           </button>
 
                           <button
                             onClick={() => onDeleteProduct(p.id)}
-                            className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-black border border-rose-500/30 transition-colors cursor-pointer"
+                            className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition-colors cursor-pointer"
                             title="Eliminar producto"
                           >
                             <Trash2 className="w-4 h-4" />
