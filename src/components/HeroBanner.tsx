@@ -12,7 +12,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onOpenQuickIDCheck,
 }) => {
   return (
-    <div id="hero-banner-section" className="relative overflow-hidden bg-[#050505] border-b border-emerald-900/30 text-white py-8 sm:py-12 px-3 sm:px-6 lg:px-8">
+    <div id="hero-banner-section" className="relative overflow-hidden bg-[#050505] text-white py-8 sm:py-12 px-3 sm:px-6 lg:px-8">
       {/* Glow Effects */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
