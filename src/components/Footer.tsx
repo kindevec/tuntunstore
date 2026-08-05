@@ -1,6 +1,12 @@
 import React from 'react';
 import { DiamondIcon } from './DiamondIcon';
-import { ShieldCheck, Heart, ExternalLink } from 'lucide-react';
+import { ShieldCheck, Heart, ExternalLink, Facebook, Instagram } from 'lucide-react';
+
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/>
+  </svg>
+);
 
 interface FooterProps {
   onSelectTab: (tab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin') => void;
@@ -23,8 +29,21 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
               Plataforma líder en recargas directas de diamantes para videojuegos en Ecuador. Acreditación rápida y garantizada.
             </p>
             <p className="text-[11px] text-emerald-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" /> Servidor Oficial: WhatsApp +593 99 008 4680
+              <ShieldCheck className="w-3.5 h-3.5" /> Servidor Oficial: WhatsApp +593 96 872 9952
             </p>
+            
+            {/* Social Media Links */}
+            <div className="flex items-center gap-4 pt-2">
+              <a href="https://www.facebook.com/profile.php?id=61592564474036" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-zinc-900 hover:bg-emerald-500 hover:text-black text-zinc-400 transition-colors" title="Facebook">
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a href="https://www.instagram.com/sahur055?igsh=MWs3cXI1cDM0Z2x2YQ==" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-zinc-900 hover:bg-emerald-500 hover:text-black text-zinc-400 transition-colors" title="Instagram">
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a href="https://www.tiktok.com/@tuntunstore1" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-zinc-900 hover:bg-emerald-500 hover:text-black text-zinc-400 transition-colors" title="TikTok">
+                <TikTokIcon className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -93,7 +112,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
         <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-500 text-[11px] font-bold uppercase text-center sm:text-left">
           <p>© 2026 TunTun Store. Todos los derechos reservados. Operado en Ecuador 🇪🇨.</p>
           <p className="flex items-center gap-1.5">
-            <span>Desarrollado por <strong className="text-emerald-400 font-extrabold tracking-wider">KinDev S.A.S</strong></span>
+            <span>Desarrollado por <a href="https://kindevx.web.app/" target="_blank" rel="noreferrer" className="text-emerald-400 font-extrabold tracking-wider hover:underline">KinDev S.A.S</a></span>
             <span className="text-zinc-600">•</span>
             <span className="flex items-center gap-1">
               Diseñado con <Heart className="w-3 h-3 text-rose-500 fill-current" /> para Gamers

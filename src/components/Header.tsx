@@ -173,39 +173,45 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="user-profile-menu-btn"
                   onClick={() => setShowAuthMenu(!showAuthMenu)}
-                  className="flex items-center gap-1.5 sm:gap-2.5 p-1 sm:p-1.5 sm:pl-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-emerald-500/50 transition-all text-left cursor-pointer"
+                  className={`flex items-center gap-1.5 sm:gap-2.5 p-1 sm:p-1.5 sm:pl-3 rounded-xl border transition-all text-left cursor-pointer shadow-lg hover:shadow-xl ${
+                    isAdmin 
+                      ? 'bg-gradient-to-r from-amber-950/40 to-black border-amber-500/30 hover:border-amber-400/50' 
+                      : 'bg-gradient-to-r from-emerald-950/40 to-black border-emerald-500/30 hover:border-emerald-400/50'
+                  }`}
                 >
                   <img
                     src={currentUser.avatar}
                     alt={currentUser.name}
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover ring-2 ring-emerald-500/50 shrink-0"
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover ring-2 shrink-0 shadow-md ${isAdmin ? 'ring-amber-500/50' : 'ring-emerald-500/50'}`}
                   />
-                  <div className="hidden sm:block leading-tight">
-                    <p className="text-xs font-bold text-white line-clamp-1">{currentUser.name}</p>
-                    <p className="text-[10px] text-zinc-400 flex items-center gap-1">
+                  <div className="hidden sm:block leading-tight pr-1">
+                    <p className="text-xs font-black text-white line-clamp-1 drop-shadow-md">{currentUser.name}</p>
+                    <p className="text-[10px] text-zinc-400 flex items-center gap-1 mt-0.5">
                       {isAdmin ? (
-                        <span className="text-amber-400 font-semibold flex items-center gap-0.5">
-                          ⭐ Administrador
+                        <span className="text-amber-400 font-bold flex items-center gap-1 uppercase tracking-wider text-[9px]">
+                          <ShieldCheck className="w-3 h-3" /> ADMIN
                         </span>
                       ) : (
-                        <span className="text-emerald-400 flex items-center gap-0.5">
-                          <CheckCircle2 className="w-2.5 h-2.5" /> Cliente Google
+                        <span className="text-emerald-400 font-bold flex items-center gap-1 uppercase tracking-wider text-[9px]">
+                          <CheckCircle2 className="w-3 h-3" /> VERIFICADO
                         </span>
                       )}
                     </p>
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
+                  <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isAdmin ? 'text-amber-500' : 'text-emerald-500'}`} />
                 </button>
 
                 {/* Dropdown menu */}
                 {showAuthMenu && (
-                  <div className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
-                    <div className="px-3 py-2 border-b border-zinc-800 mb-1">
-                      <p className="text-xs font-bold text-white">{currentUser.name}</p>
+                  <div className={`absolute right-0 mt-3 w-64 border rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 backdrop-blur-xl ${
+                    isAdmin ? 'bg-zinc-950/90 border-amber-500/30 shadow-[0_10px_40px_rgba(251,191,36,0.15)]' : 'bg-zinc-950/90 border-emerald-500/30 shadow-[0_10px_40px_rgba(16,185,129,0.15)]'
+                  }`}>
+                    <div className="px-3 py-3 border-b border-white/5 mb-2 bg-white/5 rounded-xl">
+                      <p className="text-sm font-black text-white">{currentUser.name}</p>
                       <p className="text-[11px] text-zinc-400 truncate">{currentUser.email}</p>
-                      <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        Sesión verificada con Google
+                      <p className={`text-[10px] font-bold mt-1.5 flex items-center gap-1 uppercase tracking-wider ${isAdmin ? 'text-amber-400' : 'text-emerald-400'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isAdmin ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
+                        {isAdmin ? 'Cuenta Administrador' : 'Cuenta Verificada'}
                       </p>
                     </div>
 
@@ -294,47 +300,7 @@ export const Header: React.FC<HeaderProps> = ({
                         </>
                       )}
 
-                      <div className="my-1 border-t border-zinc-800"></div>
 
-                      <button
-                        onClick={() => {
-                          onLoginGoogle('client');
-                          setShowAuthMenu(false);
-                          setActiveTab('catalog');
-                        }}
-                        className={`w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between transition-colors cursor-pointer ${
-                          currentUser.role === 'client'
-                            ? 'bg-emerald-950/60 text-emerald-300 font-semibold border border-emerald-800/40'
-                            : 'text-zinc-300 hover:bg-zinc-800'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <User className="w-3.5 h-3.5 text-emerald-400" />
-                          Modo Cliente ({currentUser.name.split(' ')[0]})
-                        </span>
-                        {currentUser.role === 'client' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          onLoginGoogle('admin');
-                          setShowAuthMenu(false);
-                          setActiveTab('admin', 'orders');
-                        }}
-                        className={`w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between transition-colors cursor-pointer ${
-                          currentUser.role === 'admin'
-                            ? 'bg-amber-950/60 text-amber-300 font-semibold border border-amber-800/40'
-                            : 'text-zinc-300 hover:bg-zinc-800'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2">
-                          <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                          Modo Administrador
-                        </span>
-                        {currentUser.role === 'admin' && <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />}
-                      </button>
-
-                      <div className="my-1 border-t border-zinc-800"></div>
 
                       <button
                         onClick={() => {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 import { 
   User, 
   Lock, 
@@ -50,7 +51,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [playerId, setPlayerId] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
@@ -59,22 +60,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       return;
     }
 
-    const found = registeredUsers.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-    );
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password.trim(),
+    });
 
-    if (found) {
-      onLoginSuccess(found);
-    } else {
-      onRegisterUser(
-        name.trim() || email.split('@')[0],
-        email.trim(),
-        playerId.trim() || undefined
-      );
+    if (error) {
+      setErrorMessage(`Error de acceso: ${error.message}`);
+    } else if (data.user) {
+      // The onAuthStateChange listener in App.tsx will pick this up automatically
+      // But we can trigger a manual redirect or toast if needed.
     }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
@@ -88,7 +87,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       return;
     }
 
-    onRegisterUser(name.trim(), email.trim(), playerId.trim() || undefined);
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password: password.trim(),
+      options: {
+        data: {
+          full_name: name.trim(),
+          player_id: playerId.trim() || null,
+        }
+      }
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      // Automatically attempt to login or tell the user to confirm email.
+      if (data.session) {
+        // Logged in immediately (email confirmation disabled)
+      } else {
+        alert("¡Cuenta creada exitosamente! Si Supabase requiere confirmación, por favor revisa tu bandeja de entrada.");
+      }
+    }
   };
 
   return (
@@ -247,16 +266,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-                <span>Iniciar sesión con Google (Demo Cliente)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onLoginGoogle('admin')}
-                className="w-full py-2.5 px-4 bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800/80 text-emerald-400/90 hover:text-emerald-300 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Acceder como Administrador (Demo Admin)</span>
+                <span>Iniciar sesión con Google</span>
               </button>
 
               <button
@@ -351,10 +361,28 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 Registrarme y Crear Cuenta
               </button>
 
+              <div className="text-center my-3 text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
+                o
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onLoginGoogle('client')}
+                className="w-full py-3 px-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                <span>Registrarse con Google</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setAuthMode('login')}
-                className="w-full py-3 px-4 bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center"
+                className="w-full py-3 px-4 bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center mt-4"
               >
                 ¿Ya tienes cuenta? Iniciar Sesión
               </button>

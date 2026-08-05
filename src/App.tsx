@@ -8,6 +8,7 @@ import {
   DEFAULT_USER_ADMIN,
   INITIAL_EMAIL_CONFIG 
 } from './data/mockData';
+import { supabase } from './supabaseClient';
 
 import { Header } from './components/Header';
 import { HeroBanner } from './components/HeroBanner';
@@ -26,7 +27,7 @@ export default function App() {
   // State Persistence Initialization
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>(() => {
     try {
-      const saved = localStorage.getItem('tuntun_users');
+      const saved = localStorage.getItem('tuntun_users_v2');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error(e);
@@ -44,9 +45,64 @@ export default function App() {
     return null;
   });
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      } else {
+        updateCurrentActiveUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching profile from Supabase:", error);
+      // Fallback: If profile trigger failed but auth succeeded, force them out or create a temporary fallback
+      showToast(`❌ Error cargando perfil: ${error.message}`);
+      return;
+    }
+
+    if (data) {
+      const userProfile: UserProfile = {
+        uid: data.id,
+        name: data.name || 'Usuario',
+        email: data.email,
+        avatar: data.avatar_url || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
+        role: data.role as 'client' | 'admin',
+        walletBalanceUSD: data.wallet_balance_usd || 0,
+        playerIdDefault: data.player_id_default,
+        gamerTag: data.gamer_tag,
+        phone: data.phone,
+        preferredBank: data.preferred_bank,
+      };
+      updateCurrentActiveUser(userProfile);
+      
+      // If we just logged in and we are on the login page, redirect
+      if (window.location.hash.includes('login')) {
+        window.location.hash = data.role === 'admin' ? '#admin' : '#catalog';
+        showToast(`👋 Bienvenid@, ${data.name || data.email}`);
+      }
+    }
+  };
+
   const [products, setProducts] = useState<Product[]>(() => {
     try {
-      const saved = localStorage.getItem('tuntun_products');
+      const saved = localStorage.getItem('tuntun_products_v2');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error(e);
@@ -57,7 +113,7 @@ export default function App() {
   const saveProductsToStorage = (updatedProducts: Product[]) => {
     setProducts(updatedProducts);
     try {
-      localStorage.setItem('tuntun_products', JSON.stringify(updatedProducts));
+      localStorage.setItem('tuntun_products_v2', JSON.stringify(updatedProducts));
     } catch (e) {
       console.error(e);
     }
@@ -80,7 +136,7 @@ export default function App() {
   const saveUsersToStorage = (updatedUsers: UserProfile[]) => {
     setRegisteredUsers(updatedUsers);
     try {
-      localStorage.setItem('tuntun_users', JSON.stringify(updatedUsers));
+      localStorage.setItem('tuntun_users_v2', JSON.stringify(updatedUsers));
     } catch (e) {
       console.error(e);
     }
@@ -231,59 +287,45 @@ export default function App() {
   };
 
   // Auth Handling
-  const handleLoginGoogle = (role: 'client' | 'admin') => {
-    const targetEmail = role === 'admin' ? DEFAULT_USER_ADMIN.email : DEFAULT_USER_CLIENT.email;
-    const existingUser = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail.toLowerCase());
-
-    if (role === 'admin') {
-      const adminUser = existingUser || DEFAULT_USER_ADMIN;
-      updateCurrentActiveUser(adminUser);
-      window.location.hash = '#admin';
-      showToast(`⚡ Sesión iniciada como Administrador (${adminUser.email})`);
-    } else {
-      const clientUser = existingUser || DEFAULT_USER_CLIENT;
-      updateCurrentActiveUser(clientUser);
-      window.location.hash = '#catalog';
-      showToast(`👋 Sesión iniciada como ${clientUser.name}`);
-    }
+  const handleLoginGoogle = async (role: 'client' | 'admin') => {
+    await supabase.auth.signInWithOAuth({ provider: 'google' });
   };
 
-  const handleRegisterUser = (name: string, email: string, playerId?: string) => {
-    const existing = registeredUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (existing) {
-      updateCurrentActiveUser(existing);
-      window.location.hash = '#catalog';
-      showToast(`👋 Bienvenid@ de nuevo, ${existing.name}`);
-      return;
-    }
-
-    const newUser: UserProfile = {
-      uid: `user-${Date.now()}`,
-      name,
-      email,
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
-      role: 'client',
-      walletBalanceUSD: 0,
-      playerIdDefault: playerId || undefined,
-    };
-    const updatedList = [...registeredUsers, newUser];
-    saveUsersToStorage(updatedList);
-    updateCurrentActiveUser(newUser);
-    window.location.hash = '#catalog';
-    showToast(`🎉 ¡Cuenta creada con éxito! Bienvenido ${newUser.name}`);
+  const handleRegisterUser = () => {
+    // Logic moved to LoginPage directly
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     updateCurrentActiveUser(null);
     window.location.hash = '#catalog';
     showToast('Sesión cerrada correctamente');
   };
 
-  const handleSaveProfile = (updatedProfile: UserProfile) => {
+  const handleSaveProfile = async (updatedProfile: UserProfile) => {
+    if (!currentUser) return;
+
+    // Optimistic UI update
     updateCurrentActiveUser(updatedProfile);
-    const updatedList = registeredUsers.map((u) => (u.email === updatedProfile.email ? updatedProfile : u));
-    saveUsersToStorage(updatedList);
-    showToast('✨ Perfil personalizado guardado exitosamente');
+
+    // Save to real database
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        name: updatedProfile.name,
+        player_id_default: updatedProfile.playerIdDefault || null,
+        gamer_tag: updatedProfile.gamerTag || null,
+        phone: updatedProfile.phone || null,
+        preferred_bank: updatedProfile.preferredBank || null,
+        avatar_url: updatedProfile.avatar,
+      })
+      .eq('id', currentUser.uid);
+
+    if (error) {
+      showToast(`❌ Error al guardar perfil: ${error.message}`);
+    } else {
+      showToast('✨ Perfil guardado en la base de datos exitosamente');
+    }
   };
 
   // Protected Tab Navigation & Admin Routing
@@ -544,7 +586,7 @@ export default function App() {
                 ? `¡Hola TunTun Store! Necesito soporte con mi pedido de recarga #${order.id} (ID Jugador: ${order.playerId}).`
                 : '¡Hola TunTun Store! Quisiera realizar una consulta sobre una recarga de diamantes.';
               const encoded = encodeURIComponent(msg);
-              window.open(`https://wa.me/593990084680?text=${encoded}`, '_blank');
+              window.open(`https://wa.me/593968729952?text=${encoded}`, '_blank');
             }}
           />
         )}

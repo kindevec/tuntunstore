@@ -64,49 +64,6 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageType: 'diamond-large',
   },
 
-  // OPCIONAL (PASES & MEMBRESÍAS)
-  {
-    id: 'pase-elite',
-    name: 'Pase Elite',
-    diamonds: 0,
-    priceUSD: 2.55,
-    category: 'passes',
-    description: 'Pase Elite de Temporada Free Fire • Acreditación directa por ID.',
-    badgeText: '$2.55 ⭐',
-    imageType: 'pass-level',
-  },
-  {
-    id: 'pase-nivel',
-    name: 'Pase de Nivel',
-    diamonds: 1000,
-    priceUSD: 4.25,
-    category: 'passes',
-    description: 'Desbloquea hasta 1000💎 a medida que subes tu nivel de cuenta.',
-    badgeText: '$4.25 🎯',
-    imageType: 'pass-level',
-  },
-  {
-    id: 'tarjeta-semanal',
-    name: 'Tarjeta Semanal',
-    diamonds: 450,
-    priceUSD: 2.20,
-    category: 'memberships',
-    description: 'Recibe diamantes diarios durante 7 días + Recompensas Exclusivas.',
-    isGoldPromo: true,
-    badgeText: 'SEMANAL $2.20 🟡',
-    imageType: 'membership-weekly',
-  },
-  {
-    id: 'tarjeta-mensual',
-    name: 'Tarjeta Mensual',
-    diamonds: 2600,
-    priceUSD: 10.99,
-    category: 'memberships',
-    description: 'Recibe diamantes diarios durante 30 días + Marco de Perfil VIP.',
-    isGoldPromo: true,
-    badgeText: 'MENSUAL $10.99 ⭐',
-    imageType: 'membership-monthly',
-  },
 ];
 
 export const BANK_ACCOUNTS: BankAccount[] = [
@@ -234,7 +191,7 @@ export const DEFAULT_USER_CLIENT: UserProfile = {
 export const DEFAULT_USER_ADMIN: UserProfile = {
   uid: 'usr_admin_tuntun',
   name: 'Administración TunTun Store',
-  email: 'admin@tuntunstore.com',
+  email: 'admin@gmail.com',
   avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
   role: 'admin',
   walletBalanceUSD: 0.00,

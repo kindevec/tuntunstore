@@ -17,9 +17,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
-          {/* Main Hero Copy (Left 7 cols) */}
+          {/* Main Hero Copy */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-6">
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
               <Zap className="w-3.5 h-3.5 text-emerald-400 animate-bounce" />
@@ -78,88 +78,17 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                 <span>Ver Catálogo Diamantes</span>
                 <ChevronRight className="w-4 h-4 text-black stroke-[3]" />
               </button>
-
-              <button
-                onClick={() => onSelectProductGroup('memberships')}
-                className="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-amber-400 text-black font-black uppercase text-xs tracking-wider shadow-[0_0_20px_rgba(251,191,36,0.3)] hover:bg-amber-300 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
-              >
-                <Sparkles className="w-4 h-4 text-black" />
-                <span>Membresías VIP (Oro 🟡)</span>
-              </button>
             </div>
           </div>
 
-          {/* Right Highlight Card - GOLD PROMO FEATURE */}
-          <div className="lg:col-span-5">
-            <div id="gold-promo-card-hero" className="relative p-0.5 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-[0_0_30px_rgba(251,191,36,0.3)]">
-              <div className="bg-[#0a0a0a] rounded-[14px] p-6 text-white space-y-4">
-                
-                {/* Exclusive Gold Badge Tag */}
-                <div className="flex items-center justify-between">
-                  <div className="bg-amber-400 text-black text-[10px] px-2.5 py-1 rounded font-black uppercase tracking-wider flex items-center gap-1">
-                    <Flame className="w-3.5 h-3.5 fill-current" />
-                    OFERTA DORADA VIP
-                  </div>
-                  <span className="text-[10px] uppercase font-bold text-amber-400/80 tracking-widest">Soporte TunTun Store 🇪🇨</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-xl bg-amber-400/10 border border-amber-400/30">
-                    <DiamondIcon size="lg" variant="gold" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-black uppercase text-amber-400 leading-tight">
-                      Membresía Mensual VIP
-                    </h2>
-                    <p className="text-xs font-bold text-amber-400/70 uppercase tracking-tight">
-                      2,600 Diamantes Totales + Badge
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-black border border-amber-400/30 space-y-2 text-xs font-bold">
-                  <div className="flex items-center justify-between text-zinc-300">
-                    <span className="flex items-center gap-1.5">
-                      <Check className="w-3.5 h-3.5 text-amber-400" /> 70 Diamantes diarios x 30 días
-                    </span>
-                    <span className="text-amber-400">2,100💎</span>
-                  </div>
-                  <div className="flex items-center justify-between text-zinc-300">
-                    <span className="flex items-center gap-1.5">
-                      <Check className="w-3.5 h-3.5 text-amber-400" /> Bono instantáneo de compra
-                    </span>
-                    <span className="text-amber-400">+500💎</span>
-                  </div>
-                  <div className="flex items-center justify-between text-zinc-300">
-                    <span className="flex items-center gap-1.5">
-                      <Check className="w-3.5 h-3.5 text-amber-400" /> Marco Especial Perfil
-                    </span>
-                    <span className="text-[9px] bg-amber-400 text-black px-1.5 py-0.5 rounded font-black uppercase">
-                      EXCLUSIVO
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <div>
-                    <span className="text-xs text-white/40 line-through mr-2 font-bold">$14.99</span>
-                    <span className="text-3xl font-black text-amber-400">$10.99</span>
-                  </div>
-
-                  <button
-                    onClick={() => onSelectProductGroup('memberships')}
-                    className="px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md"
-                  >
-                    Adquirir Membresía 🟡
-                  </button>
-                </div>
-
-                <div className="text-[10px] text-white/40 uppercase font-bold tracking-widest text-center border-t border-amber-500/20 pt-2 flex items-center justify-center gap-1">
-                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Acreditación Garantizada TunTun Store</span>
-                </div>
-              </div>
-            </div>
+          {/* Right Logo Banner */}
+          <div className="hidden lg:flex lg:col-span-5 justify-center relative">
+            <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
+            <img 
+              src="/logo-transparent.png" 
+              alt="TunTun Store" 
+              className="w-full max-w-[380px] object-contain drop-shadow-[0_0_50px_rgba(16,185,129,0.4)] hover:scale-105 transition-transform duration-700" 
+            />
           </div>
 
         </div>
