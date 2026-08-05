@@ -312,7 +312,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   });
 
   return (
-    <section id="catalog-section" className="py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-8">
+    <section id="catalog-section" className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
       {/* Admin Mode Special Control Bar (ONLY visible for Administrator) */}
       {isAdmin && (
         <div className="bg-gradient-to-r from-amber-950/90 via-zinc-900 to-amber-950/90 p-4 rounded-2xl border-2 border-amber-500/50 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_25px_rgba(251,191,36,0.2)]">
@@ -478,7 +478,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
       </div>
 
       {/* Grid of Product Cards */}
-      <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2.5 sm:gap-4">
+      <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2.5 sm:gap-4 max-w-5xl mx-auto">
         {filteredProducts.map((product) => {
           const isGoldStyle = product.isGoldPromo || product.category === 'memberships';
           const isQuickEditing = quickPriceId === product.id;
