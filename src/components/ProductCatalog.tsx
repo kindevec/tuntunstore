@@ -72,63 +72,54 @@ const CyanProductCard: React.FC<{
       ref={cardRef}
       id={`product-card-${product.id}`}
       data-active={isVisible}
-      className={`bg-zinc-800 border transition-all duration-500 rounded-xl p-2.5 sm:p-4 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 data-[active=true]:scale-105 data-[active=true]:z-10 ${
+      className={`bg-gradient-to-b from-zinc-800 to-zinc-900 border transition-all duration-500 rounded-xl flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-[1.03] hover:z-10 data-[active=true]:scale-[1.03] data-[active=true]:z-10 ${
         isAdmin
           ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)] data-[active=true]:border-amber-400'
           : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] data-[active=true]:border-emerald-400 data-[active=true]:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
       }`}
     >
-      {/* Badge Overlay or Admin Quick Edit Button */}
-      <div className="flex items-center justify-between mb-1">
-        {product.badgeText ? (
-          <span className="bg-emerald-500 text-black font-black uppercase text-[9px] sm:text-[10px] tracking-wider px-1.5 sm:px-2 py-0.5 rounded shadow">
-            {product.badgeText}
-          </span>
-        ) : (
-          <span></span>
-        )}
-
-        {isAdmin && (
-          <button
-            onClick={() => handleOpenEdit(product)}
-            className="bg-amber-400 text-black px-2 py-0.5 rounded-md font-black text-[10px] flex items-center gap-1 cursor-pointer hover:bg-amber-300 shadow uppercase relative z-20"
-            title="Editar producto"
-          >
-            <Edit className="w-3 h-3" />
-            <span>Editar</span>
-          </button>
-        )}
-      </div>
-
-      <div className="space-y-1 sm:space-y-2">
-        {/* Product Name Title */}
-        <div className="text-center">
-          <h3 className="text-base sm:text-xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 group-data-[active=true]:text-emerald-400 transition-colors leading-tight">
-            {product.name}
-          </h3>
-          <p className="text-[8px] sm:text-[10px] text-emerald-400/80 font-black uppercase tracking-widest">
-            DIAMANTES FREE FIRE
-          </p>
+      {/* Top section: badge + image + title overlaid */}
+      <div className="relative px-3 pt-2.5 sm:px-4 sm:pt-3 pb-1">
+        {/* Badge row */}
+        <div className="flex items-center justify-between mb-1">
+          {product.badgeText ? (
+            <span className="bg-emerald-500 text-black font-black uppercase text-[9px] sm:text-[10px] tracking-wider px-1.5 sm:px-2 py-0.5 rounded shadow">
+              {product.badgeText}
+            </span>
+          ) : (
+            <span></span>
+          )}
+          {isAdmin && (
+            <button
+              onClick={() => handleOpenEdit(product)}
+              className="bg-amber-400 text-black px-2 py-0.5 rounded-md font-black text-[10px] flex items-center gap-1 cursor-pointer hover:bg-amber-300 shadow uppercase relative z-20"
+              title="Editar producto"
+            >
+              <Edit className="w-3 h-3" />
+              <span>Editar</span>
+            </button>
+          )}
         </div>
 
-        {/* Card Artwork Graphic - Using Custom Diamond Image with Hover Swap */}
-        <div className="flex items-center justify-center py-1 sm:py-2">
+        {/* Product Title */}
+        <h3 className="text-center text-base sm:text-lg font-black text-white uppercase tracking-tight group-hover:text-emerald-400 group-data-[active=true]:text-emerald-400 transition-colors leading-tight">
+          {product.name}
+        </h3>
+
+        {/* Diamond Image — fills card width nicely */}
+        <div className="flex items-center justify-center py-1.5 sm:py-3">
           <div className="relative group-hover:scale-110 group-data-[active=true]:scale-110 transition-transform duration-500">
-            <div className="absolute inset-0 bg-emerald-500/20 blur-[15px] sm:blur-[20px] rounded-full animate-pulse group-hover:bg-emerald-400/30 group-data-[active=true]:bg-emerald-400/30 transition-colors" />
-            
-            {/* Base Image */}
+            <div className="absolute inset-0 bg-emerald-500/20 blur-[18px] sm:blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 group-data-[active=true]:bg-emerald-400/30 transition-colors" />
             <img 
               src="/diamante.png" 
               alt="Diamante" 
-              className="w-16 h-16 sm:w-28 sm:h-28 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] sm:drop-shadow-[0_0_20px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+              className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
             />
-            {/* Hover Image */}
             <img 
               src="/diamante-2.png" 
               alt="Diamante 2" 
-              className="absolute top-0 left-0 w-16 h-16 sm:w-28 sm:h-28 object-contain z-10 drop-shadow-[0_0_20px_rgba(16,185,129,1)] sm:drop-shadow-[0_0_30px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+              className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
             />
-
             {product.bonusDiamonds > 0 && (
               <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-3 bg-amber-400 text-black font-black text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
                 +{product.bonusDiamonds}
@@ -137,18 +128,16 @@ const CyanProductCard: React.FC<{
           </div>
         </div>
 
-        {/* Subtitle Details */}
-        <div className="text-center space-y-0.5">
-          <p className="text-[11px] sm:text-xs text-white/90 font-bold uppercase tracking-wide">
-            {product.diamonds} 💎 {product.bonusDiamonds ? `+ ${product.bonusDiamonds} bono` : ''}
-          </p>
-        </div>
+        {/* Diamond count pill */}
+        <p className="text-center text-[11px] sm:text-xs text-white/80 font-bold uppercase tracking-wide">
+          {product.diamonds} 💎 {product.bonusDiamonds ? `+ ${product.bonusDiamonds} bono` : ''}
+        </p>
       </div>
 
-      {/* Price & Action Button */}
-      <div className="pt-2 mt-1.5 border-t border-emerald-900/30 space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-emerald-400/70 font-bold uppercase">Precio</span>
+      {/* Footer: Price + Button integrated */}
+      <div className="px-3 pb-2.5 sm:px-4 sm:pb-3 pt-1.5 mt-auto">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] text-emerald-400/60 font-bold uppercase">Precio</span>
 
           {isAdmin && isQuickEditing ? (
             <div className="flex items-center gap-1">
@@ -176,7 +165,7 @@ const CyanProductCard: React.FC<{
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-base sm:text-2xl font-black text-[#00e676] tracking-tight">
+              <span className="text-lg sm:text-2xl font-black text-[#00e676] tracking-tight">
                 ${product.priceUSD.toFixed(2)}
               </span>
               {isAdmin && (
@@ -199,14 +188,14 @@ const CyanProductCard: React.FC<{
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleOpenEdit(product)}
-              className="py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow relative z-20"
+              className="py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow relative z-20"
             >
               <Edit className="w-3.5 h-3.5" />
               <span>Editar</span>
             </button>
             <button
               onClick={() => onDeleteProduct && onDeleteProduct(product.id)}
-              className="py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 relative z-20"
+              className="py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 relative z-20"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Eliminar</span>
@@ -216,7 +205,7 @@ const CyanProductCard: React.FC<{
           <button
             id={`btn-buy-${product.id}`}
             onClick={() => onSelectProduct(product)}
-            className="w-full py-2.5 sm:py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer relative z-20"
+            className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer relative z-20"
           >
             <ShoppingCart className="w-4 h-4 text-black" />
             <span>Comprar</span>
