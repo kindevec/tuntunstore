@@ -91,7 +91,7 @@ const CyanProductCard: React.FC<{
         {isAdmin && (
           <button
             onClick={() => handleOpenEdit(product)}
-            className="bg-amber-400 text-black px-2 py-0.5 rounded-md font-black text-[10px] flex items-center gap-1 cursor-pointer hover:bg-amber-300 shadow uppercase relative z-50"
+            className="bg-amber-400 text-black px-2 py-0.5 rounded-md font-black text-[10px] flex items-center gap-1 cursor-pointer hover:bg-amber-300 shadow uppercase relative z-20"
             title="Editar producto"
           >
             <Edit className="w-3 h-3" />
@@ -161,18 +161,18 @@ const CyanProductCard: React.FC<{
                 step="0.01"
                 value={quickPriceValue}
                 onChange={(e) => setQuickPriceValue(e.target.value)}
-                className="w-20 px-2 py-1 bg-black border-2 border-emerald-400 text-emerald-300 rounded-lg text-sm font-black text-right focus:outline-none relative z-50"
+                className="w-20 px-2 py-1 bg-black border-2 border-emerald-400 text-emerald-300 rounded-lg text-sm font-black text-right focus:outline-none relative z-20"
                 autoFocus
               />
               <button
                 onClick={() => handleSaveQuickPrice(product)}
-                className="p-1 bg-emerald-500 text-black rounded-lg text-[10px] font-black hover:bg-emerald-400 cursor-pointer relative z-50"
+                className="p-1 bg-emerald-500 text-black rounded-lg text-[10px] font-black hover:bg-emerald-400 cursor-pointer relative z-20"
               >
                 ✓
               </button>
               <button
                 onClick={() => setQuickPriceId(null)}
-                className="p-1 bg-zinc-800 text-zinc-400 rounded-lg text-[10px] hover:text-white cursor-pointer relative z-50"
+                className="p-1 bg-zinc-800 text-zinc-400 rounded-lg text-[10px] hover:text-white cursor-pointer relative z-20"
               >
                 ✕
               </button>
@@ -188,7 +188,7 @@ const CyanProductCard: React.FC<{
                     setQuickPriceId(product.id);
                     setQuickPriceValue(product.priceUSD.toString());
                   }}
-                  className="text-[10px] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 px-2 py-0.5 rounded font-bold underline cursor-pointer relative z-50"
+                  className="text-[10px] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 px-2 py-0.5 rounded font-bold underline cursor-pointer relative z-20"
                   title="Cambiar precio rápido"
                 >
                   $ Edit
@@ -202,14 +202,14 @@ const CyanProductCard: React.FC<{
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleOpenEdit(product)}
-              className="py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow relative z-50"
+              className="py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow relative z-20"
             >
               <Edit className="w-3.5 h-3.5" />
               <span>Editar</span>
             </button>
             <button
               onClick={() => onDeleteProduct && onDeleteProduct(product.id)}
-              className="py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 relative z-50"
+              className="py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 relative z-20"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Eliminar</span>
@@ -219,7 +219,7 @@ const CyanProductCard: React.FC<{
           <button
             id={`btn-buy-${product.id}`}
             onClick={() => onSelectProduct(product)}
-            className="w-full py-3 sm:py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer relative z-50"
+            className="w-full py-3 sm:py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer relative z-20"
           >
             <ShoppingCart className="w-4 h-4 text-black" />
             <span>Comprar</span>
