@@ -72,7 +72,7 @@ const CyanProductCard: React.FC<{
       ref={cardRef}
       id={`product-card-${product.id}`}
       data-active={isVisible}
-      className={`bg-zinc-900 border transition-all duration-500 rounded-2xl p-3 sm:p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 data-[active=true]:scale-105 data-[active=true]:z-10 ${
+      className={`bg-zinc-800 border transition-all duration-500 rounded-2xl p-3 sm:p-5 flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-105 hover:z-10 data-[active=true]:scale-105 data-[active=true]:z-10 ${
         isAdmin
           ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)] data-[active=true]:border-amber-400'
           : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] data-[active=true]:border-emerald-400 data-[active=true]:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
@@ -504,7 +504,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 id={`product-card-${product.id}`}
                 className="relative p-0.5 rounded-2xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 shadow-[0_0_20px_rgba(251,191,36,0.25)] group hover:scale-105 transition-transform"
               >
-                <div className="bg-zinc-900 rounded-[14px] p-3 sm:p-5 text-white space-y-3 sm:space-y-4 flex flex-col justify-between h-full">
+                <div className="bg-zinc-800 rounded-[14px] p-3 sm:p-5 text-white space-y-3 sm:space-y-4 flex flex-col justify-between h-full">
                   {/* Card Header Top Labels & Admin Edit Button */}
                   <div className="flex items-center justify-between text-[10px] font-black uppercase text-amber-400/80">
                     <span className="bg-amber-950/80 border border-amber-500/30 px-2 py-0.5 rounded">FREE FIRE VIP</span>

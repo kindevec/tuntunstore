@@ -146,7 +146,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </div>
 
       {/* Main Profile Layout Card */}
-      <div className="bg-zinc-950 border border-emerald-500/30 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+      <div className="bg-zinc-900 border border-emerald-500/30 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.1)]">
         
         {/* Profile Identity Banner */}
         <div className="bg-gradient-to-r from-emerald-950 via-zinc-900 to-cyan-950 p-6 sm:p-8 border-b border-white/10 flex flex-col sm:flex-row items-center gap-6">
@@ -243,7 +243,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   placeholder="https://ejemplo.com/mi-foto-de-perfil.jpg"
                   value={customAvatarUrl}
                   onChange={(e) => setCustomAvatarUrl(e.target.value)}
-                  className="w-full mt-2 bg-zinc-900 border border-emerald-500/40 rounded-xl px-4 py-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400"
+                  className="w-full mt-2 bg-zinc-800 border border-emerald-500/40 rounded-xl px-4 py-2.5 text-xs text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400"
                 />
               )}
             </div>
@@ -261,7 +261,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 font-semibold"
+                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400 font-semibold"
               />
             </div>
 
@@ -275,7 +275,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 font-semibold"
+                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400 font-semibold"
               />
             </div>
 
@@ -289,7 +289,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 placeholder="Ej: 284910293"
                 value={playerIdDefault}
                 onChange={(e) => setPlayerIdDefault(e.target.value)}
-                className="w-full bg-zinc-900 border border-amber-500/40 rounded-xl px-4 py-3 text-sm text-amber-300 font-mono font-bold placeholder-zinc-500 focus:outline-none focus:border-amber-400"
+                className="w-full bg-zinc-800 border border-amber-500/40 rounded-xl px-4 py-3 text-sm text-amber-300 font-mono font-bold placeholder-zinc-400 focus:outline-none focus:border-amber-400"
               />
               <p className="text-[11px] text-zinc-500 mt-1">Este ID se ingresará automáticamente en tus pedidos de diamantes.</p>
             </div>
@@ -304,7 +304,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 placeholder="Ej: ꧁⚡PRO_GAMER⚡꧂"
                 value={gamerTag}
                 onChange={(e) => setGamerTag(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-cyan-300 font-semibold placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
+                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-cyan-300 font-semibold placeholder-zinc-400 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
@@ -318,7 +318,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 placeholder="Ej: 0990084680"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-emerald-400 font-semibold"
+                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400 font-semibold"
               />
             </div>
 
@@ -330,7 +330,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <select
                 value={preferredBank}
                 onChange={(e) => setPreferredBank(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-emerald-400 font-semibold cursor-pointer"
+                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-emerald-400 font-semibold cursor-pointer"
               >
                 {PREFERRED_BANKS.map((b) => (
                   <option key={b} value={b}>
@@ -342,7 +342,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Account Security Info & Actions */}
-          <div className="p-4 bg-zinc-900/60 rounded-2xl border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-4 bg-zinc-800/60 rounded-2xl border border-zinc-700 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
               <div>

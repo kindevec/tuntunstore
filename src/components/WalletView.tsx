@@ -216,7 +216,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Form Side */}
-          <div className="lg:col-span-7 bg-zinc-950 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+          <div className="lg:col-span-7 bg-zinc-900 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
             
             <div className="space-y-1">
               <h2 className="text-xl font-black text-white uppercase flex items-center gap-2">
@@ -229,7 +229,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
             </div>
 
             {/* Mode Switcher */}
-            <div className="grid grid-cols-2 gap-3 p-1.5 bg-zinc-900 rounded-2xl border border-zinc-700/50">
+            <div className="grid grid-cols-2 gap-3 p-1.5 bg-zinc-800 rounded-2xl border border-zinc-600/50">
               <button
                 type="button"
                 onClick={() => setTopUpType('instant')}
@@ -290,7 +290,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
                   placeholder="O ingresa un monto personalizado (Ej: 15)"
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400 font-mono font-bold"
+                  className="w-full bg-zinc-700 border border-zinc-600 rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-400 focus:outline-none focus:border-emerald-400 font-mono font-bold"
                 />
               </div>
             </div>
@@ -345,7 +345,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
                       const found = bankAccounts.find((b) => b.id === e.target.value);
                       if (found) setSelectedBank(found);
                     }}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-xs text-white font-bold focus:outline-none focus:border-emerald-400 cursor-pointer"
+                    className="w-full bg-zinc-700 border border-zinc-600 rounded-xl px-4 py-3 text-xs text-white font-bold focus:outline-none focus:border-emerald-400 cursor-pointer"
                   >
                     {bankAccounts.map((b) => (
                       <option key={b.id} value={b.id}>
@@ -361,7 +361,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
                     3. Adjunta la Captura / Foto del Comprobante
                   </label>
 
-                  <div className="border-2 border-dashed border-emerald-500/30 hover:border-emerald-400 rounded-2xl p-4 text-center bg-zinc-800/50 transition-colors">
+                  <div className="border-2 border-dashed border-emerald-500/30 hover:border-emerald-400 rounded-2xl p-4 text-center bg-zinc-700/50 transition-colors">
                     {receiptImage ? (
                       <div className="space-y-2">
                         <img
@@ -434,14 +434,14 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
           {/* Right Info Box */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-zinc-950 border border-emerald-500/30 rounded-3xl p-6 space-y-4">
+            <div className="bg-zinc-900 border border-emerald-500/30 rounded-3xl p-6 space-y-4">
               <h3 className="font-black text-sm text-white uppercase flex items-center gap-2 border-b border-white/10 pb-3">
                 <Building2 className="w-4 h-4 text-emerald-400" />
                 Datos Bancarios Oficiales TunTun Store
               </h3>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-700/50 space-y-1">
+                <div className="p-3 bg-zinc-800 rounded-xl border border-zinc-600/50 space-y-1">
                   <span className="text-[10px] font-black uppercase text-emerald-400 block">{selectedBank.bankName}</span>
                   <div className="flex items-center justify-between font-mono text-white font-bold text-sm">
                     <span>{selectedBank.accountNumber}</span>
@@ -456,7 +456,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
                   <p className="text-[10px] text-zinc-500 font-mono">C.I.: {selectedBank.idNumber}</p>
                 </div>
 
-                <div className="p-3 bg-zinc-900/60 rounded-xl border border-zinc-800 space-y-1 text-zinc-300 text-[11px]">
+                <div className="p-3 bg-zinc-800/60 rounded-xl border border-zinc-700 space-y-1 text-zinc-300 text-[11px]">
                   <p className="font-bold text-white flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Aprobación Garantizada
                   </p>
@@ -471,7 +471,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
       {/* SECTION 2: HISTORIAL DE MOVIMIENTOS ($ USD) */}
       {activeSubTab === 'history' && (
-        <div className="bg-zinc-950 border border-emerald-500/30 rounded-3xl overflow-hidden shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+        <div className="bg-zinc-900 border border-emerald-500/30 rounded-3xl overflow-hidden shadow-[0_0_30px_rgba(16,185,129,0.1)]">
           <div className="p-6 border-b border-white/10 flex items-center justify-between">
             <div>
               <h2 className="text-xl font-black text-white uppercase flex items-center gap-2">
@@ -500,7 +500,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-zinc-900 text-zinc-300 font-black uppercase text-[10px] border-b border-zinc-800">
+                  <tr className="bg-zinc-800 text-zinc-300 font-black uppercase text-[10px] border-b border-zinc-700">
                     <th className="p-4">Código / Fecha</th>
                     <th className="p-4">Concepto del Movimiento</th>
                     <th className="p-4">Tipo</th>

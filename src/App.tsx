@@ -450,11 +450,11 @@ export default function App() {
   const activePendingOrdersCount = orders.filter((o) => o.status === 'Pendiente' || o.status === 'En proceso').length;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen bg-zinc-900 text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
       
       {/* Toast Notification Bar */}
       {toastMessage && (
-        <div id="toast-notification-bar" className="fixed top-20 right-4 z-50 bg-zinc-950 text-white border-2 border-emerald-500 px-5 py-3.5 rounded-2xl shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+        <div id="toast-notification-bar" className="fixed top-20 right-4 z-50 bg-zinc-800 text-white border-2 border-emerald-500 px-5 py-3.5 rounded-2xl shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
           <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
           <p className="text-xs font-black uppercase tracking-wide text-emerald-300">{toastMessage}</p>
         </div>
