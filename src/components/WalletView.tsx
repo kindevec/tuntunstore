@@ -23,7 +23,7 @@ interface WalletViewProps {
   bankAccounts: BankAccount[];
   userOrders: Order[];
   onTopUpInstant: (amount: number) => void;
-  onSubmitTopUpOrder: (order: Order) => void;
+  onSubmitTopUpOrder: (order: Order, receiptFile?: File) => void;
   onNavigateToCatalog: () => void;
 }
 
@@ -43,6 +43,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
   const [customAmount, setCustomAmount] = useState<string>('');
   const [selectedBank, setSelectedBank] = useState<BankAccount>(bankAccounts[0]);
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | undefined>(undefined);
   const [receiptFileName, setReceiptFileName] = useState<string>('');
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -100,7 +101,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
       ],
     };
 
-    onSubmitTopUpOrder(newTopUpOrder);
+    onSubmitTopUpOrder(newTopUpOrder, receiptFile);
     setIsSuccess(true);
     setTimeout(() => {
       setIsSuccess(false);
@@ -394,11 +395,8 @@ export const WalletView: React.FC<WalletViewProps> = ({
                             const file = e.target.files?.[0];
                             if (file) {
                               setReceiptFileName(file.name);
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setReceiptImage(reader.result as string);
-                              };
-                              reader.readAsDataURL(file);
+                              setReceiptFile(file);
+                              setReceiptImage(URL.createObjectURL(file));
                             }
                           }}
                         />

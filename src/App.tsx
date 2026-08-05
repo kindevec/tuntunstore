@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Product, BankAccount, Order, UserProfile, OrderStatus, EmailAlertConfig, ProductCategory } from './types';
-import { 
-  INITIAL_PRODUCTS, 
-  BANK_ACCOUNTS, 
-  INITIAL_ORDERS, 
-  DEFAULT_USER_CLIENT, 
-  DEFAULT_USER_ADMIN,
-  INITIAL_EMAIL_CONFIG 
-} from './data/mockData';
 import { supabase } from './supabaseClient';
 
 import { Header } from './components/Header';
@@ -24,17 +16,6 @@ import { WalletView } from './components/WalletView';
 import { Footer } from './components/Footer';
 
 export default function App() {
-  // State Persistence Initialization
-  const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>(() => {
-    try {
-      const saved = localStorage.getItem('tuntun_users_v2');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return [DEFAULT_USER_CLIENT, DEFAULT_USER_ADMIN];
-  });
-
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem('tuntun_current_user');
@@ -45,7 +26,31 @@ export default function App() {
     return null;
   });
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
+  const [emailConfig, setEmailConfig] = useState<EmailAlertConfig>({
+    adminEmail: 'kindevx@gmail.com',
+    notifyNewOrder: true,
+    notifyWalletTopUp: true
+  });
+
+  const [loginRedirectReason, setLoginRedirectReason] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login'>('catalog');
+  const [adminSubTab, setAdminSubTab] = useState<'orders' | 'catalog' | 'email' | 'wallets'>('orders');
+  const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<ProductCategory | 'all'>('all');
+  const [selectedProductForOrder, setSelectedProductForOrder] = useState<Product | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4500);
+  };
+
   useEffect(() => {
+    fetchInitialData();
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         fetchUserProfile(session.user.id);
@@ -63,20 +68,106 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+  const fetchInitialData = async () => {
+    const { data: prodData } = await supabase.from('products').select('*').eq('active', true).order('price_usd', { ascending: true });
+    if (prodData) {
+      setProducts(prodData.map(p => ({
+        id: p.id,
+        name: p.name,
+        diamonds: p.diamonds,
+        bonusDiamonds: p.bonus_diamonds,
+        priceUSD: p.price_usd,
+        category: p.category as any,
+        description: p.description,
+        isPopular: p.is_popular,
+        isGoldPromo: p.is_gold_promo,
+        imageType: p.image_type,
+        badgeText: p.badge_text,
+        active: p.active
+      })));
+    }
+    
+    const { data: bankData } = await supabase.from('bank_accounts').select('*').eq('active', true);
+    if (bankData) {
+      setBankAccounts(bankData.map(b => ({
+        id: b.id,
+        bankName: b.bank_name,
+        accountType: b.account_type,
+        accountNumber: b.account_number,
+        holderName: b.holder_name,
+        holderId: b.holder_id,
+        email: b.email,
+        active: b.active
+      })));
+    }
+  };
 
+  const fetchOrders = async (userRole: string, userId: string) => {
+    let query = supabase
+      .from('orders')
+      .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
+      .order('created_at', { ascending: false });
+      
+    if (userRole !== 'admin') {
+      query = query.eq('user_id', userId);
+    }
+    
+    const { data: ordData, error } = await query;
     if (error) {
-      console.error("Error fetching profile from Supabase:", error);
-      // Fallback: If profile trigger failed but auth succeeded, force them out or create a temporary fallback
+      console.error("Error fetching orders:", error);
+      return;
+    }
+    if (ordData) {
+      setOrders(ordData.map((o: any) => ({
+        id: o.id,
+        date: o.created_at,
+        userEmail: o.profiles?.email || 'N/A',
+        userName: o.profiles?.name || 'Cliente',
+        playerId: o.player_id,
+        playerTag: o.player_tag,
+        productId: o.product_id,
+        productName: o.product_name_snapshot,
+        diamondsTotal: o.diamonds_total,
+        priceUSD: o.price_usd,
+        bankName: o.payment_method === 'wallet_balance' ? 'Saldo TunTun USD' : 'Transferencia Bancaria',
+        receiptUrl: o.receipt_storage_path ? supabase.storage.from('receipts').getPublicUrl(o.receipt_storage_path).data.publicUrl : '',
+        receiptFileName: o.receipt_storage_path ? 'Comprobante Subido' : '',
+        status: o.status,
+        paymentMethod: o.payment_method,
+        isWalletTopUp: o.is_wallet_top_up,
+        statusHistory: (o.order_status_history || []).map((h: any) => ({
+          status: h.status,
+          timestamp: h.created_at,
+          note: h.note
+        })).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      })));
+    }
+  };
+  
+  const fetchAllUsersForAdmin = async () => {
+    const { data } = await supabase.from('profiles').select('*');
+    if (data) {
+      setRegisteredUsers(data.map(p => ({
+        uid: p.id,
+        name: p.name || 'Usuario',
+        email: p.email,
+        avatar: p.avatar_url,
+        role: p.role as any,
+        walletBalanceUSD: p.wallet_balance_usd,
+        playerIdDefault: p.player_id_default,
+        gamerTag: p.gamer_tag,
+        phone: p.phone,
+        preferredBank: p.preferred_bank,
+      })));
+    }
+  };
+
+  const fetchUserProfile = async (userId: string) => {
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (error) {
       showToast(`❌ Error cargando perfil: ${error.message}`);
       return;
     }
-
     if (data) {
       const userProfile: UserProfile = {
         uid: data.id,
@@ -92,7 +183,9 @@ export default function App() {
       };
       updateCurrentActiveUser(userProfile);
       
-      // If we just logged in and we are on the login page, redirect
+      fetchOrders(userProfile.role, userProfile.uid);
+      if (userProfile.role === 'admin') fetchAllUsersForAdmin();
+
       if (window.location.hash.includes('login')) {
         window.location.hash = data.role === 'admin' ? '#admin' : '#catalog';
         showToast(`👋 Bienvenid@, ${data.name || data.email}`);
@@ -100,103 +193,15 @@ export default function App() {
     }
   };
 
-  const [products, setProducts] = useState<Product[]>(() => {
-    try {
-      const saved = localStorage.getItem('tuntun_products_v2');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return INITIAL_PRODUCTS;
-  });
-
-  const saveProductsToStorage = (updatedProducts: Product[]) => {
-    setProducts(updatedProducts);
-    try {
-      localStorage.setItem('tuntun_products_v2', JSON.stringify(updatedProducts));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const [orders, setOrders] = useState<Order[]>(() => {
-    try {
-      const saved = localStorage.getItem('tuntun_orders');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error(e);
-    }
-    return INITIAL_ORDERS;
-  });
-
-  const [bankAccounts] = useState<BankAccount[]>(BANK_ACCOUNTS);
-  const [emailConfig, setEmailConfig] = useState<EmailAlertConfig>(INITIAL_EMAIL_CONFIG);
-
-  // Sync state to localStorage whenever changed
-  const saveUsersToStorage = (updatedUsers: UserProfile[]) => {
-    setRegisteredUsers(updatedUsers);
-    try {
-      localStorage.setItem('tuntun_users_v2', JSON.stringify(updatedUsers));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const saveOrdersToStorage = (updatedOrders: Order[]) => {
-    setOrders(updatedOrders);
-    try {
-      localStorage.setItem('tuntun_orders', JSON.stringify(updatedOrders));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const updateCurrentActiveUser = (user: UserProfile | null) => {
     setCurrentUser(user);
-    try {
-      if (user) {
-        localStorage.setItem('tuntun_current_user', JSON.stringify(user));
-      } else {
-        localStorage.removeItem('tuntun_current_user');
-      }
-    } catch (e) {
-      console.error(e);
+    if (user) localStorage.setItem('tuntun_current_user', JSON.stringify(user));
+    else {
+      localStorage.removeItem('tuntun_current_user');
+      setOrders([]); 
     }
   };
 
-  // Helper to update a user's wallet balance reliably across registeredUsers & currentUser
-  const updateUserWalletBalance = (email: string, deltaAmount: number, isSetExact: boolean = false) => {
-    let newBalanceForCurrent = 0;
-
-    const nextUsers = registeredUsers.map((u) => {
-      if (u.email.toLowerCase() === email.toLowerCase()) {
-        const updatedVal = isSetExact ? deltaAmount : (u.walletBalanceUSD || 0) + deltaAmount;
-        const clampedVal = Math.max(0, updatedVal);
-        if (currentUser && currentUser.email.toLowerCase() === email.toLowerCase()) {
-          newBalanceForCurrent = clampedVal;
-        }
-        return { ...u, walletBalanceUSD: clampedVal };
-      }
-      return u;
-    });
-
-    saveUsersToStorage(nextUsers);
-
-    if (currentUser && currentUser.email.toLowerCase() === email.toLowerCase()) {
-      const updatedCurr = { ...currentUser, walletBalanceUSD: newBalanceForCurrent };
-      updateCurrentActiveUser(updatedCurr);
-    }
-  };
-
-  // Login Page State & Reason
-  const [loginRedirectReason, setLoginRedirectReason] = useState<string | null>(null);
-
-  // Navigation State - Synced with Hash
-  const [activeTab, setActiveTab] = useState<'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login'>('catalog');
-  const [adminSubTab, setAdminSubTab] = useState<'orders' | 'catalog' | 'email' | 'wallets'>('orders');
-  const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<ProductCategory | 'all'>('all');
-
-  // Routing Effect
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
@@ -205,80 +210,30 @@ export default function App() {
       let subTab = parts[1] as any;
 
       if (currentUser?.role === 'admin') {
-        if (tab === 'orders') {
-          tab = 'admin';
-          subTab = 'orders';
-          window.history.replaceState(null, '', '#admin/orders');
-        } else if (tab === 'wallet') {
-          tab = 'admin';
-          subTab = 'wallets';
-          window.history.replaceState(null, '', '#admin/wallets');
-        } else if (tab === 'profile') {
-          tab = 'admin';
-          window.history.replaceState(null, '', '#admin');
-        }
+        if (tab === 'orders') { tab = 'admin'; subTab = 'orders'; window.history.replaceState(null, '', '#admin/orders'); }
+        else if (tab === 'wallet') { tab = 'admin'; subTab = 'wallets'; window.history.replaceState(null, '', '#admin/wallets'); }
+        else if (tab === 'profile') { tab = 'admin'; window.history.replaceState(null, '', '#admin'); }
       } else {
-        if (tab === 'orders') {
-          if (!currentUser) {
-            setLoginRedirectReason('Inicia sesión con Google para ver y realizar seguimiento a tus pedidos.');
-            tab = 'login';
-            window.location.hash = '#login';
-            return;
-          }
-        } else if (tab === 'wallet') {
-          if (!currentUser) {
-            setLoginRedirectReason('Inicia sesión con Google para acceder a tu Billetera Virtual y recargar saldo USD.');
-            tab = 'login';
-            window.location.hash = '#login';
-            return;
-          }
-        } else if (tab === 'profile') {
-          if (!currentUser) {
-            setLoginRedirectReason('Inicia sesión con Google para acceder a la página de tu perfil de usuario.');
-            tab = 'login';
-            window.location.hash = '#login';
-            return;
-          }
-        } else if (tab === 'admin') {
-          if (!currentUser) {
-            setLoginRedirectReason('Acceso reservado únicamente para Administradores de TunTun Store.');
-            tab = 'login';
-            window.location.hash = '#login';
-            return;
-          } else if (currentUser.role !== 'admin') {
-            setLoginRedirectReason('El Panel de Administración es exclusivo para el equipo de TunTun Store.');
-            tab = 'login';
-            window.location.hash = '#login';
-            return;
-          }
+        if (['orders', 'wallet', 'profile', 'admin'].includes(tab) && !currentUser) {
+          setLoginRedirectReason(`Inicia sesión con Google para acceder a ${tab}.`);
+          tab = 'login';
+          window.location.hash = '#login';
+          return;
+        }
+        if (tab === 'admin' && currentUser?.role !== 'admin') {
+          setLoginRedirectReason('El Panel de Administración es exclusivo.');
+          tab = 'login';
+          window.location.hash = '#login';
+          return;
         }
       }
-
       setActiveTab(tab);
-      if (subTab) {
-        setAdminSubTab(subTab);
-      }
+      if (subTab) setAdminSubTab(subTab);
     };
-
     window.addEventListener('hashchange', handleHashChange);
-    // Execute immediately to sync state on load
     handleHashChange();
-
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [currentUser]);
-
-  // Active Order Flow Modal
-  const [selectedProductForOrder, setSelectedProductForOrder] = useState<Product | null>(null);
-
-  // Success Toast Message State
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4500);
-  };
 
   const openLoginWithReason = (reason: string) => {
     setLoginRedirectReason(reason);
@@ -286,15 +241,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Auth Handling
-  const handleLoginGoogle = async (role: 'client' | 'admin') => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
-  };
-
-  const handleRegisterUser = () => {
-    // Logic moved to LoginPage directly
-  };
-
+  const handleLoginGoogle = async () => await supabase.auth.signInWithOAuth({ provider: 'google' });
   const handleLogout = async () => {
     await supabase.auth.signOut();
     updateCurrentActiveUser(null);
@@ -304,357 +251,195 @@ export default function App() {
 
   const handleSaveProfile = async (updatedProfile: UserProfile) => {
     if (!currentUser) return;
-
-    // Optimistic UI update
     updateCurrentActiveUser(updatedProfile);
-
-    // Save to real database
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        name: updatedProfile.name,
-        player_id_default: updatedProfile.playerIdDefault || null,
-        gamer_tag: updatedProfile.gamerTag || null,
-        phone: updatedProfile.phone || null,
-        preferred_bank: updatedProfile.preferredBank || null,
-        avatar_url: updatedProfile.avatar,
-      })
-      .eq('id', currentUser.uid);
-
-    if (error) {
-      showToast(`❌ Error al guardar perfil: ${error.message}`);
-    } else {
-      showToast('✨ Perfil guardado en la base de datos exitosamente');
-    }
+    const { error } = await supabase.from('profiles').update({
+      name: updatedProfile.name,
+      player_id_default: updatedProfile.playerIdDefault || null,
+      gamer_tag: updatedProfile.gamerTag || null,
+      phone: updatedProfile.phone || null,
+      preferred_bank: updatedProfile.preferredBank || null,
+    }).eq('id', currentUser.uid);
+    if (error) showToast(`❌ Error al guardar perfil: ${error.message}`);
+    else showToast('✨ Perfil guardado exitosamente');
   };
 
-  // Protected Tab Navigation & Admin Routing
-  const handleSelectTab = (
-    tab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
-    subTab?: 'orders' | 'catalog' | 'email' | 'wallets'
-  ) => {
-    const newHash = subTab ? `#${tab}/${subTab}` : `#${tab}`;
-    window.location.hash = newHash;
-  };
+  const handleSelectTab = (tab: string, subTab?: string) => window.location.hash = subTab ? `#${tab}/${subTab}` : `#${tab}`;
 
-  // Protected Product Purchase Selection
   const handleSelectProductForPurchase = (product: Product) => {
-    if (!currentUser) {
-      openLoginWithReason('Para realizar tu recarga de diamantes por ID, inicia sesión con Google primero.');
-      return;
-    }
+    if (!currentUser) return openLoginWithReason('Para realizar tu recarga de diamantes por ID, inicia sesión con Google primero.');
     setSelectedProductForOrder(product);
   };
 
-  // Wallet Top-Up Handlers
-  const handleTopUpInstant = (amount: number) => {
+  const handleCreateOrder = async (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>, receiptFile?: File) => {
     if (!currentUser) return;
-    
-    // Update user balance in state and storage
-    updateUserWalletBalance(currentUser.email, amount);
-
-    const updatedUser = registeredUsers.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
-    const newBalance = (updatedUser?.walletBalanceUSD || (currentUser.walletBalanceUSD || 0)) + amount;
-
-    const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
-    const topUpId = `REC-${Math.floor(10000 + Math.random() * 90000)}`;
-
-    const topUpOrder: Order = {
-      id: topUpId,
-      date: nowStr,
-      userEmail: currentUser.email,
-      userName: currentUser.name,
-      playerId: currentUser.playerIdDefault || 'N/A',
-      playerTag: 'Recarga Inmediata Saldo USD',
-      productId: 'wallet-topup',
-      productName: `Recarga de Saldo USD ($${amount.toFixed(2)})`,
-      diamondsTotal: 0,
-      priceUSD: amount,
-      bankName: 'Acreditación Directa',
-      receiptUrl: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80',
-      receiptFileName: 'recarga_instantanea.png',
-      status: 'Completado',
-      paymentMethod: 'bank_transfer',
-      isWalletTopUp: true,
-      statusHistory: [
-        {
-          status: 'Completado',
-          timestamp: nowStr,
-          note: `Acreditación inmediata de $${amount.toFixed(2)} USD efectuada. Nuevo saldo: $${newBalance.toFixed(2)} USD.`,
-        },
-      ],
-    };
-
-    saveOrdersToStorage([topUpOrder, ...orders]);
-    showToast(`💰 ¡Se acreditaron $${amount.toFixed(2)} USD a tu Billetera! Saldo actual: $${newBalance.toFixed(2)} USD.`);
-  };
-
-  const handleSubmitTopUpOrder = (topUpOrder: Order) => {
-    saveOrdersToStorage([topUpOrder, ...orders]);
-    showToast(`📩 Solicitud de recarga por $${topUpOrder.priceUSD.toFixed(2)} USD registrada. Pendiente de aprobación.`);
-  };
-
-  // Submit Order Workflow
-  const handleCreateOrder = (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>) => {
-    const newId = `TTS-${Math.floor(10000 + Math.random() * 90000)}`;
-    const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
-
     const isPaidWithWallet = newOrderData.paymentMethod === 'wallet_balance';
+    let uploadedReceiptPath = null;
 
-    // Deduct balance if paid with wallet
-    if (isPaidWithWallet && currentUser) {
-      updateUserWalletBalance(currentUser.email, -newOrderData.priceUSD);
+    if (receiptFile) {
+      const fileExt = receiptFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${currentUser.uid}/${fileName}`;
+      const { error: uploadError } = await supabase.storage.from('receipts').upload(filePath, receiptFile);
+      if (uploadError) {
+        showToast(`❌ Error al subir comprobante: ${uploadError.message}`);
+        return;
+      }
+      uploadedReceiptPath = filePath;
     }
-
-    const newOrder: Order = {
-      ...newOrderData,
-      id: newId,
-      date: nowStr,
-      status: isPaidWithWallet ? 'En proceso' : 'Pendiente',
-      statusHistory: [
-        {
-          status: isPaidWithWallet ? 'En proceso' : 'Pendiente',
-          timestamp: nowStr,
-          note: isPaidWithWallet
-            ? `Pago realizado con Saldo Billetera USD ($${newOrderData.priceUSD.toFixed(2)}). Orden enviada a carga automática por ID.`
-            : 'Pedido registrado por cliente con comprobante bancario. En espera de verificación.',
-        },
-      ],
-    };
-
-    saveOrdersToStorage([newOrder, ...orders]);
-    setSelectedProductForOrder(null);
-    window.location.hash = '#orders';
 
     if (isPaidWithWallet) {
-      showToast(`⚡ ¡Pedido #${newId} pagado con Saldo Billetera! Tu recarga de diamantes está en proceso.`);
-    } else {
-      showToast(`🎉 ¡Pedido #${newId} registrado exitosamente! Redirigiendo a Mis Pedidos.`);
-    }
-  };
-
-  // Admin Order Status Update
-  const handleUpdateOrderStatus = (orderId: string, newStatus: OrderStatus, note?: string) => {
-    const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
-
-    const targetOrder = orders.find((o) => o.id === orderId);
-
-    // If order was a wallet top-up and is being marked as Completed, credit user balance!
-    if (targetOrder && targetOrder.isWalletTopUp && newStatus === 'Completado' && targetOrder.status !== 'Completado') {
-      updateUserWalletBalance(targetOrder.userEmail, targetOrder.priceUSD);
-    }
-
-    const nextOrders = orders.map((o) => {
-      if (o.id === orderId) {
-        return {
-          ...o,
-          status: newStatus,
-          statusHistory: [
-            ...o.statusHistory,
-            {
-              status: newStatus,
-              timestamp: nowStr,
-              note: note || `Estado actualizado a ${newStatus}.`,
-            },
-          ],
-        };
+      const { error } = await supabase.rpc('purchase_with_wallet', {
+        p_player_id: newOrderData.playerId,
+        p_player_tag: newOrderData.playerTag || '',
+        p_product_id: newOrderData.productId,
+        p_product_name_snapshot: newOrderData.productName,
+        p_diamonds_total: newOrderData.diamondsTotal,
+        p_price_usd: newOrderData.priceUSD,
+        p_is_wallet_top_up: false
+      });
+      if (error) {
+        showToast(`❌ Error de billetera: ${error.message}`);
+        return;
       }
-      return o;
+      showToast(`⚡ ¡Pedido pagado con Saldo Billetera! Tu recarga de diamantes está en proceso.`);
+    } else {
+      const { data: insertedOrder, error: insertError } = await supabase.from('orders').insert({
+        user_id: currentUser.uid,
+        player_id: newOrderData.playerId,
+        player_tag: newOrderData.playerTag,
+        product_id: newOrderData.productId,
+        product_name_snapshot: newOrderData.productName,
+        diamonds_total: newOrderData.diamondsTotal,
+        price_usd: newOrderData.priceUSD,
+        receipt_storage_path: uploadedReceiptPath,
+        status: 'Pendiente',
+        payment_method: 'bank_transfer',
+        is_wallet_top_up: false,
+      }).select().single();
+      
+      if (insertError) {
+        showToast(`❌ Error al registrar pedido: ${insertError.message}`);
+        return;
+      }
+      await supabase.from('order_status_history').insert({
+        order_id: insertedOrder.id,
+        status: 'Pendiente',
+        note: 'Pedido registrado por cliente con comprobante bancario. En espera de verificación.'
+      });
+      showToast(`🎉 ¡Pedido registrado exitosamente!`);
+    }
+
+    if (isPaidWithWallet) await fetchUserProfile(currentUser.uid);
+    await fetchOrders(currentUser.role, currentUser.uid); 
+    setSelectedProductForOrder(null);
+    window.location.hash = '#orders';
+  };
+
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: OrderStatus, note?: string) => {
+    const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+    if (error) {
+      showToast(`❌ Error al actualizar estado: ${error.message}`);
+      return;
+    }
+    await supabase.from('order_status_history').insert({
+      order_id: orderId,
+      status: newStatus,
+      note: note || `Estado actualizado a ${newStatus}.`
     });
-
-    saveOrdersToStorage(nextOrders);
-    showToast(`Estado del pedido #${orderId} actualizado a "${newStatus}"`);
+    
+    showToast(`Estado del pedido actualizado a "${newStatus}"`);
+    fetchOrders(currentUser!.role, currentUser!.uid);
   };
 
-  // Catalog CRUD Operations
-  const handleAddProduct = (newProduct: Omit<Product, 'id'>) => {
-    const created: Product = {
-      ...newProduct,
-      id: `prod-${Date.now()}`,
-    };
-    saveProductsToStorage([...products, created]);
-    showToast(`✅ Producto "${created.name}" añadido al catálogo.`);
+  const handleSubmitTopUpOrder = async (topUpOrder: Order, receiptFile?: File) => {
+    if (!currentUser) return;
+    let uploadedReceiptPath = null;
+    if (receiptFile) {
+      const fileExt = receiptFile.name.split('.').pop();
+      const filePath = `${currentUser.uid}/${Math.random()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('receipts').upload(filePath, receiptFile);
+      if (uploadError) {
+        showToast(`❌ Error al subir comprobante: ${uploadError.message}`);
+        return;
+      }
+      uploadedReceiptPath = filePath;
+    }
+
+    const { data: insertedOrder, error } = await supabase.from('orders').insert({
+      user_id: currentUser.uid,
+      player_id: currentUser.playerIdDefault || 'N/A',
+      product_name_snapshot: topUpOrder.productName,
+      diamonds_total: 0,
+      price_usd: topUpOrder.priceUSD,
+      receipt_storage_path: uploadedReceiptPath,
+      status: 'Pendiente',
+      payment_method: 'bank_transfer',
+      is_wallet_top_up: true,
+    }).select().single();
+    
+    if (error) {
+      showToast(`❌ Error: ${error.message}`);
+      return;
+    }
+    
+    await supabase.from('order_status_history').insert({
+      order_id: insertedOrder.id,
+      status: 'Pendiente',
+      note: 'Solicitud de recarga de saldo. En espera de verificación.'
+    });
+    
+    showToast(`📩 Solicitud de recarga por $${topUpOrder.priceUSD.toFixed(2)} USD registrada.`);
+    fetchOrders(currentUser.role, currentUser.uid);
   };
 
-  const handleUpdateProduct = (updatedProduct: Product) => {
-    const updated = products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p));
-    saveProductsToStorage(updated);
-    showToast(`✏️ Producto "${updatedProduct.name}" actualizado (Precio: $${updatedProduct.priceUSD.toFixed(2)} USD).`);
-  };
-
-  const handleDeleteProduct = (productId: string) => {
-    const updated = products.filter((p) => p.id !== productId);
-    saveProductsToStorage(updated);
-    showToast('🗑️ Producto eliminado del catálogo.');
-  };
-
-  // Pending order count for current client
   const activePendingOrdersCount = orders.filter((o) => o.status === 'Pendiente' || o.status === 'En proceso').length;
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
-      
-      {/* Toast Notification Bar */}
       {toastMessage && (
-        <div id="toast-notification-bar" className="fixed top-20 right-4 z-50 bg-zinc-800 text-white border-2 border-emerald-500 px-5 py-3.5 rounded-2xl shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+        <div id="toast-notification-bar" className="fixed top-20 right-4 z-50 bg-zinc-800 text-white border-2 border-emerald-500 px-5 py-3.5 rounded-2xl shadow flex items-center gap-3 animate-in fade-in">
           <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
           <p className="text-xs font-black uppercase tracking-wide text-emerald-300">{toastMessage}</p>
         </div>
       )}
-
-      {/* Main Header (Hidden on dedicated Login Page) */}
       {activeTab !== 'login' && (
-        <Header
-          currentUser={currentUser}
-          onLoginGoogle={handleLoginGoogle}
-          onLogout={handleLogout}
-          onOpenLoginModal={() => {
-            setLoginRedirectReason(null);
-            window.location.hash = '#login';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          activeTab={activeTab}
-          adminSubTab={adminSubTab}
-          setActiveTab={handleSelectTab}
-          pendingOrdersCount={activePendingOrdersCount}
-        />
+        <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} />
       )}
-
-      {/* Main App Content View - All independent full-page sections */}
       <main className="flex-1 pb-20 md:pb-0">
-        {/* VIEW 1: CATALOG (Main Landing & Storefront) */}
         {activeTab === 'catalog' && (
           <div>
-            <HeroBanner
-              onSelectProductGroup={(category) => {
-                setSelectedCatalogCategory(category);
-                const el = document.getElementById('catalog-section');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              onOpenQuickIDCheck={() => handleSelectTab('orders')}
-            />
-
-            <ProductCatalog
-              products={products}
-              onSelectProduct={handleSelectProductForPurchase}
-              selectedCategory={selectedCatalogCategory}
-              setSelectedCategory={setSelectedCatalogCategory}
-              currentUser={currentUser}
-              onOpenWalletModal={() => handleSelectTab('wallet')}
-              onUpdateProduct={handleUpdateProduct}
-              onDeleteProduct={handleDeleteProduct}
-              onAddProduct={handleAddProduct}
-            />
+            <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />
+            <ProductCatalog products={products} onSelectProduct={handleSelectProductForPurchase} selectedCategory={selectedCatalogCategory} setSelectedCategory={setSelectedCatalogCategory} currentUser={currentUser} onOpenWalletModal={() => handleSelectTab('wallet')} onUpdateProduct={() => {}} onDeleteProduct={() => {}} onAddProduct={() => {}} />
           </div>
         )}
-
-        {/* VIEW: FULL DEDICATED LOGIN / REGISTER PAGE */}
         {activeTab === 'login' && (
-          <LoginPage
-            onLoginGoogle={handleLoginGoogle}
-            onLoginSuccess={(user) => {
-              updateCurrentActiveUser(user);
-              window.location.hash = '#catalog';
-              showToast(`👋 Bienvenid@ de nuevo, ${user.name}`);
-            }}
-            onRegisterUser={handleRegisterUser}
-            redirectReason={loginRedirectReason}
-            onBackToCatalog={() => window.location.hash = '#catalog'}
-            registeredUsers={registeredUsers}
-          />
+          <LoginPage onLoginGoogle={handleLoginGoogle} onLoginSuccess={() => {}} onRegisterUser={() => {}} redirectReason={loginRedirectReason} onBackToCatalog={() => window.location.hash = '#catalog'} registeredUsers={registeredUsers} />
         )}
-
-        {/* VIEW 2: VIRTUAL WALLET PAGE */}
         {activeTab === 'wallet' && currentUser && (
-          <WalletView
-            currentUser={currentUser}
-            bankAccounts={bankAccounts}
-            userOrders={orders.filter((o) => o.userEmail === currentUser.email)}
-            onTopUpInstant={handleTopUpInstant}
-            onSubmitTopUpOrder={handleSubmitTopUpOrder}
-            onNavigateToCatalog={() => window.location.hash = '#catalog'}
-          />
+          <WalletView currentUser={currentUser} bankAccounts={bankAccounts} userOrders={orders.filter(o => o.userEmail === currentUser.email)} onTopUpInstant={() => {}} onSubmitTopUpOrder={handleSubmitTopUpOrder} onNavigateToCatalog={() => window.location.hash = '#catalog'} />
         )}
-
-        {/* VIEW 3: MY ORDERS (Client Tracking) */}
         {activeTab === 'orders' && (
-          <MyOrders
-            orders={orders}
-            currentUserEmail={currentUser?.email}
-            onOpenWhatsAppSupport={(order) => {
-              const msg = order
-                ? `¡Hola TunTun Store! Necesito soporte con mi pedido de recarga #${order.id} (ID Jugador: ${order.playerId}).`
-                : '¡Hola TunTun Store! Quisiera realizar una consulta sobre una recarga de diamantes.';
-              const encoded = encodeURIComponent(msg);
-              window.open(`https://wa.me/593968729952?text=${encoded}`, '_blank');
-            }}
-          />
+          <MyOrders orders={orders} currentUserEmail={currentUser?.email} onOpenWhatsAppSupport={() => {}} />
         )}
-
-        {/* VIEW 4: USER PROFILE PAGE */}
         {activeTab === 'profile' && currentUser && (
-          <ProfileView
-            currentUser={currentUser}
-            onSaveProfile={handleSaveProfile}
-            onLogout={handleLogout}
-            onNavigateToWallet={() => window.location.hash = '#wallet'}
-          />
+          <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
         )}
-
-        {/* VIEW 5: ADMIN PANEL */}
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
-          <AdminPanel
-            orders={orders}
-            products={products}
-            emailConfig={emailConfig}
-            registeredUsers={registeredUsers}
-            activeSubTab={adminSubTab}
-            onSubTabChange={(subTab) => window.location.hash = `#admin/${subTab}`}
-            onUpdateOrderStatus={handleUpdateOrderStatus}
-            onAddProduct={handleAddProduct}
-            onUpdateProduct={handleUpdateProduct}
-            onDeleteProduct={handleDeleteProduct}
-            onUpdateEmailConfig={setEmailConfig}
-            onUpdateUserWalletBalance={(email, amount, isSetExact) => {
-              updateUserWalletBalance(email, amount, isSetExact);
-              showToast(`💰 Saldo de usuario (${email}) actualizado con éxito`);
-            }}
-          />
+          <AdminPanel orders={orders} products={products} emailConfig={emailConfig} registeredUsers={registeredUsers} activeSubTab={adminSubTab} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={() => {}} onUpdateProduct={() => {}} onDeleteProduct={() => {}} onUpdateEmailConfig={setEmailConfig} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
+            const user = registeredUsers.find(u => u.email === email);
+            if (user) {
+              const newBalance = isSetExact ? amount : (user.walletBalanceUSD || 0) + amount;
+              await supabase.from('profiles').update({ wallet_balance_usd: newBalance }).eq('id', user.uid);
+              fetchAllUsersForAdmin();
+              showToast(`💰 Saldo de ${email} actualizado a $${newBalance}`);
+            }
+          }} />
         )}
       </main>
-
-      {/* Order Purchase Modal (Step-by-step with bank & receipt upload & wallet payment) */}
-      <OrderModal
-        product={selectedProductForOrder}
-        bankAccounts={bankAccounts}
-        currentUser={currentUser}
-        onClose={() => setSelectedProductForOrder(null)}
-        onSubmitOrder={handleCreateOrder}
-        onOpenWalletModal={() => {
-          setSelectedProductForOrder(null);
-          handleSelectTab('wallet');
-        }}
-      />
-
-      {/* Floating WhatsApp Support Button (Visible only on client view, hidden on admin panel) */}
-      {activeTab !== 'admin' && (
-        <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />
-      )}
-
-      {/* Global Footer (Hidden on dedicated Login Page) */}
+      <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
+      {activeTab !== 'admin' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
       {activeTab !== 'login' && <Footer onSelectTab={handleSelectTab} />}
-
-      {/* Mobile Sticky Bottom Navigation Bar (Visible only when user is logged in and not on login page) */}
-      {currentUser && activeTab !== 'login' && (
-        <BottomNavigation
-          activeTab={activeTab}
-          adminSubTab={adminSubTab}
-          setActiveTab={handleSelectTab}
-          pendingOrdersCount={activePendingOrdersCount}
-          currentUser={currentUser}
-        />
-      )}
-
+      {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
     </div>
   );
 }

@@ -25,7 +25,7 @@ interface OrderModalProps {
   currentUser: UserProfile | null;
   onClose: () => void;
   onOpenWalletModal?: () => void;
-  onSubmitOrder: (newOrder: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>) => void;
+  onSubmitOrder: (newOrder: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>, receiptFile?: File) => void;
 }
 
 export const OrderModal: React.FC<OrderModalProps> = ({
@@ -49,6 +49,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   const [playerId, setPlayerId] = useState(currentUser?.playerIdDefault || '');
   const [playerTag, setPlayerTag] = useState(currentUser?.gamerTag || '');
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | undefined>(undefined);
   const [receiptFileName, setReceiptFileName] = useState<string>('');
   const [copiedBankField, setCopiedBankField] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -87,11 +88,8 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       }
       setErrorMessage(null);
       setReceiptFileName(file.name);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setReceiptImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setReceiptFile(file);
+      setReceiptImage(URL.createObjectURL(file));
     }
   };
 
@@ -99,6 +97,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   const handleUseDemoReceipt = () => {
     setReceiptImage('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80');
     setReceiptFileName('comprobante_banco_pichincha_demo.jpg');
+    setReceiptFile(undefined); // Demo has no physical file
     setErrorMessage(null);
   };
 
@@ -130,7 +129,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       receiptUrl: paymentMethod === 'wallet_balance' ? 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80' : receiptImage!,
       receiptFileName: paymentMethod === 'wallet_balance' ? 'pago_saldo_tuntun.png' : (receiptFileName || 'comprobante_baucher.jpg'),
       paymentMethod,
-    });
+    }, receiptFile);
   };
 
   return (
