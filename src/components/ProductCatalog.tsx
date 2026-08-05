@@ -103,7 +103,7 @@ const CyanProductCard: React.FC<{
       <div className="space-y-2 sm:space-y-3">
         {/* Product Name Title */}
         <div className="text-center pt-1">
-          <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 group-data-[active=true]:text-emerald-400 transition-colors">
+          <h3 className="text-lg sm:text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 group-data-[active=true]:text-emerald-400 transition-colors">
             {product.name}
           </h3>
           <p className="text-[9px] sm:text-[10px] text-emerald-400/80 font-black uppercase tracking-widest mt-0.5">
@@ -179,7 +179,7 @@ const CyanProductCard: React.FC<{
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-xl sm:text-3xl font-black text-[#00e676] tracking-tight">
+              <span className="text-lg sm:text-3xl font-black text-[#00e676] tracking-tight">
                 ${product.priceUSD.toFixed(2)} USD
               </span>
               {isAdmin && (
@@ -524,7 +524,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
                   <div className="space-y-2 sm:space-y-3">
                     <div className="text-center space-y-1">
-                      <h3 className="font-black text-xl sm:text-2xl text-amber-400 uppercase tracking-tight">
+                      <h3 className="font-black text-lg sm:text-2xl text-amber-400 uppercase tracking-tight">
                         {product.name}
                       </h3>
                       <p className="text-[11px] text-amber-300/80 uppercase font-bold tracking-wider">
@@ -573,7 +573,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-xl sm:text-3xl font-black text-amber-400">${product.priceUSD.toFixed(2)} USD</span>
+                          <span className="text-lg sm:text-3xl font-black text-amber-400">${product.priceUSD.toFixed(2)} USD</span>
                           {isAdmin && (
                             <button
                               onClick={() => {
