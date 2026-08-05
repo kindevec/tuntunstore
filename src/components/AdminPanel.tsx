@@ -186,7 +186,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         
-        <div className="bg-zinc-900/60 p-3.5 sm:p-5 rounded-2xl border border-emerald-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
+        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-emerald-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
           <div>
             <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">Ventas Totales USD</p>
             <p className="text-xl sm:text-3xl font-black text-white mt-1">${totalSalesUSD.toFixed(2)}</p>
@@ -199,7 +199,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         </div>
 
-        <div className="bg-zinc-900/60 p-3.5 sm:p-5 rounded-2xl border border-amber-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
+        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-amber-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
           <div>
             <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pedidos Pendientes</p>
             <p className="text-xl sm:text-3xl font-black text-amber-400 mt-1">{pendingOrdersCount}</p>
@@ -210,7 +210,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         </div>
 
-        <div className="bg-zinc-900/60 p-3.5 sm:p-5 rounded-2xl border border-sky-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
+        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-sky-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
           <div>
             <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">En Proceso</p>
             <p className="text-xl sm:text-3xl font-black text-sky-400 mt-1">{inProgressOrdersCount}</p>
@@ -221,7 +221,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         </div>
 
-        <div className="bg-zinc-900/60 p-3.5 sm:p-5 rounded-2xl border border-emerald-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
+        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-emerald-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
           <div>
             <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">Diamantes Entregados</p>
             <p className="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{totalDiamondsDelivered.toLocaleString()} 💎</p>
@@ -241,7 +241,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
             activeTab === 'orders'
               ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-              : 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/5'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
           }`}
         >
           <Clock className="w-4 h-4" />
@@ -253,7 +253,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
             activeTab === 'wallets'
               ? 'bg-amber-400 text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]'
-              : 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/5'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
           }`}
         >
           <DollarSign className="w-4 h-4" />
@@ -265,7 +265,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
             activeTab === 'catalog'
               ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-              : 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/5'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
           }`}
         >
           <Sparkles className="w-4 h-4" />
@@ -277,7 +277,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
             activeTab === 'email'
               ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-              : 'bg-zinc-900 text-zinc-400 hover:text-white border border-white/5'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
           }`}
         >
           <Mail className="w-4 h-4" />
@@ -290,7 +290,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <div className="space-y-6">
           
           {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-900/60 p-4 rounded-2xl border border-white/10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-zinc-800 p-4 rounded-2xl border border-zinc-700/50">
             <div className="w-full sm:w-80 relative">
               <Search className="w-4 h-4 absolute left-3 top-3 text-zinc-500" />
               <input
@@ -298,7 +298,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 placeholder="Buscar por ID jugador, orden o cliente..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-black border border-white/10 text-white font-bold text-xs focus:outline-none focus:border-emerald-500"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold text-xs focus:outline-none focus:border-emerald-500"
               />
             </div>
 
@@ -311,7 +311,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all whitespace-nowrap cursor-pointer ${
                     statusFilter === st
                       ? 'bg-emerald-500 text-black'
-                      : 'bg-black text-zinc-400 hover:text-white border border-white/5'
+                      : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-700'
                   }`}
                 >
                   {st}
@@ -324,9 +324,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <div className="grid grid-cols-1 gap-3.5 md:hidden">
             {filteredOrders.length > 0 ? (
               filteredOrders.map((order) => (
-                <div key={order.id} className="bg-zinc-900/90 rounded-2xl border border-white/10 p-4 space-y-3 shadow-lg">
+                <div key={order.id} className="bg-zinc-800 rounded-2xl border border-zinc-700/50 p-4 space-y-3 shadow-lg">
                   {/* Top bar: Order ID, Status, Date */}
-                  <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                  <div className="flex items-center justify-between gap-2 border-b border-zinc-700/50 pb-2.5">
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-black text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/30">
                         #{order.id}
@@ -358,7 +358,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   {/* Player ID & Name block */}
-                  <div className="bg-black/60 p-2.5 rounded-xl border border-white/5 flex items-center justify-between">
+                  <div className="bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-700/50 flex items-center justify-between">
                     <div>
                       <span className="text-[10px] text-zinc-400 font-bold uppercase block">ID Jugador FF:</span>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -386,7 +386,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   {/* Product details & Price */}
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-zinc-950/80 p-2.5 rounded-xl border border-white/5">
+                    <div className="bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-700/50">
                       <span className="text-[10px] text-zinc-400 font-bold uppercase block">Producto:</span>
                       <p className="font-black text-white uppercase text-xs truncate mt-0.5">{order.productName}</p>
                       {order.isWalletTopUp ? (
@@ -400,7 +400,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       )}
                     </div>
 
-                    <div className="bg-zinc-950/80 p-2.5 rounded-xl border border-white/5">
+                    <div className="bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-700/50">
                       <span className="text-[10px] text-zinc-400 font-bold uppercase block">Monto / Pago:</span>
                       <p className="font-black text-emerald-300 text-sm mt-0.5">${order.priceUSD.toFixed(2)} USD</p>
                       <span className="text-[10px] text-zinc-400 font-bold uppercase block truncate">
@@ -421,13 +421,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-2 border-t border-white/10">
+                  <div className="pt-2 border-t border-zinc-700/50">
                     <span className="text-[10px] text-zinc-400 font-bold uppercase block mb-1.5">Acción de Estado:</span>
                     <div className="flex">
                       <select
                         value={order.status}
                         onChange={(e) => onUpdateOrderStatus(order.id, e.target.value as OrderStatus)}
-                        className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 border border-white/10 text-white text-xs font-black uppercase transition-colors focus:outline-none focus:border-emerald-500 cursor-pointer"
+                        className="w-full py-2.5 px-3 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs font-black uppercase transition-colors focus:outline-none focus:border-emerald-500 cursor-pointer"
                       >
                         <option value="Pendiente">🟡 Pendiente</option>
                         <option value="En proceso">🔵 En Proceso</option>
@@ -446,10 +446,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           {/* Orders Desktop Central Table (Hidden on mobile) */}
-          <div className="hidden md:block bg-zinc-900/60 rounded-2xl border border-white/10 shadow-xl overflow-hidden">
+          <div className="hidden md:block bg-zinc-800 rounded-2xl border border-zinc-700/50 shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-black text-emerald-400 uppercase font-black text-[10px] tracking-widest border-b border-white/10">
+                <thead className="bg-zinc-900/80 text-emerald-400 uppercase font-black text-[10px] tracking-widest border-b border-zinc-700">
                   <tr>
                     <th className="p-4">Orden</th>
                     <th className="p-4">Jugador / ID</th>
@@ -460,10 +460,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="p-4 text-right">Acción de Estado</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-zinc-700/50">
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-white/5 transition-colors">
+                      <tr key={order.id} className="hover:bg-zinc-700/30 transition-colors">
                         {/* Order ID & Date */}
                         <td className="p-4">
                           <span className="font-mono font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30">
@@ -475,7 +475,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         {/* Player ID with Quick Copy */}
                         <td className="p-4">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-black text-sm text-white bg-black px-2 py-0.5 rounded border border-white/10">
+                            <span className="font-mono font-black text-sm text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700/50">
                               {order.playerId}
                             </span>
                             <button
@@ -560,7 +560,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <select
                               value={order.status}
                               onChange={(e) => onUpdateOrderStatus(order.id, e.target.value as OrderStatus)}
-                              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-white/10 text-white text-[10px] font-black uppercase transition-colors focus:outline-none focus:border-emerald-500 cursor-pointer"
+                              className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-[10px] font-black uppercase transition-colors focus:outline-none focus:border-emerald-500 cursor-pointer"
                             >
                               <option value="Pendiente">🟡 Pendiente</option>
                               <option value="En proceso">🔵 En Proceso</option>
@@ -620,8 +620,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
           {/* Product CRUD Form Modal/Section */}
           {isAddingProduct && (
-            <form id="admin-product-form" onSubmit={handleSaveProduct} className="bg-zinc-900 text-white p-6 rounded-2xl border-2 border-amber-500/40 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <form id="admin-product-form" onSubmit={handleSaveProduct} className="bg-zinc-800 text-white p-6 rounded-2xl border-2 border-zinc-700 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-zinc-700/50 pb-3">
                 <h3 className="text-base font-black text-amber-300 flex items-center gap-2">
                   <Edit className="w-5 h-5 text-amber-400" />
                   {editingProductId ? `Editar Producto: ${productForm.name || 'Sin Nombre'}` : 'Crear Nuevo Producto en Catálogo'}
@@ -647,7 +647,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     placeholder="Ej: 572 Diamantes"
                     value={productForm.name}
                     onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold"
+                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
                   />
                 </div>
 
@@ -661,7 +661,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     required
                     value={productForm.priceUSD}
                     onChange={(e) => setProductForm({ ...productForm, priceUSD: parseFloat(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-black border-2 border-amber-400 text-amber-300 font-extrabold text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    className="w-full p-2.5 rounded-xl bg-zinc-900 border-2 border-amber-400/50 text-amber-300 font-extrabold text-sm text-right focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
                   />
                 </div>
 
@@ -672,7 +672,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     required
                     value={productForm.diamonds}
                     onChange={(e) => setProductForm({ ...productForm, diamonds: parseInt(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold"
+                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
                   />
                 </div>
 
@@ -682,7 +682,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     type="number"
                     value={productForm.bonusDiamonds}
                     onChange={(e) => setProductForm({ ...productForm, bonusDiamonds: parseInt(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold"
+                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
                   />
                 </div>
 
@@ -691,7 +691,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <select
                     value={productForm.category}
                     onChange={(e) => setProductForm({ ...productForm, category: e.target.value as any })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold"
+                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
                   >
                     <option value="diamonds">Diamantes Directos</option>
                     <option value="memberships">Membresías VIP (Dorado 🟡)</option>
@@ -707,7 +707,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     placeholder="Ej: MÁS VENDIDO ⚡"
                     value={productForm.badgeText}
                     onChange={(e) => setProductForm({ ...productForm, badgeText: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold"
+                    className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold"
                   />
                 </div>
               </div>
@@ -719,7 +719,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   placeholder="Descripción rápida del producto..."
                   value={productForm.description}
                   onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs font-semibold"
+                  className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs font-semibold"
                 />
               </div>
 
@@ -745,7 +745,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-700/50">
                 <button
                   type="button"
                   onClick={() => {
@@ -772,8 +772,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             {products.map((p) => {
               const isEditingInline = editingInlinePriceId === p.id;
               return (
-                <div key={p.id} className="bg-zinc-900/90 rounded-2xl border border-white/10 p-4 space-y-3 shadow-lg flex flex-col">
-                  <div className="flex items-start justify-between border-b border-white/10 pb-3">
+                <div key={p.id} className="bg-zinc-800 rounded-2xl border border-zinc-700/50 p-4 space-y-3 shadow-lg flex flex-col">
+                  <div className="flex items-start justify-between border-b border-zinc-700/50 pb-3">
                     <div className="flex items-center gap-3">
                       <DiamondIcon size="md" variant={p.isGoldPromo || p.category === 'memberships' ? 'gold' : 'emerald'} />
                       <div>
@@ -796,14 +796,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-zinc-950/80 p-2.5 rounded-xl border border-white/5">
+                    <div className="bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-700/50">
                       <span className="text-[10px] text-zinc-400 font-bold uppercase block">Diamantes:</span>
                       <p className="font-black text-emerald-400 text-sm mt-0.5">
                         {p.diamonds.toLocaleString()} 💎 {p.bonusDiamonds ? `(+${p.bonusDiamonds})` : ''}
                       </p>
                     </div>
 
-                    <div className="bg-zinc-950/80 p-2.5 rounded-xl border border-white/5 flex flex-col justify-center">
+                    <div className="bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-700/50 flex flex-col justify-center">
                       <span className="text-[10px] text-zinc-400 font-bold uppercase block">Precio USD:</span>
                       {isEditingInline ? (
                          <div className="flex items-center gap-1.5 mt-0.5">
@@ -813,7 +813,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                               step="0.01"
                               value={inlinePriceValue}
                               onChange={(e) => setInlinePriceValue(e.target.value)}
-                              className="w-full px-2 py-1 rounded-lg bg-black border-2 border-amber-400 text-amber-300 font-black text-xs text-right focus:outline-none"
+                              className="w-full px-2 py-1 rounded-lg bg-zinc-900 border-2 border-amber-400/50 text-amber-300 font-black text-xs text-right focus:outline-none focus:border-amber-400"
                               autoFocus
                             />
                          </div>
@@ -824,7 +824,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+                  <div className="pt-2 border-t border-zinc-700/50 flex items-center justify-between gap-2">
                       {isEditingInline ? (
                         <div className="flex items-center gap-2 w-full">
                           <button
@@ -880,9 +880,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
 
           {/* Current Catalog Table (Hidden on mobile) */}
-          <div className="hidden md:block bg-zinc-900/60 rounded-2xl border border-white/10 shadow-xl overflow-hidden">
+          <div className="hidden md:block bg-zinc-800 rounded-2xl border border-zinc-700/50 shadow-xl overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-black text-emerald-400 uppercase font-black text-[10px] tracking-widest border-b border-white/10">
+              <thead className="bg-zinc-900/80 text-emerald-400 uppercase font-black text-[10px] tracking-widest border-b border-zinc-700">
                 <tr>
                   <th className="p-4">Producto</th>
                   <th className="p-4">Categoría</th>
@@ -1007,7 +1007,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* TAB 3: SISTEMA DE ALERTAS POR CORREO */}
       {activeTab === 'email' && (
-        <div className="bg-zinc-900/60 p-6 rounded-2xl border border-white/10 space-y-6 text-white">
+        <div className="bg-zinc-800 p-6 rounded-2xl border border-zinc-700/50 space-y-6 text-white">
           <div>
             <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2 text-white">
               <Mail className="w-5 h-5 text-emerald-400" />
@@ -1020,7 +1020,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <div className="space-y-4 bg-black p-5 rounded-xl border border-white/10 text-xs">
+            <div className="space-y-4 bg-zinc-900/50 p-5 rounded-xl border border-zinc-700/50 text-xs">
               <h3 className="font-black text-emerald-400 uppercase tracking-wider">Parámetros del Servidor de Correo</h3>
 
               <div>
@@ -1029,7 +1029,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   type="email"
                   value={emailConfig.adminEmail}
                   onChange={(e) => onUpdateEmailConfig({ ...emailConfig, adminEmail: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-zinc-950 border border-white/20 text-white font-black"
+                  className="w-full p-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-black"
                 />
               </div>
 
@@ -1074,21 +1074,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
 
             {/* Email Preview Card */}
-            <div className="bg-black text-white p-5 rounded-xl border border-white/10 space-y-3 text-xs">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <div className="bg-zinc-900/50 text-white p-5 rounded-xl border border-zinc-700/50 space-y-3 text-xs">
+              <div className="flex items-center justify-between border-b border-zinc-700/50 pb-2">
                 <span className="font-black text-amber-400 flex items-center gap-1.5 uppercase tracking-wider">
                   <Bell className="w-4 h-4" /> Vista Previa de la Alerta
                 </span>
                 <span className="text-[10px] text-zinc-500 font-mono">SMTP Firebase Functions</span>
               </div>
 
-              <div className="bg-zinc-950 p-3 rounded-lg border border-white/10 font-mono text-[11px] space-y-1">
+              <div className="bg-zinc-900 p-3 rounded-lg border border-zinc-700/50 font-mono text-[11px] space-y-1">
                 <p><strong className="text-zinc-500">De:</strong> notificaciones@tuntunstore.com</p>
                 <p><strong className="text-zinc-500">Para:</strong> {emailConfig.adminEmail}</p>
                 <p><strong className="text-zinc-500">Asunto:</strong> 🚨 ¡NUEVA RECARGA REGISTRADA! Pedido #TTS-84920</p>
               </div>
 
-              <div className="bg-zinc-950 p-4 rounded-lg border border-white/10 space-y-2 text-zinc-300">
+              <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700/50 space-y-2 text-zinc-300">
                 <p className="font-bold text-white uppercase">¡Hola Administrador!</p>
                 <p>El cliente <strong>Mateo Cárdenas</strong> ha registrado un nuevo pedido:</p>
                 <ul className="list-disc pl-4 space-y-1 text-zinc-400 font-semibold">
@@ -1134,8 +1134,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
           </div>
 
-          <div className="bg-zinc-900/60 rounded-2xl border border-white/10 overflow-hidden">
-            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+          <div className="bg-zinc-800 rounded-2xl border border-zinc-700/50 overflow-hidden">
+            <div className="p-4 border-b border-zinc-700/50 flex items-center justify-between">
               <h3 className="font-black text-sm text-white uppercase flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-amber-400" /> Usuarios Registrados y Saldos
               </h3>
@@ -1147,8 +1147,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               {registeredUsers.map((u) => {
                 const customVal = userCustomAmounts[u.email] || '';
                 return (
-                  <div key={u.uid} className="bg-zinc-950/80 rounded-2xl border border-white/10 p-4 space-y-4 shadow-lg">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div key={u.uid} className="bg-zinc-900/80 rounded-2xl border border-zinc-700/50 p-4 space-y-4 shadow-lg">
+                    <div className="flex items-center justify-between border-b border-zinc-700/50 pb-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <img
                           src={u.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
@@ -1169,7 +1169,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5">
+                    <div className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-xl border border-zinc-700/50">
                       <div>
                         <span className="text-[10px] text-zinc-400 font-bold uppercase block">ID FF:</span>
                         <span className="font-mono font-bold text-zinc-300">{u.playerIdDefault || 'N/A'}</span>
@@ -1204,7 +1204,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           onChange={(e) =>
                             setUserCustomAmounts({ ...userCustomAmounts, [u.email]: e.target.value })
                           }
-                          className="flex-1 px-3 py-2.5 rounded-xl bg-black border border-white/10 text-white font-bold text-xs focus:outline-none focus:border-amber-400"
+                          className="flex-1 px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold text-xs focus:outline-none focus:border-amber-400"
                         />
                         <div className="flex gap-2">
                           <button
@@ -1243,7 +1243,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-black/50 text-zinc-400 font-black uppercase tracking-wider text-[10px] border-b border-white/10">
+                  <tr className="bg-zinc-900/80 text-zinc-400 font-black uppercase tracking-wider text-[10px] border-b border-zinc-700">
                     <th className="p-4">Usuario</th>
                     <th className="p-4">Email</th>
                     <th className="p-4">Rol</th>
@@ -1252,11 +1252,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="p-4 text-right">Acciones de Recarga Directa</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-zinc-700/50">
                   {registeredUsers.map((u) => {
                     const customVal = userCustomAmounts[u.email] || '';
                     return (
-                      <tr key={u.uid} className="hover:bg-white/5 transition-colors">
+                      <tr key={u.uid} className="hover:bg-zinc-700/30 transition-colors">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <img
