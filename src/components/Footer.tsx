@@ -80,16 +80,16 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
 
           {/* Payment Methods */}
           <div className="space-y-2">
-            <p className="font-black text-white text-xs uppercase tracking-widest">Métodos de Pago Ecuador</p>
+            <p className="font-black text-white text-xs uppercase tracking-widest">Métodos de Pago Oficiales</p>
             <ul className="space-y-1.5 text-zinc-400 font-bold text-[11px]">
               <li className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400"></span> BANCO PICHINCHA (BANCA WEB / VECINO)
+                <span className="w-2 h-2 rounded-full bg-rose-500"></span> BANCO GUAYAQUIL / APP DEUNA
               </li>
               <li className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-rose-500"></span> BANCO GUAYAQUIL / APLICACIÓN DEUNA
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span> BANCO PICHINCHA / MI VECINO
               </li>
               <li className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400"></span> PRODUBANCO / SERVIPAGOS
+                <span className="w-2 h-2 rounded-full bg-yellow-500"></span> BINANCE PAY (INTERNACIONAL 🌐)
               </li>
             </ul>
           </div>
