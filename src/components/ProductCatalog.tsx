@@ -416,66 +416,6 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div id="catalog-category-tabs" className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x touch-pan-x">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all cursor-pointer flex items-center gap-1.5 min-h-[42px] ${
-            selectedCategory === 'all'
-              ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 hover:text-white'
-          }`}
-        >
-          <span>⭐ Todos los Productos</span>
-        </button>
-
-        <button
-          onClick={() => setSelectedCategory('diamonds')}
-          className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] ${
-            selectedCategory === 'diamonds'
-              ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-900/40'
-          }`}
-        >
-          <span>🔥 Free Fire (LATAM)</span>
-        </button>
-
-        <button
-          onClick={() => setSelectedCategory('memberships')}
-          className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] ${
-            selectedCategory === 'memberships'
-              ? 'bg-amber-400 text-black shadow-[0_0_15px_rgba(251,191,36,0.4)]'
-              : 'bg-amber-950/60 text-amber-400 border border-amber-400/30 hover:bg-amber-900/40'
-          }`}
-        >
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <span>🟡 Membresías VIP</span>
-        </button>
-
-        <button
-          onClick={() => setSelectedCategory('passes')}
-          className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] ${
-            selectedCategory === 'passes'
-              ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-              : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 hover:text-white'
-          }`}
-        >
-          <Trophy className="w-4 h-4 text-emerald-400" />
-          <span>🎯 Pases de Nivel</span>
-        </button>
-
-        <button
-          onClick={() => setSelectedCategory('promos')}
-          className={`px-3.5 sm:px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap shrink-0 snap-start transition-all flex items-center gap-1.5 cursor-pointer min-h-[42px] ${
-            selectedCategory === 'promos'
-              ? 'bg-amber-400 text-black shadow-[0_0_15px_rgba(251,191,36,0.4)]'
-              : 'bg-amber-400/10 text-amber-400 border border-amber-400/30 hover:bg-amber-400/20'
-          }`}
-        >
-          <Flame className="w-4 h-4 text-amber-400 fill-current" />
-          <span>🎁 Promos Especiales</span>
-        </button>
-      </div>
 
       {/* Grid of Product Cards */}
       <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2.5 sm:gap-4 max-w-5xl mx-auto">
