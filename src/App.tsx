@@ -205,6 +205,13 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
+      
+      if (hash.startsWith('access_token=') || hash.startsWith('error=')) {
+        // Ignoramos el hash de Supabase para que no rompa el enrutador de tabs.
+        // Supabase se encarga automáticamente de leer este token y autenticar al usuario.
+        return;
+      }
+
       const parts = hash.split('/');
       let tab = (parts[0] || 'catalog') as any;
       let subTab = parts[1] as any;

@@ -110,16 +110,46 @@ const CyanProductCard: React.FC<{
         <div className="flex items-center justify-center py-1.5 sm:py-3">
           <div className="relative group-hover:scale-110 group-data-[active=true]:scale-110 transition-transform duration-500">
             <div className="absolute inset-0 bg-emerald-500/20 blur-[18px] sm:blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 group-data-[active=true]:bg-emerald-400/30 transition-colors" />
-            <img 
-              src="/diamante.png" 
-              alt="Diamante" 
-              className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
-            />
-            <img 
-              src="/diamante-2.png" 
-              alt="Diamante 2" 
-              className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
-            />
+            {product.imageType === 'diamond-medium' ? (
+              <>
+                <img 
+                  src="/cofresito.png" 
+                  alt="Cofre de Diamantes" 
+                  className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+                />
+                <img 
+                  src="/cofresito2.png" 
+                  alt="Cofre de Diamantes 2" 
+                  className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+                />
+              </>
+            ) : product.imageType === 'diamond-large' ? (
+              <>
+                <img 
+                  src="/coofre.png" 
+                  alt="Cofre Grande" 
+                  className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+                />
+                <img 
+                  src="/coofre2.png" 
+                  alt="Cofre Grande 2" 
+                  className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+                />
+              </>
+            ) : (
+              <>
+                <img 
+                  src="/diamante.png" 
+                  alt="Diamante" 
+                  className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+                />
+                <img 
+                  src="/diamante-2.png" 
+                  alt="Diamante 2" 
+                  className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+                />
+              </>
+            )}
             {product.bonusDiamonds > 0 && (
               <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-3 bg-amber-400 text-black font-black text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.8)] z-20 animate-bounce">
                 +{product.bonusDiamonds}
@@ -418,7 +448,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
 
       {/* Grid of Product Cards */}
-      <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2.5 sm:gap-4 max-w-5xl mx-auto">
+      <div id="catalog-products-grid" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-rows-2 lg:grid-flow-col gap-2.5 sm:gap-4 max-w-5xl mx-auto">
         {filteredProducts.map((product) => {
           const isGoldStyle = product.isGoldPromo || product.category === 'memberships';
           const isQuickEditing = quickPriceId === product.id;
