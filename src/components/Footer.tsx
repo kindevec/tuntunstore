@@ -14,8 +14,10 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
   return (
-    <footer id="footer-main" className="bg-[#050505] text-zinc-400 text-xs border-t border-emerald-500/20 pt-12 pb-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <footer id="footer-main" className="relative bg-[#050505] text-zinc-400 text-xs pt-12 pb-8 px-4 sm:px-6 lg:px-8 mt-16 sm:mt-24">
+      {/* Smooth gradient fade into footer */}
+      <div className="absolute top-0 left-0 w-full h-16 sm:h-24 bg-gradient-to-t from-[#050505] to-transparent -translate-y-full pointer-events-none" />
+      <div className="max-w-7xl mx-auto space-y-8 relative z-10">
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           
