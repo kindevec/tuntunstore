@@ -248,7 +248,14 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLoginGoogle = async () => await supabase.auth.signInWithOAuth({ provider: 'google' });
+  const handleLoginGoogle = async () => {
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+  };
   const handleLogout = async () => {
     await supabase.auth.signOut();
     updateCurrentActiveUser(null);
