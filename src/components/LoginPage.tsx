@@ -1,26 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { 
-  User, 
-  Lock, 
-  Mail, 
-  ShieldCheck, 
-  Sparkles, 
-  CheckCircle2, 
-  Gamepad2, 
-  ArrowRight, 
-  Eye, 
-  EyeOff, 
-  ArrowLeft,
-  UserPlus,
-  LogIn,
-  AlertCircle,
-  Zap,
-  Shield,
-  CreditCard,
-  Headphones,
-  Award,
-  Gem
+  User, Lock, Mail, ShieldCheck, Sparkles, Gamepad2,
+  Eye, EyeOff, ArrowLeft, LogIn, AlertCircle, Zap,
+  CreditCard, Headphones, Gem, CheckCircle2, Diamond
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -69,7 +52,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       setErrorMessage(`Error de acceso: ${error.message}`);
     } else if (data.user) {
       // The onAuthStateChange listener in App.tsx will pick this up automatically
-      // But we can trigger a manual redirect or toast if needed.
     }
   };
 
@@ -101,10 +83,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     if (error) {
       setErrorMessage(error.message);
     } else {
-      // Automatically attempt to login or tell the user to confirm email.
-      if (data.session) {
-        // Logged in immediately (email confirmation disabled)
-      } else {
+      if (!data.session) {
         alert("¡Cuenta creada exitosamente! Si Supabase requiere confirmación, por favor revisa tu bandeja de entrada.");
       }
     }
@@ -113,28 +92,53 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   return (
     <div className="h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden">
       
-      {/* LEFT COLUMN: Clean Form Panel (TunTun Emerald & Black Style) */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center p-4 sm:p-10 lg:p-16 relative z-10 h-full overflow-hidden">
-        <div className="flex-1 flex flex-col justify-center w-full max-w-md mx-auto">
-          {/* Mobile Glowing Logo Showcase (Only visible on mobile) */}
-          <div className="relative flex justify-center w-full mb-2 sm:mb-6 lg:hidden mt-1">
-            {/* Outer animated ring */}
-            <div className="absolute inset-0 bg-emerald-500/20 blur-[30px] rounded-full animate-pulse" />
-            <div className="relative w-24 h-24 sm:w-48 sm:h-48 rounded-full p-1.5 bg-gradient-to-br from-emerald-400 via-black to-emerald-700 shadow-[0_0_50px_rgba(16,185,129,0.3)] group">
-              <img
-                src="/logo.jpeg"
-                alt="TunTun Store Identity"
-                className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-500"
-              />
-              {/* Badge */}
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black border border-emerald-500/50 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)]">
-                Oficial Store
+      {/* LEFT COLUMN: Clean Form Panel */}
+      <div className="w-full lg:w-1/2 flex flex-col p-4 sm:p-10 lg:p-16 relative z-10 h-full overflow-y-auto lg:overflow-hidden custom-scrollbar">
+        
+        {/* Subtle ambient glow for mobile */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/8 rounded-full blur-[100px] pointer-events-none lg:hidden" />
+        <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-emerald-900/20 to-transparent pointer-events-none lg:hidden" />
+
+        {/* Top: Back button */}
+        <div className="relative z-10 shrink-0 mb-4 lg:mb-0">
+          <button
+            onClick={onBackToCatalog}
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500 hover:text-emerald-400 transition-colors cursor-pointer group lg:bg-transparent lg:border-none lg:px-0 lg:py-0 bg-white/5 border border-white/5 px-3 py-1.5 rounded-full backdrop-blur-md"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+            <span>Regresar</span>
+          </button>
+        </div>
+
+        {/* Center: Logo + Brand + Form */}
+        <div className="flex-1 flex flex-col justify-center items-center w-full max-w-md mx-auto relative z-10">
+          
+          {/* ----------------- MOBILE LOGO (Premium Animated) ----------------- */}
+          <div className="relative flex justify-center w-full mb-6 pt-4 lg:hidden">
+            {/* Outer Glow / Halo */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-emerald-500/30 blur-[60px] rounded-full animate-pulse pointer-events-none" />
+            {/* Animated Rotating Rings */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin" style={{ animationDuration: '4s' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140px] h-[140px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+            
+            {/* The Logo Itself */}
+            <div className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_40px_rgba(16,185,129,0.3)] ring-4 ring-black/50">
+              <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
+                <img
+                  src="/logo.jpeg"
+                  alt="TunTun Store"
+                  className="w-full h-full object-cover rounded-full border-2 border-black"
+                />
+              </div>
+              {/* Micro-badge on logo */}
+              <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-black p-1 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] border-2 border-black">
+                <ShieldCheck className="w-3 h-3" />
               </div>
             </div>
           </div>
 
-          {/* Official TunTun Mascot Brand Header (Desktop Only) */}
-          <div className="hidden lg:flex items-center gap-3.5 mb-6">
+          {/* ----------------- DESKTOP LOGO (Original) ----------------- */}
+          <div className="hidden lg:flex items-center gap-3.5 mb-6 self-start">
             <img 
               src="/logo-transparent.png" 
               alt="TunTun Store Logo" 
@@ -149,19 +153,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </div>
           </div>
 
-          {/* Back Button (Regresar) */}
-          <button
-            onClick={onBackToCatalog}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-emerald-400 transition-colors mb-3 cursor-pointer group w-fit"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            <span>Regresar</span>
-          </button>
-
           {/* Form Title */}
-          <div className="mb-3 sm:mb-5">
+          <div className="mb-3 sm:mb-5 w-full text-center lg:text-left relative z-10">
             <h1 className="text-xl sm:text-3xl font-black tracking-tight text-white mb-0.5 sm:mb-1.5">
-              {authMode === 'login' ? 'Inicia Sesión en TunTun' : 'Crear Cuenta Gamer'}
+              {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta Gamer'}
             </h1>
             <p className="hidden sm:block text-xs sm:text-sm text-zinc-400">
               {authMode === 'login'
@@ -170,228 +165,241 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </p>
           </div>
 
-          {/* Redirect Notice Banner */}
-          {redirectReason && (
-            <div className="mb-6 p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs font-medium flex items-center gap-2.5 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
-              <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>{redirectReason}</span>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {errorMessage && (
-            <div className="mb-6 p-3.5 rounded-xl bg-red-950/80 border border-red-500/40 text-red-300 text-xs font-medium flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          {/* LOGIN FORM */}
-          {authMode === 'login' ? (
-            <form onSubmit={handleLoginSubmit} className="space-y-3 sm:space-y-4 max-w-md">
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Correo o Usuario
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tuemail@ejemplo.com"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
-                </div>
+          {/* FORM CONTAINER (Premium Glassmorphism on Mobile, Original on Desktop) */}
+          <div className="w-full bg-zinc-950/60 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/5 lg:border-transparent rounded-3xl lg:rounded-none p-5 sm:p-8 lg:p-0 shadow-2xl lg:shadow-none relative overflow-hidden lg:overflow-visible">
+            
+            {/* Decorative glare for mobile card */}
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent lg:hidden" />
+            
+            {/* Redirect Notice Banner */}
+            {redirectReason && (
+              <div className="mb-3 p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs font-medium flex items-center gap-2.5 w-full">
+                <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{redirectReason}</span>
               </div>
+            )}
 
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
+            {/* Error Message */}
+            {errorMessage && (
+              <div className="mb-3 p-3 rounded-xl bg-red-950/80 border border-red-500/40 text-red-300 text-xs font-medium flex items-center gap-2 w-full">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {/* LOGIN FORM */}
+            {authMode === 'login' ? (
+              <form onSubmit={handleLoginSubmit} className="space-y-2.5 sm:space-y-4 w-full relative z-10">
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-zinc-400 mb-1 lg:text-zinc-400 text-zinc-300">
+                    Correo electrónico
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-zinc-500 lg:text-zinc-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="tuemail@ejemplo.com"
+                      className="w-full bg-zinc-900/80 lg:bg-zinc-950/80 border border-zinc-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-600 lg:placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-zinc-400 mb-1 lg:text-zinc-400 text-zinc-300">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-zinc-500 lg:text-zinc-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-zinc-900/80 lg:bg-zinc-950/80 border border-zinc-800/80 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 lg:text-zinc-600 hover:text-zinc-300 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] sm:text-xs">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-zinc-400 lg:text-zinc-500 hover:text-white">
+                    <input type="checkbox" className="rounded bg-black border-zinc-700 text-emerald-500 focus:ring-emerald-500 w-3 h-3" defaultChecked />
+                    <span>Recordarme</span>
+                  </label>
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                    onClick={() => alert('Para recuperar tu clave comunícate directamente con soporte por WhatsApp.')}
+                    className="text-emerald-400 lg:text-emerald-500/70 hover:text-emerald-300 lg:hover:text-emerald-400 hover:underline cursor-pointer font-medium"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    ¿Olvidaste tu contraseña?
                   </button>
                 </div>
-              </div>
 
-              <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white">
-                  <input type="checkbox" className="rounded bg-black border-zinc-700 text-emerald-500 focus:ring-emerald-500" defaultChecked />
-                  <span>Recordarme</span>
-                </label>
+                <button
+                  type="submit"
+                  className="w-full py-2.5 sm:py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer active:scale-[0.98] !mt-4 lg:!mt-3"
+                >
+                  Iniciar Sesión
+                </button>
+
+                <div className="flex items-center gap-3 !mt-4 lg:!mt-3">
+                  <div className="flex-1 h-px bg-zinc-800" />
+                  <span className="text-[10px] text-zinc-500 lg:text-zinc-600 font-bold uppercase tracking-widest">o</span>
+                  <div className="flex-1 h-px bg-zinc-800" />
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => alert('Para recuperar tu clave comunícate directamente con soporte por WhatsApp.')}
-                  className="text-emerald-400 hover:underline cursor-pointer font-medium"
+                  onClick={() => onLoginGoogle('client')}
+                  className="w-full py-2.5 sm:py-3 px-4 bg-white/5 hover:bg-white/10 border border-zinc-700/80 lg:border-zinc-800/80 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2.5 backdrop-blur-sm"
                 >
-                  ¿Olvidaste tu contraseña?
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  <span>Iniciar sesión con Google</span>
                 </button>
-              </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 sm:py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all cursor-pointer active:scale-98 mt-2"
-              >
-                Iniciar Sesión
-              </button>
-
-              <div className="text-center my-2 sm:my-3 text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
-                o
-              </div>
-
-              <button
-                type="button"
-                onClick={() => onLoginGoogle('client')}
-                className="w-full py-2.5 sm:py-3 px-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                <span>Iniciar sesión con Google</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAuthMode('register')}
-                className="w-full py-2.5 sm:py-3 px-4 bg-black hover:bg-zinc-900 border border-emerald-500/30 text-emerald-400 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center mt-2"
-              >
-                ¿No tienes cuenta? Registrarme gratis
-              </button>
-            </form>
-          ) : (
-            /* REGISTER FORM */
-            <form onSubmit={handleRegisterSubmit} className="space-y-3 sm:space-y-4 max-w-md">
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Nombre Completo / Gamer
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Tu nombre completo o nick"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Correo Electrónico
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tuemail@ejemplo.com"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  ID de Jugador Free Fire (Opcional)
-                </label>
-                <div className="relative">
-                  <Gamepad2 className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={playerId}
-                    onChange={(e) => setPlayerId(e.target.value)}
-                    placeholder="Ej. 748920193"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Crea una contraseña"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-                  />
+                <div className="mt-4 lg:mt-2 text-center">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                    onClick={() => setAuthMode('register')}
+                    className="text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer w-full py-2.5 lg:py-3 px-4 bg-transparent lg:hover:bg-emerald-500/5 lg:border lg:border-emerald-500/20 lg:text-emerald-400 lg:font-semibold rounded-xl"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    ¿No tienes cuenta? <span className="text-emerald-400 lg:text-emerald-400">Registrarme gratis</span>
                   </button>
                 </div>
-              </div>
+              </form>
+            ) : (
+              /* REGISTER FORM */
+              <form onSubmit={handleRegisterSubmit} className="space-y-3 sm:space-y-4 w-full relative z-10">
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-zinc-400 mb-1 lg:text-zinc-400 text-zinc-300">
+                    Nombre Completo / Gamer
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-zinc-500 lg:text-zinc-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Tu nombre completo o nick"
+                      className="w-full bg-zinc-900/80 lg:bg-zinc-950/80 border border-zinc-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    />
+                  </div>
+                </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 sm:py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all cursor-pointer active:scale-98 mt-2"
-              >
-                Registrarme y Crear Cuenta
-              </button>
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-zinc-400 mb-1 lg:text-zinc-400 text-zinc-300">
+                    Correo Electrónico
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-zinc-500 lg:text-zinc-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="tuemail@ejemplo.com"
+                      className="w-full bg-zinc-900/80 lg:bg-zinc-950/80 border border-zinc-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    />
+                  </div>
+                </div>
 
-              <div className="text-center my-2 sm:my-3 text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
-                o
-              </div>
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-zinc-400 mb-1 lg:text-zinc-400 text-zinc-300">
+                    ID de Jugador Free Fire (Opcional)
+                  </label>
+                  <div className="relative">
+                    <Gamepad2 className="w-4 h-4 text-zinc-500 lg:text-zinc-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={playerId}
+                      onChange={(e) => setPlayerId(e.target.value)}
+                      placeholder="Ej. 748920193"
+                      className="w-full bg-zinc-900/80 lg:bg-zinc-950/80 border border-zinc-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    />
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => onLoginGoogle('client')}
-                className="w-full py-2.5 sm:py-3 px-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                <span>Registrarse con Google</span>
-              </button>
+                <div>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-zinc-400 mb-1 lg:text-zinc-400 text-zinc-300">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-zinc-500 lg:text-zinc-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Crea una contraseña"
+                      className="w-full bg-zinc-900/80 lg:bg-zinc-950/80 border border-zinc-800/80 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 lg:text-zinc-600 hover:text-zinc-300 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => setAuthMode('login')}
-                className="w-full py-2.5 sm:py-3 px-4 bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center mt-2 sm:mt-4"
-              >
-                ¿Ya tienes cuenta? Iniciar Sesión
-              </button>
-            </form>
-          )}
+                <button
+                  type="submit"
+                  className="w-full py-2.5 sm:py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all cursor-pointer active:scale-98 mt-2"
+                >
+                  Registrarme y Crear Cuenta
+                </button>
+
+                <div className="text-center my-3 text-[11px] text-zinc-500 lg:text-zinc-600 font-bold uppercase tracking-widest">
+                  o
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => onLoginGoogle('client')}
+                  className="w-full py-2.5 sm:py-3 px-4 bg-white/5 lg:bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 lg:border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  <span>Registrarse con Google</span>
+                </button>
+
+                <div className="mt-4 lg:mt-4 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setAuthMode('login')}
+                    className="text-xs text-zinc-400 hover:text-white transition-colors cursor-pointer w-full py-2.5 lg:py-3 px-4 bg-transparent lg:bg-black lg:hover:bg-zinc-900 lg:border lg:border-zinc-800 lg:text-zinc-300 lg:font-semibold rounded-xl"
+                  >
+                    ¿Ya tienes cuenta? <span className="text-emerald-400 lg:text-zinc-300">Iniciar Sesión</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
 
         {/* Footer terms */}
-        <div className="hidden sm:block mt-8 text-xs text-zinc-500 w-full max-w-md mx-auto pt-4 border-t border-zinc-900 text-center">
+        <div className="hidden lg:block mt-8 text-xs text-zinc-500 w-full max-w-md mx-auto pt-4 border-t border-zinc-900 text-center">
           Al continuar, aceptas nuestros{' '}
           <a href="#" onClick={(e) => e.preventDefault()} className="text-zinc-400 hover:underline">
             Términos de Servicio
@@ -403,7 +411,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Emerald & Black Side Panel with Premium Brand Identity (Hidden on Mobile) */}
+      {/* RIGHT COLUMN: Original Emerald & Black Side Panel with Premium Brand Identity (Hidden on Mobile) */}
       <div className="hidden lg:flex w-full lg:w-1/2 bg-gradient-to-br from-[#020b06] via-[#05140b] to-[#010403] p-6 sm:p-10 lg:p-16 flex-col justify-between relative overflow-hidden border-t lg:border-t-0 lg:border-l border-emerald-500/20 min-h-screen">
         {/* Decorative light ambient glow */}
         <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[130px] pointer-events-none" />
@@ -466,4 +474,3 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     </div>
   );
 };
-
