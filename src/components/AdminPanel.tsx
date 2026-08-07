@@ -27,7 +27,8 @@ import {
   AlertCircle,
   Code,
   Upload,
-  Package
+  Package,
+  History
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
@@ -80,6 +81,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Modal for Viewing Receipt Image
   const [selectedReceiptUrl, setSelectedReceiptUrl] = useState<string | null>(null);
   const [copiedPlayerId, setCopiedPlayerId] = useState<string | null>(null);
+
+  // User History Modal State
+  const [selectedUserHistory, setSelectedUserHistory] = useState<any[] | null>(null);
+  const [selectedUserHistoryName, setSelectedUserHistoryName] = useState<string>('');
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  const handleViewUserHistory = async (userId: string, userName: string) => {
+    setIsLoadingHistory(true);
+    setSelectedUserHistoryName(userName);
+    setSelectedUserHistory([]);
+    const { data } = await supabase
+      .from('wallet_transactions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('type', 'top_up')
+      .order('created_at', { ascending: false });
+    
+    setSelectedUserHistory(data || []);
+    setIsLoadingHistory(false);
+  };
 
   // Catalog CRUD Form state
   const [isAddingProduct, setIsAddingProduct] = useState(false);
@@ -1361,11 +1382,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <span className="text-[10px] text-zinc-400 font-bold uppercase block">ID FF:</span>
                         <span className="font-mono font-bold text-zinc-300">{u.playerIdDefault || 'N/A'}</span>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex flex-col items-end">
                         <span className="text-[10px] text-zinc-400 font-bold uppercase block">Saldo Actual:</span>
                         <span className="text-lg font-black text-amber-400">
                           ${(u.walletBalanceUSD || 0).toFixed(2)} USD
                         </span>
+                        <button
+                           onClick={() => handleViewUserHistory(u.uid, u.name)}
+                           className="mt-2 w-full py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex items-center justify-center gap-1"
+                        >
+                          <History className="w-3 h-3" /> Historial
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1423,9 +1450,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </td>
 
                         <td className="p-4">
-                          <span className="text-lg font-black text-amber-400 bg-amber-400/10 px-3 py-1 rounded-xl border border-amber-400/30 inline-block">
-                            ${(u.walletBalanceUSD || 0).toFixed(2)} USD
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-lg font-black text-amber-400 bg-amber-400/10 px-3 py-1 rounded-xl border border-amber-400/30 inline-block">
+                              ${(u.walletBalanceUSD || 0).toFixed(2)} USD
+                            </span>
+                            <button
+                               onClick={() => handleViewUserHistory(u.uid, u.name)}
+                               className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex items-center gap-1"
+                            >
+                              <History className="w-3 h-3" /> Ver Historial
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1518,6 +1553,75 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {selectedUserHistory && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl max-w-2xl w-full border border-blue-500/30 space-y-4 shadow-2xl text-white max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                  <History className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-white text-lg">Historial de Recargas</h3>
+                  <p className="text-xs text-zinc-400">Usuario: <span className="text-blue-400">{selectedUserHistoryName}</span></p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedUserHistory(null)}
+                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-xs font-bold transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+              {isLoadingHistory ? (
+                <div className="flex justify-center items-center py-10">
+                  <RefreshCw className="w-8 h-8 text-blue-500 animate-spin opacity-50" />
+                </div>
+              ) : selectedUserHistory.length === 0 ? (
+                <div className="text-center py-10 text-zinc-500 bg-black/20 rounded-xl border border-zinc-800/50">
+                  <p className="text-sm font-bold uppercase tracking-wider mb-1">Sin Historial</p>
+                  <p className="text-xs">El usuario no tiene recargas registradas.</p>
+                </div>
+              ) : (
+                selectedUserHistory.map((t) => (
+                  <div key={t.id} className="bg-black/40 border border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-black text-white text-lg">+${t.amount.toFixed(2)} USD</span>
+                        {t.status === 'Aprobado' && <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Aprobado</span>}
+                        {t.status === 'Rechazado' && <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-rose-500/10 text-rose-400 border border-rose-500/20">Rechazado</span>}
+                        {t.status === 'Pendiente' && <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">Pendiente</span>}
+                      </div>
+                      <div className="text-xs text-zinc-500 space-y-0.5">
+                        <p>{new Date(t.created_at).toLocaleString()}</p>
+                        {t.auto_verified ? (
+                          <p className="text-emerald-500/80 flex items-center gap-1"><ShieldCheck className="w-3 h-3"/> Verificado por OCR</p>
+                        ) : t.verification_warnings && t.verification_warnings.length > 0 ? (
+                          <p className="text-rose-400 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Alertas: {t.verification_warnings.length}</p>
+                        ) : null}
+                      </div>
+                    </div>
+                    {t.receipt_url && (
+                      <button
+                        onClick={() => {
+                          const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co';
+                          setSelectedReceiptUrl(`${baseUrl}/storage/v1/object/public/receipts/${t.receipt_url}`);
+                        }}
+                        className="w-full sm:w-auto px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-black uppercase flex items-center justify-center gap-2 border border-blue-500/30 transition-colors"
+                      >
+                        <Eye className="w-3.5 h-3.5" /> Ver Baucher
+                      </button>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}
