@@ -104,15 +104,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div className="flex-1 flex flex-col justify-center items-center w-full max-w-md mx-auto relative z-10">
           
           {/* ----------------- MOBILE LOGO (Premium Animated) ----------------- */}
-          <div className="relative flex justify-center w-full mb-3 pt-1 lg:hidden shrink-0">
+          <div className="relative flex justify-center w-full mb-4 pt-2 lg:hidden shrink-0">
             {/* Outer Glow / Halo */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-48 sm:h-48 bg-emerald-500/30 blur-[40px] rounded-full animate-pulse pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 sm:w-64 sm:h-64 bg-emerald-500/30 blur-[50px] rounded-full animate-pulse pointer-events-none" />
             {/* Animated Rotating Rings */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-36 sm:h-36 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin" style={{ animationDuration: '4s' }} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-48 sm:h-48 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin" style={{ animationDuration: '4s' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[176px] h-[176px] sm:w-[208px] sm:h-[208px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
             
             {/* The Logo Itself */}
-            <div className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_30px_rgba(16,185,129,0.3)] ring-2 ring-black/50">
+            <div className="relative z-10 w-32 h-32 sm:w-40 sm:h-40 rounded-full p-1.5 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_30px_rgba(16,185,129,0.3)] ring-2 ring-black/50">
               <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
                 <img
                   src="/logo.jpeg"
@@ -121,8 +121,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 />
               </div>
               {/* Micro-badge on logo */}
-              <div className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-black p-1 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] border-2 border-black">
-                <ShieldCheck className="w-3.5 h-3.5" />
+              <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-black p-1.5 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] border-2 border-black">
+                <ShieldCheck className="w-4 h-4" />
               </div>
             </div>
           </div>
