@@ -124,7 +124,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         
         {/* BENTO 1: Identity Card (col-4) */}
         <div className="md:col-span-4 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           
           <div className="relative mb-5">
             <img
@@ -140,10 +140,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black text-white line-clamp-1">{currentUser.name}</h2>
-          <p className="text-xs text-zinc-400 font-mono mt-1 mb-4">{currentUser.email}</p>
+          <h2 className="relative z-10 text-xl sm:text-2xl font-black text-white line-clamp-1">{currentUser.name}</h2>
+          <p className="relative z-10 text-xs text-zinc-400 font-mono mt-1 mb-4">{currentUser.email}</p>
           
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+          <div className="relative z-10 flex items-center justify-center gap-2 flex-wrap">
             <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
               currentUser.role === 'admin' 
                 ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' 
