@@ -12,7 +12,7 @@ interface WalletModalProps {
   onSubmitTopUpOrder: (order: Order) => void;
 }
 
-const PRESET_AMOUNTS = [5, 10, 20, 50, 100];
+const PRESET_AMOUNTS = [1, 5, 10, 20, 50];
 
 export const WalletModal: React.FC<WalletModalProps> = ({
   currentUser,
