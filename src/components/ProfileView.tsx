@@ -79,6 +79,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [phone, setPhone] = useState(currentUser.phone || '');
   const [preferredBank, setPreferredBank] = useState(currentUser.preferredBank || PREFERRED_BANKS[0]);
   const [isSavedSuccess, setIsSavedSuccess] = useState(false);
+  const [isAvatarStudioOpen, setIsAvatarStudioOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,18 +126,26 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         <div className="md:col-span-4 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
-          <div className="relative mb-5">
+          <div className="relative mb-5 group/avatarbtn">
             <img
               src={avatar}
               alt={name}
-              className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover ring-4 ring-emerald-500/30 shadow-2xl transition-transform group-hover:scale-105"
+              className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover ring-4 ring-emerald-500/30 shadow-2xl transition-transform group-hover/avatarbtn:scale-105"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = PRESET_AVATARS[0].url;
               }}
             />
-            <span className="absolute -bottom-3 -right-3 bg-emerald-500 text-black p-2 rounded-xl text-xs font-black shadow-lg">
+            <span className="absolute -bottom-3 -right-3 bg-emerald-500 text-black p-2 rounded-xl text-xs font-black shadow-lg pointer-events-none z-10">
               <Sparkles className="w-5 h-5" />
             </span>
+            <button
+              type="button"
+              onClick={() => setIsAvatarStudioOpen(!isAvatarStudioOpen)}
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-2xl opacity-0 group-hover/avatarbtn:opacity-100 transition-opacity backdrop-blur-sm cursor-pointer border border-white/10"
+            >
+              <ImageIcon className="w-6 h-6 text-white mb-1" />
+              <span className="text-white text-[10px] font-black uppercase tracking-wider">Editar Avatar</span>
+            </button>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black text-white line-clamp-1">{currentUser.name}</h2>
@@ -172,6 +181,43 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           
           <div className="hidden sm:flex w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 items-center justify-center group-hover:bg-emerald-500 group-hover:text-black group-hover:translate-x-2 transition-all z-10 border border-emerald-500/30">
             <ArrowRight className="w-5 h-5 stroke-[3]" />
+          </div>
+        </div>
+
+        {/* BENTO 5: Avatar Studio (col-12) */}
+        <div className={`md:col-span-12 grid transition-all duration-500 ease-in-out ${isAvatarStudioOpen ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0 mb-0'}`}>
+          <div className="overflow-hidden">
+            <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg relative group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-indigo-400" /> Avatar Studio
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+                {PRESET_AVATARS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setAvatar(p.url);
+                    }}
+                    className={`p-2 rounded-2xl border transition-all overflow-hidden cursor-pointer relative group/avatar ${
+                      avatar === p.url
+                        ? 'border-indigo-400 bg-indigo-500/10 ring-2 ring-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
+                        : 'border-white/5 bg-black/40 hover:border-white/20'
+                    }`}
+                  >
+                    <img src={p.url} alt={p.name} className="w-full aspect-square rounded-xl object-cover" />
+                    <span className="block text-[10px] font-bold text-center text-zinc-400 mt-2 truncate group-hover/avatar:text-zinc-200 transition-colors">
+                      {p.name.split(' ')[0]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -237,38 +283,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </div>
 
-        {/* BENTO 5: Avatar Studio (col-12) */}
-        <div className="md:col-span-12 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-indigo-400" /> Avatar Studio
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-            {PRESET_AVATARS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => {
-                  setAvatar(p.url);
-                }}
-                className={`p-2 rounded-2xl border transition-all overflow-hidden cursor-pointer relative group/avatar ${
-                  avatar === p.url
-                    ? 'border-indigo-400 bg-indigo-500/10 ring-2 ring-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
-                    : 'border-white/5 bg-black/40 hover:border-white/20'
-                }`}
-              >
-                <img src={p.url} alt={p.name} className="w-full aspect-square rounded-xl object-cover" />
-                <span className="block text-[10px] font-bold text-center text-zinc-400 mt-2 truncate group-hover/avatar:text-zinc-200 transition-colors">
-                  {p.name.split(' ')[0]}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Flat Section: Finance & Security (col-12) */}
         <div className="md:col-span-12 border-b border-white/10 pb-8 grid grid-cols-1 md:grid-cols-2 gap-0">
