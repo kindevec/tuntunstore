@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { DiamondIcon } from './DiamondIcon';
-import { ShieldCheck, Heart, Facebook, Instagram, ChevronDown } from 'lucide-react';
-
-const TikTokIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/>
-  </svg>
-);
+import { ShieldCheck, Heart, ChevronDown } from 'lucide-react';
 
 interface FooterProps {
   onSelectTab: (tab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin') => void;
@@ -41,19 +35,6 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
             <p className="text-[11px] text-emerald-400 font-extrabold uppercase tracking-wider flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" /> Servidor Oficial: WhatsApp +593 96 872 9952
             </p>
-            
-            {/* Social Media Links */}
-            <div className="flex items-center gap-4 pt-2">
-              <a href="https://www.facebook.com/profile.php?id=61592564474036" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-zinc-900 hover:bg-emerald-500 hover:text-black text-zinc-400 transition-colors" title="Facebook">
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a href="https://www.instagram.com/sahur055?igsh=MWs3cXI1cDM0Z2x2YQ==" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-zinc-900 hover:bg-emerald-500 hover:text-black text-zinc-400 transition-colors" title="Instagram">
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a href="https://www.tiktok.com/@tuntunstore1" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-zinc-900 hover:bg-emerald-500 hover:text-black text-zinc-400 transition-colors" title="TikTok">
-                <TikTokIcon className="w-4 h-4" />
-              </a>
-            </div>
           </div>
 
           {/* Quick Links */}
