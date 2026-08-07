@@ -1259,8 +1259,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     return (
                       <div key={topUp.id} className="bg-zinc-900 border border-amber-500/30 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-lg">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 shrink-0">
-                            <Wallet className="w-6 h-6" />
+                          <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 shrink-0 overflow-hidden">
+                            {topUp.receipt_url ? (
+                              <img 
+                                src={`${import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co'}/storage/v1/object/public/receipts/${topUp.receipt_url}`} 
+                                alt="Baucher miniatura" 
+                                className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => {
+                                  const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co';
+                                  setSelectedReceiptUrl(`${baseUrl}/storage/v1/object/public/receipts/${topUp.receipt_url}`);
+                                }}
+                                title="Clic para ampliar"
+                              />
+                            ) : (
+                              <Wallet className="w-6 h-6" />
+                            )}
                           </div>
                           <div>
                             <p className="font-black text-white text-base">Recarga de ${topUp.amount.toFixed(2)} USD</p>
