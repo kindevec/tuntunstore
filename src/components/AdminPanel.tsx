@@ -483,16 +483,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                   </div>
 
-                  {/* Baucher Button */}
-                  <div>
-                    <button
-                      onClick={() => setSelectedReceiptUrl(order.receiptUrl)}
-                      className="w-full py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 font-black text-xs flex items-center justify-center gap-2 border border-emerald-500/30 active:scale-98 transition-all cursor-pointer uppercase"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>Ver Baucher Comprobante</span>
-                    </button>
-                  </div>
+
 
                   {/* Action Buttons */}
                   <div className="pt-2 border-t border-zinc-700/50">
@@ -529,7 +520,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="p-4">Jugador / ID</th>
                     <th className="p-4">Producto & Diamantes</th>
                     <th className="p-4">Monto / Banco</th>
-                    <th className="p-4">Baucher Comprobante</th>
                     <th className="p-4">Estado</th>
                     <th className="p-4 text-right">Acción de Estado</th>
                   </tr>
@@ -593,16 +583,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           )}
                         </td>
 
-                        {/* Baucher Receipt Inspector */}
-                        <td className="p-4">
-                          <button
-                            onClick={() => setSelectedReceiptUrl(order.receiptUrl)}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-black text-xs flex items-center gap-1.5 border border-emerald-500/30 transition-all cursor-pointer uppercase"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Revisar Baucher</span>
-                          </button>
-                        </td>
+
 
                         {/* Current Status Badge */}
                         <td className="p-4">
@@ -1182,7 +1163,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <li><strong>ID Jugador Free Fire:</strong> 284910293</li>
                   <li><strong>Producto:</strong> 572 Diamantes ($5.80 USD)</li>
                   <li><strong>Banco:</strong> Banco Pichincha</li>
-                  <li><strong>Baucher Comprobante:</strong> Adjunto en panel</li>
+
                 </ul>
                 <p className="text-emerald-400 font-black uppercase pt-2">Por favor ingresa al Panel de TunTun Store para verificar la transferencia.</p>
               </div>
