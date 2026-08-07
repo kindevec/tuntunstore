@@ -81,6 +81,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [isSavedSuccess, setIsSavedSuccess] = useState(false);
   const [isAvatarStudioOpen, setIsAvatarStudioOpen] = useState(false);
 
+  const hasChanges = 
+    name.trim() !== (currentUser.name || '') ||
+    email.trim() !== (currentUser.email || '') ||
+    avatar !== (currentUser.avatar || PRESET_AVATARS[0].url) ||
+    playerIdDefault.trim() !== (currentUser.playerIdDefault || '') ||
+    gamerTag.trim() !== (currentUser.gamerTag || '') ||
+    phone.trim() !== (currentUser.phone || '') ||
+    preferredBank !== (currentUser.preferredBank || PREFERRED_BANKS[0]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -161,6 +170,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <ImageIcon className="w-3.5 h-3.5" />
                 Editar Avatar
               </button>
+
+              {hasChanges && (
+                <button
+                  type="submit"
+                  disabled={isSavedSuccess}
+                  className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-black border border-emerald-400 hover:bg-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all cursor-pointer flex items-center gap-1.5 shadow-sm animate-in fade-in zoom-in duration-300"
+                >
+                  {isSavedSuccess ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Save className="w-3.5 h-3.5" />}
+                  {isSavedSuccess ? '¡Guardado!' : 'Guardar Cambios'}
+                </button>
+              )}
             </div>
           </div>
           
