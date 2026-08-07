@@ -419,7 +419,7 @@ export default function App() {
       {activeTab !== 'login' && (
         <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} />
       )}
-      <main className="flex-1 pb-20 md:pb-0">
+      <main className={activeTab === 'login' ? 'flex-1' : 'flex-1 pb-20 md:pb-0'}>
         {activeTab === 'catalog' && (
           <div>
             <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />

@@ -111,25 +111,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#05070a] text-white flex flex-col lg:flex-row overflow-x-hidden">
+    <div className="h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden">
       
       {/* LEFT COLUMN: Clean Form Panel (TunTun Emerald & Black Style) */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-10 lg:p-16 relative z-10 min-h-screen">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center p-4 sm:p-10 lg:p-16 relative z-10 h-full overflow-hidden">
         <div className="flex-1 flex flex-col justify-center w-full max-w-md mx-auto">
-          {/* Top back button */}
-          <button
-            onClick={onBackToCatalog}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-emerald-400 transition-colors mb-8 cursor-pointer group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span>Volver a TunTun Store</span>
-          </button>
-
           {/* Mobile Glowing Logo Showcase (Only visible on mobile) */}
-          <div className="relative flex justify-center w-full mb-10 lg:hidden mt-4">
+          <div className="relative flex justify-center w-full mb-2 sm:mb-6 lg:hidden mt-1">
             {/* Outer animated ring */}
-            <div className="absolute inset-0 bg-emerald-500/20 blur-[40px] rounded-full animate-pulse" />
-            <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full p-1.5 bg-gradient-to-br from-emerald-400 via-black to-emerald-700 shadow-[0_0_50px_rgba(16,185,129,0.3)] group">
+            <div className="absolute inset-0 bg-emerald-500/20 blur-[30px] rounded-full animate-pulse" />
+            <div className="relative w-24 h-24 sm:w-48 sm:h-48 rounded-full p-1.5 bg-gradient-to-br from-emerald-400 via-black to-emerald-700 shadow-[0_0_50px_rgba(16,185,129,0.3)] group">
               <img
                 src="/logo.jpeg"
                 alt="TunTun Store Identity"
@@ -143,7 +134,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
 
           {/* Official TunTun Mascot Brand Header (Desktop Only) */}
-          <div className="hidden lg:flex items-center gap-3.5 mb-8">
+          <div className="hidden lg:flex items-center gap-3.5 mb-6">
             <img 
               src="/logo-transparent.png" 
               alt="TunTun Store Logo" 
@@ -158,12 +149,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </div>
           </div>
 
+          {/* Back Button (Regresar) */}
+          <button
+            onClick={onBackToCatalog}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-emerald-400 transition-colors mb-3 cursor-pointer group w-fit"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+            <span>Regresar</span>
+          </button>
+
           {/* Form Title */}
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-2">
+          <div className="mb-3 sm:mb-5">
+            <h1 className="text-xl sm:text-3xl font-black tracking-tight text-white mb-0.5 sm:mb-1.5">
               {authMode === 'login' ? 'Inicia Sesión en TunTun' : 'Crear Cuenta Gamer'}
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400">
+            <p className="hidden sm:block text-xs sm:text-sm text-zinc-400">
               {authMode === 'login'
                 ? 'Ingresa a tu cuenta para recargar tus juegos y comprar PINs al instante'
                 : 'Únete hoy y disfruta de las recargas más rápidas y los PINs más accesibles'}
@@ -188,7 +188,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
           {/* LOGIN FORM */}
           {authMode === 'login' ? (
-            <form onSubmit={handleLoginSubmit} className="space-y-4 max-w-md">
+            <form onSubmit={handleLoginSubmit} className="space-y-3 sm:space-y-4 max-w-md">
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Correo o Usuario
@@ -201,7 +201,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tuemail@ejemplo.com"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                 </div>
               </div>
@@ -218,7 +218,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                   <button
                     type="button"
@@ -246,19 +246,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all cursor-pointer active:scale-98 mt-2"
+                className="w-full py-2.5 sm:py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all cursor-pointer active:scale-98 mt-2"
               >
                 Iniciar Sesión
               </button>
 
-              <div className="text-center my-3 text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
+              <div className="text-center my-2 sm:my-3 text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
                 o
               </div>
 
               <button
                 type="button"
                 onClick={() => onLoginGoogle('client')}
-                className="w-full py-3 px-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-2.5 sm:py-3 px-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -272,14 +272,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <button
                 type="button"
                 onClick={() => setAuthMode('register')}
-                className="w-full py-3 px-4 bg-black hover:bg-zinc-900 border border-emerald-500/30 text-emerald-400 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center mt-2"
+                className="w-full py-2.5 sm:py-3 px-4 bg-black hover:bg-zinc-900 border border-emerald-500/30 text-emerald-400 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center mt-2"
               >
                 ¿No tienes cuenta? Registrarme gratis
               </button>
             </form>
           ) : (
             /* REGISTER FORM */
-            <form onSubmit={handleRegisterSubmit} className="space-y-4 max-w-md">
+            <form onSubmit={handleRegisterSubmit} className="space-y-3 sm:space-y-4 max-w-md">
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
                   Nombre Completo / Gamer
@@ -292,7 +292,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Tu nombre completo o nick"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                 </div>
               </div>
@@ -309,7 +309,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tuemail@ejemplo.com"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                 </div>
               </div>
@@ -325,7 +325,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     value={playerId}
                     onChange={(e) => setPlayerId(e.target.value)}
                     placeholder="Ej. 748920193"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                 </div>
               </div>
@@ -342,7 +342,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Crea una contraseña"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-10 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                   />
                   <button
                     type="button"
@@ -356,19 +356,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all cursor-pointer active:scale-98 mt-2"
+                className="w-full py-2.5 sm:py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(16,185,129,0.4)] transition-all cursor-pointer active:scale-98 mt-2"
               >
                 Registrarme y Crear Cuenta
               </button>
 
-              <div className="text-center my-3 text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
+              <div className="text-center my-2 sm:my-3 text-[11px] text-zinc-600 font-bold uppercase tracking-widest">
                 o
               </div>
 
               <button
                 type="button"
                 onClick={() => onLoginGoogle('client')}
-                className="w-full py-3 px-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-2.5 sm:py-3 px-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-semibold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -382,7 +382,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <button
                 type="button"
                 onClick={() => setAuthMode('login')}
-                className="w-full py-3 px-4 bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center mt-4"
+                className="w-full py-2.5 sm:py-3 px-4 bg-black hover:bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold text-xs rounded-xl transition-all cursor-pointer text-center mt-2 sm:mt-4"
               >
                 ¿Ya tienes cuenta? Iniciar Sesión
               </button>
@@ -391,7 +391,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
         {/* Footer terms */}
-        <div className="mt-8 text-xs text-zinc-500 w-full max-w-md mx-auto pt-4 border-t border-zinc-900 text-center">
+        <div className="hidden sm:block mt-8 text-xs text-zinc-500 w-full max-w-md mx-auto pt-4 border-t border-zinc-900 text-center">
           Al continuar, aceptas nuestros{' '}
           <a href="#" onClick={(e) => e.preventDefault()} className="text-zinc-400 hover:underline">
             Términos de Servicio
