@@ -22,15 +22,15 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
   };
 
   return (
-    <footer id="footer-main" className="fixed bottom-0 left-0 w-full z-0 bg-[#050505] text-zinc-400 text-xs pt-6 pb-24 md:py-4 px-4 sm:px-6 lg:px-8">
+    <footer id="footer-main" className="fixed bottom-0 left-0 w-full z-0 bg-[#050505] text-zinc-400 text-xs pt-4 pb-20 md:py-4 px-4 sm:px-6 lg:px-8">
       {/* Smooth gradient fade into footer */}
       <div className="absolute top-0 left-0 w-full h-16 sm:h-24 bg-gradient-to-t from-[#050505] to-transparent -translate-y-full pointer-events-none" />
-      <div className="max-w-7xl mx-auto space-y-4 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-2 relative z-10">
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4">
           
           {/* Brand Info */}
-          <div className="space-y-3 col-span-1">
+          <div className="space-y-1.5 col-span-1">
             <div className="flex items-center gap-2">
               <DiamondIcon size="sm" variant="emerald" />
               <span className="text-xl font-black text-zinc-300 uppercase tracking-tighter">TunTun Store</span>
@@ -57,7 +57,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-3 col-span-1 border-t border-white/5 md:border-0 pt-4 md:pt-0">
+          <div className="space-y-1.5 col-span-1 border-t border-white/5 md:border-0 pt-2 md:pt-0">
             <button 
               onClick={() => toggleSection('links')}
               className="w-full flex items-center justify-between md:cursor-default outline-none"
@@ -97,7 +97,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
           </div>
 
           {/* Payment Methods */}
-          <div className="space-y-3 col-span-1 border-t border-white/5 md:border-0 pt-4 md:pt-0">
+          <div className="space-y-1.5 col-span-1 border-t border-white/5 md:border-0 pt-2 md:pt-0">
             <button 
               onClick={() => toggleSection('payments')}
               className="w-full flex items-center justify-between md:cursor-default outline-none"
@@ -121,7 +121,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
           </div>
 
           {/* Security & Guarantees */}
-          <div className="space-y-3 col-span-1 border-t border-white/5 md:border-0 pt-4 md:pt-0">
+          <div className="space-y-1.5 col-span-1 border-t border-white/5 md:border-0 pt-2 md:pt-0">
             <button 
               onClick={() => toggleSection('security')}
               className="w-full flex items-center justify-between md:cursor-default outline-none"
@@ -143,7 +143,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
 
         </div>
 
-        <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-zinc-500 text-[11px] font-bold uppercase text-center sm:text-left">
+        <div className="border-t border-white/5 pt-3 mt-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-zinc-500 text-[11px] font-bold uppercase text-center sm:text-left">
           <p>© 2026 TunTun Store. Todos los derechos reservados. Operado en Ecuador 🇪🇨.</p>
           <p className="flex items-center gap-1.5">
             <span>Desarrollado por <a href="https://kindevx.web.app/" target="_blank" rel="noreferrer" className="text-emerald-400 font-extrabold tracking-wider hover:underline">KinDev S.A.S</a></span>
