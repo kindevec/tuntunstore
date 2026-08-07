@@ -12,7 +12,8 @@ import {
   Mail, 
   Wallet,
   LogOut,
-  ArrowRight
+  ArrowRight,
+  Key
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -302,8 +303,29 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </div>
 
-        {/* BENTO 7: Danger Zone (col-4) */}
-        <div className="md:col-span-4 bg-rose-950/20 backdrop-blur-xl border border-rose-900/30 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col items-center justify-center relative overflow-hidden group">
+        {/* BENTO 7.1: Security / Change Password (col-2) */}
+        <div className="md:col-span-2 bg-rose-950/20 backdrop-blur-xl border border-rose-900/30 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col items-center justify-center relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <Key className="w-10 h-10 text-rose-500/50 mb-4 group-hover:scale-110 transition-transform" />
+          <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2 text-center">
+            Seguridad
+          </h3>
+          <p className="text-xs text-rose-300/70 text-center mb-6">
+            Actualiza tu contraseña para mantener tu cuenta segura.
+          </p>
+          
+          <button
+            type="button"
+            className="w-full px-4 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500 border border-rose-500/30 hover:border-rose-500 text-rose-400 hover:text-black font-black text-xs uppercase flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(244,63,94,0.4)]"
+          >
+            <Key className="w-4 h-4" />
+            Cambiar Contraseña
+          </button>
+        </div>
+
+        {/* BENTO 7.2: Danger Zone / Logout (col-2) */}
+        <div className="md:col-span-2 bg-rose-950/20 backdrop-blur-xl border border-rose-900/30 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col items-center justify-center relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
           <LogOut className="w-10 h-10 text-rose-500/50 mb-4 group-hover:scale-110 transition-transform" />
