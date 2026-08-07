@@ -303,47 +303,48 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </div>
 
-        {/* BENTO 7.1: Security / Change Password (col-2) */}
-        <div className="md:col-span-2 bg-rose-950/20 backdrop-blur-xl border border-rose-900/30 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col items-center justify-center relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        {/* BENTO 7: Security & Danger Zone (col-4) */}
+        <div className="md:col-span-4 bg-zinc-900/40 backdrop-blur-xl border border-rose-900/20 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col justify-center gap-6 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
-          <Key className="w-10 h-10 text-rose-500/50 mb-4 group-hover:scale-110 transition-transform" />
-          <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2 text-center">
-            Seguridad
-          </h3>
-          <p className="text-xs text-rose-300/70 text-center mb-6">
-            Actualiza tu contraseña para mantener tu cuenta segura.
-          </p>
-          
-          <button
-            type="button"
-            className="w-full px-4 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500 border border-rose-500/30 hover:border-rose-500 text-rose-400 hover:text-black font-black text-xs uppercase flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(244,63,94,0.4)]"
-          >
-            <Key className="w-4 h-4" />
-            Cambiar Contraseña
-          </button>
-        </div>
+          {/* Security / Change Password */}
+          <div className="flex flex-col items-center text-center">
+            <Key className="w-8 h-8 text-zinc-500 mb-3 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xs font-black text-white uppercase tracking-wider mb-2">
+              Seguridad
+            </h3>
+            <p className="text-[10px] text-zinc-400 mb-4 px-2">
+              Actualiza tu contraseña para mantener tu cuenta segura.
+            </p>
+            <button
+              type="button"
+              className="w-full px-4 py-2.5 rounded-2xl bg-zinc-800/50 hover:bg-zinc-700 border border-white/5 hover:border-white/10 text-zinc-300 hover:text-white font-black text-[10px] uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            >
+              <Key className="w-3.5 h-3.5" />
+              Cambiar Contraseña
+            </button>
+          </div>
 
-        {/* BENTO 7.2: Danger Zone / Logout (col-2) */}
-        <div className="md:col-span-2 bg-rose-950/20 backdrop-blur-xl border border-rose-900/30 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col items-center justify-center relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          
-          <LogOut className="w-10 h-10 text-rose-500/50 mb-4 group-hover:scale-110 transition-transform" />
-          <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2 text-center">
-            Sesión Activa
-          </h3>
-          <p className="text-xs text-rose-300/70 text-center mb-6">
-            Si estás en un dispositivo público, recuerda cerrar sesión.
-          </p>
-          
-          <button
-            type="button"
-            onClick={onLogout}
-            className="w-full px-4 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500 border border-rose-500/30 hover:border-rose-500 text-rose-400 hover:text-black font-black text-xs uppercase flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(244,63,94,0.4)]"
-          >
-            <LogOut className="w-4 h-4" />
-            Cerrar Sesión
-          </button>
+          <hr className="border-white/5" />
+
+          {/* Danger Zone / Logout */}
+          <div className="flex flex-col items-center text-center">
+            <LogOut className="w-8 h-8 text-rose-500/40 mb-3 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xs font-black text-rose-100 uppercase tracking-wider mb-2">
+              Sesión Activa
+            </h3>
+            <p className="text-[10px] text-rose-200/50 mb-4 px-2">
+              Si estás en un dispositivo público, recuerda cerrar sesión.
+            </p>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="w-full px-4 py-2.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 hover:border-rose-500 text-rose-400 hover:text-black font-black text-[10px] uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Cerrar Sesión
+            </button>
+          </div>
         </div>
 
         {/* BENTO 8: Submit Area (col-12) */}
