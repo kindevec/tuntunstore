@@ -419,7 +419,7 @@ export default function App() {
       {activeTab !== 'login' && (
         <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} />
       )}
-      <main className={activeTab === 'login' ? 'flex-1' : 'flex-1 pb-20 md:pb-0'}>
+      <main className="flex-1">
         {activeTab === 'catalog' && (
           <div>
             <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />
@@ -456,6 +456,8 @@ export default function App() {
       {activeTab !== 'admin' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
       {activeTab !== 'login' && <Footer onSelectTab={handleSelectTab} />}
       {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
+      {/* Spacer for bottom navigation */}
+      {activeTab !== 'login' && <div className="h-24 md:hidden" />}
     </div>
   );
 }
