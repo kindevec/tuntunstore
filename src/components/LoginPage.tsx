@@ -90,7 +90,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden">
+    <div className="fixed inset-0 lg:static lg:h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden">
       
       {/* LEFT COLUMN: Clean Form Panel */}
       <div className="w-full lg:w-1/2 flex flex-col p-3 sm:p-6 lg:p-16 relative z-10 h-full overflow-hidden">
