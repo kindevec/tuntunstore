@@ -46,24 +46,25 @@ export const Header: React.FC<HeaderProps> = ({
   pendingTopUps = [],
 }) => {
   const [showAuthMenu, setShowAuthMenu] = useState(false);
+  const [showNotifs, setShowNotifs] = useState(false);
   const isAdmin = currentUser?.role === 'admin';
   const menuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowAuthMenu(false);
       }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifs(false);
+      }
     };
-    if (showAuthMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showAuthMenu]);
+  }, []);
 
   return (
     <header id="header-main" className="sticky top-0 z-40 bg-black/80 backdrop-blur-md text-white border-b border-emerald-900/40 shadow-2xl">
@@ -165,18 +166,68 @@ export const Header: React.FC<HeaderProps> = ({
           <div id="user-auth-section" className="relative flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Balance Badge Pill or Admin Mode Indicator */}
             {isAdmin ? (
-              <button
-                onClick={() => setActiveTab('admin', 'orders')}
-                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] transition-all cursor-pointer relative group"
-                title="Notificaciones y Pedidos"
-              >
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0 group-hover:rotate-12 transition-transform" />
-                {pendingOrdersCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-amber-400 text-black font-black text-[9px] sm:text-[10px] flex items-center justify-center rounded-full shadow-sm">
-                    {pendingOrdersCount}
-                  </span>
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => setShowNotifs(!showNotifs)}
+                  className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] transition-all cursor-pointer relative group"
+                  title="Notificaciones"
+                >
+                  <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0 group-hover:rotate-12 transition-transform" />
+                  {(pendingOrdersCount > 0 || pendingTopUps.length > 0) && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-amber-400 text-black font-black text-[9px] sm:text-[10px] flex items-center justify-center rounded-full shadow-sm">
+                      {pendingOrdersCount + pendingTopUps.length}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifs && (
+                  <div className="absolute top-full right-0 mt-2 w-64 bg-zinc-900 border border-zinc-700/50 rounded-2xl shadow-2xl overflow-hidden z-50">
+                    <div className="p-3 bg-black/50 border-b border-zinc-800">
+                      <h3 className="text-xs font-black text-white uppercase tracking-wider">Notificaciones</h3>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {pendingOrdersCount === 0 && pendingTopUps.length === 0 ? (
+                        <div className="p-4 text-center text-xs text-zinc-500">No hay nuevas notificaciones</div>
+                      ) : (
+                        <div className="flex flex-col divide-y divide-zinc-800">
+                          {pendingOrdersCount > 0 && (
+                            <button
+                              onClick={() => { setActiveTab('admin', 'orders'); setShowNotifs(false); }}
+                              className="w-full text-left p-3 hover:bg-zinc-800 transition-colors group flex items-start gap-3 cursor-pointer"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+                                <ShoppingBag className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">
+                                  {pendingOrdersCount} {pendingOrdersCount === 1 ? 'Pedido pendiente' : 'Pedidos pendientes'}
+                                </p>
+                                <p className="text-[10px] text-zinc-400 mt-0.5">Nuevas compras por revisar</p>
+                              </div>
+                            </button>
+                          )}
+                          {pendingTopUps.length > 0 && (
+                            <button
+                              onClick={() => { setActiveTab('admin', 'wallets'); setShowNotifs(false); }}
+                              className="w-full text-left p-3 hover:bg-zinc-800 transition-colors group flex items-start gap-3 cursor-pointer"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                                <DollarSign className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">
+                                  {pendingTopUps.length} {pendingTopUps.length === 1 ? 'Recarga pendiente' : 'Recargas pendientes'}
+                                </p>
+                                <p className="text-[10px] text-zinc-400 mt-0.5">Comprobantes por aprobar</p>
+                              </div>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
-              </button>
+              </div>
             ) : currentUser ? (
               <button
                 onClick={() => setActiveTab('wallet')}
