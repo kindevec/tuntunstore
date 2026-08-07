@@ -90,10 +90,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen lg:h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-x-hidden lg:overflow-hidden">
+    <div className="h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden">
       
       {/* LEFT COLUMN: Clean Form Panel */}
-      <div className="w-full lg:w-1/2 flex flex-col p-4 sm:p-10 lg:p-16 relative z-10 min-h-screen lg:min-h-0 lg:h-full lg:overflow-hidden custom-scrollbar">
+      <div className="w-full lg:w-1/2 flex flex-col p-3 sm:p-6 lg:p-16 relative z-10 h-full overflow-hidden">
         
         {/* Subtle ambient glow for mobile */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/8 rounded-full blur-[100px] pointer-events-none lg:hidden" />
@@ -104,25 +104,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div className="flex-1 flex flex-col justify-center items-center w-full max-w-md mx-auto relative z-10">
           
           {/* ----------------- MOBILE LOGO (Premium Animated) ----------------- */}
-          <div className="relative flex justify-center w-full mb-10 pt-4 lg:hidden">
+          <div className="relative flex justify-center w-full mb-3 pt-1 lg:hidden shrink-0">
             {/* Outer Glow / Halo */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] bg-emerald-500/30 blur-[70px] rounded-full animate-pulse pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-48 sm:h-48 bg-emerald-500/30 blur-[40px] rounded-full animate-pulse pointer-events-none" />
             {/* Animated Rotating Rings */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 sm:w-64 sm:h-64 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin" style={{ animationDuration: '4s' }} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] sm:w-[272px] sm:h-[272px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-36 sm:h-36 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin" style={{ animationDuration: '4s' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130px] h-[130px] sm:w-[160px] sm:h-[160px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
             
             {/* The Logo Itself */}
-            <div className="relative z-10 w-48 h-48 sm:w-56 sm:h-56 rounded-full p-2 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_50px_rgba(16,185,129,0.3)] ring-4 ring-black/50">
-              <div className="w-full h-full rounded-full p-[3px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
+            <div className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_30px_rgba(16,185,129,0.3)] ring-2 ring-black/50">
+              <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
                 <img
                   src="/logo.jpeg"
                   alt="TunTun Store"
-                  className="w-full h-full object-cover rounded-full border-[3px] border-black"
+                  className="w-full h-full object-cover rounded-full border-2 border-black"
                 />
               </div>
               {/* Micro-badge on logo */}
-              <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-black p-2 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)] border-2 border-black">
-                <ShieldCheck className="w-5 h-5" />
+              <div className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-black p-1 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] border-2 border-black">
+                <ShieldCheck className="w-3.5 h-3.5" />
               </div>
             </div>
           </div>
@@ -144,8 +144,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
 
           {/* Form Title */}
-          <div className="mb-3 sm:mb-5 w-full text-center lg:text-left relative z-10">
-            <h1 className="text-xl sm:text-3xl font-black tracking-tight text-white mb-0.5 sm:mb-1.5">
+          <div className="mb-2 sm:mb-4 w-full text-center lg:text-left relative z-10 shrink-0">
+            <h1 className="text-lg sm:text-3xl font-black tracking-tight text-white mb-0 sm:mb-1.5">
               {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta Gamer'}
             </h1>
             <p className="hidden sm:block text-xs sm:text-sm text-zinc-400">
@@ -156,7 +156,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </div>
 
           {/* FORM CONTAINER (Premium Glassmorphism on Mobile, Original on Desktop) */}
-          <div className="w-full bg-zinc-950/60 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/5 lg:border-transparent rounded-3xl lg:rounded-none p-5 sm:p-8 lg:p-0 shadow-2xl lg:shadow-none relative overflow-hidden lg:overflow-visible">
+          <div className="w-full bg-zinc-950/60 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/5 lg:border-transparent rounded-3xl lg:rounded-none p-4 sm:p-8 lg:p-0 shadow-2xl lg:shadow-none relative overflow-hidden lg:overflow-visible">
             
             {/* Decorative glare for mobile card */}
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent lg:hidden" />
