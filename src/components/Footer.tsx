@@ -14,18 +14,18 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
   return (
-    <footer id="footer-main" className="relative bg-[#050505] text-zinc-400 text-xs pt-8 pb-28 md:pb-8 px-4 sm:px-6 lg:px-8">
+    <footer id="footer-main" className="relative bg-[#050505] text-zinc-400 text-xs py-10 px-4 sm:px-6 lg:px-8">
       {/* Smooth gradient fade into footer */}
       <div className="absolute top-0 left-0 w-full h-16 sm:h-24 bg-gradient-to-t from-[#050505] to-transparent -translate-y-full pointer-events-none" />
-      <div className="max-w-7xl mx-auto space-y-8 relative z-10">
+      <div className="max-w-7xl mx-auto space-y-6 relative z-10">
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           
           {/* Brand Info */}
-          <div className="space-y-3 md:col-span-1">
+          <div className="space-y-3 col-span-2 md:col-span-1">
             <div className="flex items-center gap-2">
               <DiamondIcon size="sm" variant="emerald" />
-              <span className="text-xl font-black text-white uppercase tracking-tighter">TunTun Store</span>
+              <span className="text-xl font-black text-zinc-300 uppercase tracking-tighter">TunTun Store</span>
             </div>
             <p className="text-zinc-400 text-xs leading-relaxed font-semibold">
               Plataforma líder en recargas directas de diamantes para videojuegos en Ecuador. Acreditación rápida y garantizada.
@@ -49,8 +49,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-2">
-            <p className="font-black text-white text-xs uppercase tracking-widest">Páginas Independientes</p>
+          <div className="space-y-2 col-span-1">
+            <p className="font-black text-zinc-500 text-xs uppercase tracking-widest">Páginas Independientes</p>
             <ul className="space-y-1.5 font-bold uppercase text-[11px]">
               <li>
                 <button onClick={() => onSelectTab('catalog')} className="hover:text-emerald-400 transition-colors cursor-pointer">
@@ -81,8 +81,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
           </div>
 
           {/* Payment Methods */}
-          <div className="space-y-2">
-            <p className="font-black text-white text-xs uppercase tracking-widest">Métodos de Pago Oficiales</p>
+          <div className="space-y-2 col-span-1">
+            <p className="font-black text-zinc-500 text-xs uppercase tracking-widest">Métodos de Pago Oficiales</p>
             <ul className="space-y-1.5 text-zinc-400 font-bold text-[11px]">
               <li className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-rose-500"></span> BANCO GUAYAQUIL / APP DEUNA
@@ -97,10 +97,10 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
           </div>
 
           {/* Security & Guarantees */}
-          <div className="space-y-2">
-            <p className="font-black text-white text-xs uppercase tracking-widest">Garantía de Servicio</p>
+          <div className="space-y-2 col-span-2 md:col-span-1">
+            <p className="font-black text-zinc-500 text-xs uppercase tracking-widest">Garantía de Servicio</p>
             <p className="text-zinc-400 text-xs font-medium">
-              Todas las cargas se procesan directamente con tu <strong className="text-white">ID de Jugador</strong>. Nunca solicitaremos tu clave ni datos de acceso a tu cuenta.
+              Todas las cargas se procesan directamente con tu <strong className="text-zinc-300">ID de Jugador</strong>. Nunca solicitaremos tu clave ni datos de acceso a tu cuenta.
             </p>
             <div className="pt-2">
               <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
