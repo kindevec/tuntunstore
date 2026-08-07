@@ -176,10 +176,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
 
         {/* Flat Section: Personal Data & Gaming Data (col-12) */}
-        <div className="md:col-span-12 border-y border-white/10 py-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0">
+        <div className="md:col-span-12 border-y border-white/10 py-8 grid grid-cols-1 md:grid-cols-2 gap-0">
           
           {/* Datos Personales */}
-          <div className="space-y-4 md:border-r md:border-white/10 md:pr-12">
+          <div className="space-y-4 md:border-r md:border-white/10 md:pr-12 max-md:border-b max-md:border-white/10 max-md:pb-8">
             <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
               <User className="w-4 h-4 text-emerald-400" /> Datos Personales
             </h3>
@@ -208,7 +208,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Perfil Gamer */}
-          <div className="space-y-4 md:pl-12">
+          <div className="space-y-4 md:pl-12 max-md:pt-8">
             <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
               <Gamepad2 className="w-4 h-4 text-amber-400" /> Perfil Gamer
             </h3>
@@ -271,10 +271,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
 
         {/* Flat Section: Finance & Security (col-12) */}
-        <div className="md:col-span-12 border-b border-white/10 pb-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0">
+        <div className="md:col-span-12 border-b border-white/10 pb-8 grid grid-cols-1 md:grid-cols-2 gap-0">
           
           {/* Banco Frecuente & Seguridad */}
-          <div className="space-y-6 md:border-r md:border-white/10 md:pr-12">
+          <div className="space-y-6 md:border-r md:border-white/10 md:pr-12 max-md:border-b max-md:border-white/10 max-md:pb-8">
             <div>
               <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-4">
                 <Building2 className="w-4 h-4 text-teal-400" /> Banco Frecuente
@@ -307,7 +307,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           {/* Danger Zone & Password */}
-          <div className="flex flex-col justify-center gap-6 md:pl-12">
+          <div className="flex flex-col justify-center gap-6 md:pl-12 max-md:pt-8">
             
             {/* Security / Change Password */}
             <div className="flex flex-col items-center text-center">
