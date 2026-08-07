@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile } from '../types';
 import { 
   ShieldCheck, 
@@ -47,6 +47,23 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showAuthMenu, setShowAuthMenu] = useState(false);
   const isAdmin = currentUser?.role === 'admin';
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowAuthMenu(false);
+      }
+    };
+    if (showAuthMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showAuthMenu]);
 
   return (
     <header id="header-main" className="sticky top-0 z-40 bg-black/80 backdrop-blur-md text-white border-b border-emerald-900/40 shadow-2xl">
@@ -182,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({
             ) : null}
 
             {currentUser ? (
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
                   id="user-profile-menu-btn"
                   onClick={() => setShowAuthMenu(!showAuthMenu)}
