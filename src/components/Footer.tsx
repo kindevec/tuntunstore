@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DiamondIcon } from './DiamondIcon';
 import { ShieldCheck, Heart, ExternalLink, Facebook, Instagram } from 'lucide-react';
 
@@ -13,8 +13,29 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Usamos una pequeña tolerancia de 20px para la detección
+      const bottom = Math.ceil(window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 20;
+      setIsAtBottom(bottom);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+    
+    // Check initial state
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
+
   return (
-    <footer id="footer-main" className="relative bg-[#050505] text-zinc-400 text-xs py-10 px-4 sm:px-6 lg:px-8">
+    <footer id="footer-main" className={`fixed bottom-0 left-0 w-full z-50 bg-[#050505] text-zinc-400 text-xs py-10 px-4 sm:px-6 lg:px-8 transform transition-all duration-700 ease-in-out ${isAtBottom ? 'translate-y-0 opacity-100 pointer-events-auto shadow-[0_-10px_40px_rgba(0,0,0,0.8)]' : 'translate-y-full opacity-0 pointer-events-none'}`}>
       {/* Smooth gradient fade into footer */}
       <div className="absolute top-0 left-0 w-full h-16 sm:h-24 bg-gradient-to-t from-[#050505] to-transparent -translate-y-full pointer-events-none" />
       <div className="max-w-7xl mx-auto space-y-6 relative z-10">
