@@ -1337,59 +1337,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         </span>
                       </div>
                     </div>
-
-                    <div className="space-y-3 pt-2">
-                      <span className="text-[10px] text-zinc-400 font-bold uppercase block">Recarga Rápida:</span>
-                      <div className="flex items-center gap-2">
-                        {[5, 10, 20, 50].map((amt) => (
-                          <button
-                            key={amt}
-                            onClick={() => onUpdateUserWalletBalance && onUpdateUserWalletBalance(u.email, amt)}
-                            className="flex-1 py-1.5 bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 rounded-lg text-xs font-black uppercase cursor-pointer transition-all"
-                          >
-                            +${amt}
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
-                        <input
-                          type="number"
-                          placeholder="Monto custom ($)"
-                          value={customVal}
-                          onChange={(e) =>
-                            setUserCustomAmounts({ ...userCustomAmounts, [u.email]: e.target.value })
-                          }
-                          className="flex-1 px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold text-xs focus:outline-none focus:border-amber-400"
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              const num = parseFloat(customVal);
-                              if (num > 0 && onUpdateUserWalletBalance) {
-                                onUpdateUserWalletBalance(u.email, num);
-                                setUserCustomAmounts({ ...userCustomAmounts, [u.email]: '' });
-                              }
-                            }}
-                            className="flex-1 sm:flex-none px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-black text-xs font-black rounded-xl uppercase cursor-pointer transition-colors"
-                          >
-                            Sumar
-                          </button>
-                          <button
-                            onClick={() => {
-                              const num = parseFloat(customVal);
-                              if (num >= 0 && onUpdateUserWalletBalance) {
-                                onUpdateUserWalletBalance(u.email, num, true);
-                                setUserCustomAmounts({ ...userCustomAmounts, [u.email]: '' });
-                              }
-                            }}
-                            className="flex-1 sm:flex-none px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-black rounded-xl uppercase cursor-pointer transition-colors"
-                          >
-                            Fijar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 );
               })}
@@ -1405,7 +1352,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <th className="p-4">Rol</th>
                     <th className="p-4">ID Free Fire</th>
                     <th className="p-4">Saldo Actual USD</th>
-                    <th className="p-4 text-right">Acciones de Recarga Directa</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-700/50">
@@ -1449,62 +1395,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                           <span className="text-lg font-black text-amber-400 bg-amber-400/10 px-3 py-1 rounded-xl border border-amber-400/30 inline-block">
                             ${(u.walletBalanceUSD || 0).toFixed(2)} USD
                           </span>
-                        </td>
-
-                        <td className="p-4 text-right">
-                          <div className="flex flex-col items-end gap-2">
-                            {/* Quick Add Preset Buttons */}
-                            <div className="flex items-center gap-1">
-                              {[5, 10, 20, 50].map((amt) => (
-                                <button
-                                  key={amt}
-                                  onClick={() => onUpdateUserWalletBalance && onUpdateUserWalletBalance(u.email, amt)}
-                                  className="px-2 py-1 bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/30 rounded text-[10px] font-black uppercase cursor-pointer transition-all"
-                                  title={`Añadir $${amt} USD a ${u.name}`}
-                                >
-                                  +${amt}
-                                </button>
-                              ))}
-                            </div>
-
-                            {/* Custom Amount Form */}
-                            <div className="flex items-center gap-1.5">
-                              <input
-                                type="number"
-                                placeholder="Monto custom ($)"
-                                value={customVal}
-                                onChange={(e) =>
-                                  setUserCustomAmounts({ ...userCustomAmounts, [u.email]: e.target.value })
-                                }
-                                className="w-28 px-2 py-1 rounded bg-black border border-white/10 text-white font-bold text-xs text-right focus:outline-none focus:border-amber-400"
-                              />
-                              <button
-                                onClick={() => {
-                                  const num = parseFloat(customVal);
-                                  if (num > 0 && onUpdateUserWalletBalance) {
-                                    onUpdateUserWalletBalance(u.email, num);
-                                    setUserCustomAmounts({ ...userCustomAmounts, [u.email]: '' });
-                                  }
-                                }}
-                                className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-black text-[10px] font-black rounded uppercase cursor-pointer"
-                              >
-                                Sumar
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const num = parseFloat(customVal);
-                                  if (num >= 0 && onUpdateUserWalletBalance) {
-                                    onUpdateUserWalletBalance(u.email, num, true);
-                                    setUserCustomAmounts({ ...userCustomAmounts, [u.email]: '' });
-                                  }
-                                }}
-                                className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-black rounded uppercase cursor-pointer"
-                                title="Establecer saldo exacto"
-                              >
-                                Fijar
-                              </button>
-                            </div>
-                          </div>
                         </td>
                       </tr>
                     );
