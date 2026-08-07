@@ -449,8 +449,80 @@ export default function App() {
 
   const handleSubmitTopUpOrder = async (amount: number, bankName: string, receiptFile: File) => {
     if (!currentUser) return;
+    
     let uploadedReceiptPath = null;
+    let receiptHash = null;
+    let autoVerified = false;
+    let verificationWarnings: string[] = [];
+    
     if (receiptFile) {
+      showToast('Analizando comprobante por seguridad...');
+      try {
+        // 1. Calculate SHA-256 Hash
+        const arrayBuffer = await receiptFile.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        receiptHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        // 2. Check for duplicate hash
+        const { data: duplicateCheck } = await supabase
+          .from('wallet_transactions')
+          .select('id')
+          .eq('receipt_hash', receiptHash)
+          .limit(1);
+
+        if (duplicateCheck && duplicateCheck.length > 0) {
+          verificationWarnings.push('⚠️ Imagen duplicada: este comprobante ya fue subido previamente.');
+        }
+
+        // 3. OCR Processing with Tesseract
+        const Tesseract = (await import('tesseract.js')).default;
+        const result = await Tesseract.recognize(receiptFile, 'spa');
+        const text = result.data.text;
+        
+        // 4. Validate Date
+        const dateRegex = /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b|\b(\d{4})[\/\-](\d{2})[\/\-](\d{2})\b/g;
+        const matches = [...text.matchAll(dateRegex)];
+        
+        if (matches.length === 0) {
+          verificationWarnings.push('⚠️ Fecha no detectada: No se pudo encontrar una fecha legible en el comprobante.');
+        } else {
+          const today = new Date();
+          const d = today.getDate().toString().padStart(2, '0');
+          const m = (today.getMonth() + 1).toString().padStart(2, '0');
+          const y = today.getFullYear().toString();
+          
+          const todayStr1 = `${d}/${m}/${y}`;
+          const todayStr2 = `${d}-${m}-${y}`;
+          const todayStr3 = `${y}-${m}-${d}`;
+          const todayStr4 = `${d} ${today.toLocaleString('es', {month:'short'}).substring(0,3)} ${y}`; // e.g. 07 ago 2026
+          
+          let isToday = false;
+          for (const match of matches) {
+            const matchText = match[0];
+            if (matchText.includes(todayStr1) || matchText.includes(todayStr2) || matchText.includes(todayStr3)) {
+              isToday = true;
+              break;
+            }
+          }
+          
+          // Also simple fallback string check if regex missed some text forms
+          if (!isToday && (text.includes(todayStr1) || text.includes(todayStr2) || text.toLowerCase().includes(todayStr4.toLowerCase()))) {
+            isToday = true;
+          }
+          
+          if (!isToday) {
+            verificationWarnings.push('⚠️ Posible fecha antigua: La fecha detectada en el comprobante no coincide con el día de hoy.');
+          }
+        }
+        
+      } catch (error) {
+        console.error('OCR Error:', error);
+        verificationWarnings.push('⚠️ Error OCR: No se pudo analizar automáticamente el texto de la imagen.');
+      }
+
+      autoVerified = verificationWarnings.length === 0;
+
       const fileExt = receiptFile.name.split('.').pop();
       const filePath = `${currentUser.uid}/${Math.random()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('receipts').upload(filePath, receiptFile);
@@ -467,6 +539,9 @@ export default function App() {
       type: 'top_up',
       status: 'Pendiente',
       receipt_url: uploadedReceiptPath,
+      receipt_hash: receiptHash,
+      auto_verified: autoVerified,
+      verification_warnings: verificationWarnings
     });
     
     if (error) {

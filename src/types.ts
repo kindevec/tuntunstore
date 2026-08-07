@@ -81,6 +81,9 @@ export interface WalletTransaction {
   receipt_url?: string;
   admin_note?: string;
   created_at: string;
+  receipt_hash?: string;
+  auto_verified?: boolean;
+  verification_warnings?: string[];
 }
 
 export interface EmailAlertConfig {
