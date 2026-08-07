@@ -40,6 +40,8 @@ interface AdminPanelProps {
   onDeleteProduct: (productId: string) => void;
   onUpdateEmailConfig: (config: EmailAlertConfig) => void;
   onUpdateUserWalletBalance?: (email: string, amount: number, isSetExact?: boolean) => void;
+  pendingTopUps?: any[];
+  onUpdateTopUpStatus?: (transactionId: string, newStatus: 'Aprobado' | 'Rechazado') => void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -55,6 +57,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onDeleteProduct,
   onUpdateEmailConfig,
   onUpdateUserWalletBalance,
+  pendingTopUps = [],
+  onUpdateTopUpStatus,
 }) => {
   const [internalTab, setInternalTab] = useState<'orders' | 'catalog' | 'email' | 'wallets'>('orders');
   const activeTab = activeSubTab || internalTab;
@@ -1129,7 +1133,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </span>
                 <h2 className="text-xl font-black text-white">Billeteras Virtuales de Clientes ($ USD)</h2>
                 <p className="text-xs text-zinc-400">
-                  Como Administrador puedes recargar saldo manualmente a cualquier usuario, verificar fondos guardados o ajustar saldos.
+                  Como Administrador puedes aprobar recargas por transferencia bancaria, o ajustar saldos manualmente.
                 </p>
               </div>
 
@@ -1144,6 +1148,72 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Pending Top Ups Section */}
+          <div className="bg-zinc-800 rounded-2xl border border-amber-500/50 overflow-hidden shadow-[0_0_30px_rgba(251,191,36,0.1)]">
+            <div className="p-4 border-b border-amber-500/30 flex items-center justify-between bg-amber-500/5">
+              <h3 className="font-black text-sm text-amber-400 uppercase flex items-center gap-2">
+                <Clock className="w-4 h-4" /> Solicitudes de Recarga Pendientes
+              </h3>
+              <span className="text-xs text-amber-400 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full">{pendingTopUps.length} Pendientes</span>
+            </div>
+            
+            <div className="p-4">
+              {pendingTopUps.length === 0 ? (
+                <div className="py-8 text-center text-zinc-500 font-bold uppercase text-xs">
+                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 opacity-20 text-emerald-400" />
+                  <p>No hay solicitudes de recarga pendientes.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {pendingTopUps.map(topUp => {
+                    const user = registeredUsers.find(u => u.uid === topUp.user_id);
+                    return (
+                      <div key={topUp.id} className="bg-zinc-900 border border-amber-500/30 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 shrink-0">
+                            <Wallet className="w-6 h-6" />
+                          </div>
+                          <div>
+                            <p className="font-black text-white text-base">Recarga de ${topUp.amount.toFixed(2)} USD</p>
+                            <div className="text-xs text-zinc-400 flex flex-col gap-0.5 mt-1">
+                              <span><strong className="text-zinc-300">Cliente:</strong> {user?.name || 'Desconocido'} ({user?.email || 'N/A'})</span>
+                              <span><strong className="text-zinc-300">Fecha:</strong> {new Date(topUp.created_at).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                          {topUp.receipt_url && (
+                            <button
+                              onClick={() => setSelectedReceiptUrl(`https://nizsowkikjovtdzzwgnm.supabase.co/storage/v1/object/public/receipts/${topUp.receipt_url}`)}
+                              className="px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-black rounded-xl uppercase flex items-center gap-2 border border-blue-500/30 transition-colors w-full sm:w-auto justify-center"
+                            >
+                              <Eye className="w-4 h-4" /> Ver Baucher
+                            </button>
+                          )}
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <button
+                              onClick={() => onUpdateTopUpStatus && onUpdateTopUpStatus(topUp.id, 'Aprobado')}
+                              className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black rounded-xl uppercase flex items-center gap-1 justify-center transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                            >
+                              <CheckCircle2 className="w-4 h-4" /> Aprobar
+                            </button>
+                            <button
+                              onClick={() => onUpdateTopUpStatus && onUpdateTopUpStatus(topUp.id, 'Rechazado')}
+                              className="flex-1 sm:flex-none px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-black rounded-xl uppercase flex items-center gap-1 justify-center transition-colors"
+                            >
+                              <XCircle className="w-4 h-4" /> Rechazar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 

@@ -28,6 +28,7 @@ export default function App() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [walletHistory, setWalletHistory] = useState<any[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
   const [emailConfig, setEmailConfig] = useState<EmailAlertConfig>({
@@ -42,6 +43,7 @@ export default function App() {
   const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<ProductCategory | 'all'>('all');
   const [selectedProductForOrder, setSelectedProductForOrder] = useState<Product | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [pendingTopUps, setPendingTopUps] = useState<any[]>([]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -65,8 +67,62 @@ export default function App() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    if (currentUser.role === 'admin') {
+      supabase.from('wallet_transactions')
+        .select('*')
+        .eq('type', 'top_up')
+        .eq('status', 'Pendiente')
+        .then(({ data }) => {
+          if (data) setPendingTopUps(data);
+        });
+    }
+
+    const channel = supabase.channel('wallet_transactions_changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'wallet_transactions' 
+      }, (payload) => {
+        const newRecord = payload.new as any;
+        const oldRecord = payload.old as any;
+        
+        if (currentUser.role === 'admin') {
+          if (newRecord && newRecord.type === 'top_up' && newRecord.status === 'Pendiente') {
+            setPendingTopUps(prev => {
+              if (prev.find(t => t.id === newRecord.id)) return prev;
+              return [...prev, newRecord];
+            });
+          }
+          if (newRecord && newRecord.type === 'top_up' && newRecord.status !== 'Pendiente') {
+             setPendingTopUps(prev => prev.filter(t => t.id !== newRecord.id));
+          }
+          if (payload.eventType === 'DELETE' && oldRecord) {
+             setPendingTopUps(prev => prev.filter(t => t.id !== oldRecord.id));
+          }
+        } else {
+          if (payload.eventType === 'UPDATE' && 
+              newRecord.user_id === currentUser.uid && 
+              newRecord.type === 'top_up' && 
+              newRecord.status === 'Aprobado' &&
+              oldRecord.status !== 'Aprobado') {
+            showToast(`✅ ¡Tu recarga ha sido Aprobada! Tu saldo ha sido acreditado.`);
+          }
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentUser]);
 
   const fetchInitialData = async () => {
     const { data: prodData } = await supabase.from('products').select('*').eq('active', true).order('price_usd', { ascending: true });
@@ -145,15 +201,15 @@ export default function App() {
   };
   
   const fetchAllUsersForAdmin = async () => {
-    const { data } = await supabase.from('profiles').select('*');
+    const { data } = await supabase.rpc('get_all_users_with_balance');
     if (data) {
-      setRegisteredUsers(data.map(p => ({
+      setRegisteredUsers(data.map((p: any) => ({
         uid: p.id,
         name: p.name || 'Usuario',
         email: p.email,
         avatar: p.avatar_url,
         role: p.role as any,
-        walletBalanceUSD: p.wallet_balance_usd,
+        walletBalanceUSD: Number(p.wallet_balance_usd || 0),
         playerIdDefault: p.player_id_default,
         gamerTag: p.gamer_tag,
         phone: p.phone,
@@ -168,6 +224,15 @@ export default function App() {
       showToast(`❌ Error cargando perfil: ${error.message}`);
       return;
     }
+
+    // Fetch computed balance
+    const { data: balanceData, error: balanceError } = await supabase.rpc('get_wallet_balance', { p_user_id: userId });
+    const computedBalance = balanceError ? 0 : Number(balanceData || 0);
+
+    // Fetch wallet history
+    const { data: historyData } = await supabase.from('wallet_transactions').select('*').eq('user_id', userId);
+    if (historyData) setWalletHistory(historyData);
+
     if (data) {
       const userProfile: UserProfile = {
         uid: data.id,
@@ -175,7 +240,7 @@ export default function App() {
         email: data.email,
         avatar: data.avatar_url || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
         role: data.role as 'client' | 'admin',
-        walletBalanceUSD: data.wallet_balance_usd || 0,
+        walletBalanceUSD: computedBalance,
         playerIdDefault: data.player_id_default,
         gamerTag: data.gamer_tag,
         phone: data.phone,
@@ -284,66 +349,26 @@ export default function App() {
     setSelectedProductForOrder(product);
   };
 
-  const handleCreateOrder = async (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>, receiptFile?: File) => {
+  const handleCreateOrder = async (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>) => {
     if (!currentUser) return;
-    const isPaidWithWallet = newOrderData.paymentMethod === 'wallet_balance';
-    let uploadedReceiptPath = null;
-
-    if (receiptFile) {
-      const fileExt = receiptFile.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${currentUser.uid}/${fileName}`;
-      const { error: uploadError } = await supabase.storage.from('receipts').upload(filePath, receiptFile);
-      if (uploadError) {
-        showToast(`❌ Error al subir comprobante: ${uploadError.message}`);
-        return;
-      }
-      uploadedReceiptPath = filePath;
+    
+    const { error } = await supabase.rpc('purchase_with_wallet_v2', {
+      p_player_id: newOrderData.playerId,
+      p_player_tag: newOrderData.playerTag || '',
+      p_product_id: newOrderData.productId,
+      p_product_name_snapshot: newOrderData.productName,
+      p_diamonds_total: newOrderData.diamondsTotal,
+      p_price_usd: newOrderData.priceUSD,
+    });
+    
+    if (error) {
+      showToast(`❌ Error de billetera: ${error.message}`);
+      return;
     }
-
-    if (isPaidWithWallet) {
-      const { error } = await supabase.rpc('purchase_with_wallet', {
-        p_player_id: newOrderData.playerId,
-        p_player_tag: newOrderData.playerTag || '',
-        p_product_id: newOrderData.productId,
-        p_product_name_snapshot: newOrderData.productName,
-        p_diamonds_total: newOrderData.diamondsTotal,
-        p_price_usd: newOrderData.priceUSD,
-        p_is_wallet_top_up: false
-      });
-      if (error) {
-        showToast(`❌ Error de billetera: ${error.message}`);
-        return;
-      }
-      showToast(`⚡ ¡Pedido pagado con Saldo Billetera! Tu recarga de diamantes está en proceso.`);
-    } else {
-      const { data: insertedOrder, error: insertError } = await supabase.from('orders').insert({
-        user_id: currentUser.uid,
-        player_id: newOrderData.playerId,
-        player_tag: newOrderData.playerTag,
-        product_id: newOrderData.productId,
-        product_name_snapshot: newOrderData.productName,
-        diamonds_total: newOrderData.diamondsTotal,
-        price_usd: newOrderData.priceUSD,
-        receipt_storage_path: uploadedReceiptPath,
-        status: 'Pendiente',
-        payment_method: 'bank_transfer',
-        is_wallet_top_up: false,
-      }).select().single();
-      
-      if (insertError) {
-        showToast(`❌ Error al registrar pedido: ${insertError.message}`);
-        return;
-      }
-      await supabase.from('order_status_history').insert({
-        order_id: insertedOrder.id,
-        status: 'Pendiente',
-        note: 'Pedido registrado por cliente con comprobante bancario. En espera de verificación.'
-      });
-      showToast(`🎉 ¡Pedido registrado exitosamente!`);
-    }
-
-    if (isPaidWithWallet) await fetchUserProfile(currentUser.uid);
+    
+    showToast(`⚡ ¡Pedido pagado con Saldo Billetera! Tu recarga de diamantes está en proceso.`);
+    
+    await fetchUserProfile(currentUser.uid);
     await fetchOrders(currentUser.role, currentUser.uid); 
     setSelectedProductForOrder(null);
     window.location.hash = '#orders';
@@ -365,7 +390,7 @@ export default function App() {
     fetchOrders(currentUser!.role, currentUser!.uid);
   };
 
-  const handleSubmitTopUpOrder = async (topUpOrder: Order, receiptFile?: File) => {
+  const handleSubmitTopUpOrder = async (amount: number, bankName: string, receiptFile: File) => {
     if (!currentUser) return;
     let uploadedReceiptPath = null;
     if (receiptFile) {
@@ -379,31 +404,29 @@ export default function App() {
       uploadedReceiptPath = filePath;
     }
 
-    const { data: insertedOrder, error } = await supabase.from('orders').insert({
+    const { error } = await supabase.from('wallet_transactions').insert({
       user_id: currentUser.uid,
-      player_id: currentUser.playerIdDefault || 'N/A',
-      product_name_snapshot: topUpOrder.productName,
-      diamonds_total: 0,
-      price_usd: topUpOrder.priceUSD,
-      receipt_storage_path: uploadedReceiptPath,
+      amount: amount,
+      type: 'top_up',
       status: 'Pendiente',
-      payment_method: 'bank_transfer',
-      is_wallet_top_up: true,
-    }).select().single();
-    
-    if (error) {
-      showToast(`❌ Error: ${error.message}`);
-      return;
-    }
-    
-    await supabase.from('order_status_history').insert({
-      order_id: insertedOrder.id,
-      status: 'Pendiente',
-      note: 'Solicitud de recarga de saldo. En espera de verificación.'
+      receipt_url: uploadedReceiptPath,
     });
     
-    showToast(`📩 Solicitud de recarga por $${topUpOrder.priceUSD.toFixed(2)} USD registrada.`);
-    fetchOrders(currentUser.role, currentUser.uid);
+    if (error) {
+      showToast(`❌ Error al registrar recarga: ${error.message}`);
+      return;
+    }
+    showToast(`🎉 ¡Solicitud de recarga enviada! Pendiente de verificación.`);
+    fetchUserProfile(currentUser.uid); // Refresh balance/history
+  };
+
+  const handleUpdateTopUpStatus = async (transactionId: string, newStatus: 'Aprobado' | 'Rechazado') => {
+    const { error } = await supabase.from('wallet_transactions').update({ status: newStatus }).eq('id', transactionId);
+    if (error) {
+      showToast(`❌ Error al actualizar recarga: ${error.message}`);
+      return;
+    }
+    showToast(`Recarga actualizada a "${newStatus}"`);
   };
 
   const activePendingOrdersCount = orders.filter((o) => o.status === 'Pendiente' || o.status === 'En proceso').length;
@@ -417,7 +440,7 @@ export default function App() {
         </div>
       )}
       {activeTab !== 'login' && (
-        <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} />
+        <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} pendingTopUps={pendingTopUps} />
       )}
       <main className="flex-1">
         {activeTab === 'catalog' && (
@@ -432,7 +455,7 @@ export default function App() {
           <LoginPage onLoginGoogle={handleLoginGoogle} onLoginSuccess={() => {}} onRegisterUser={() => {}} redirectReason={loginRedirectReason} onBackToCatalog={() => window.location.hash = '#catalog'} registeredUsers={registeredUsers} />
         )}
         {activeTab === 'wallet' && currentUser && (
-          <WalletView currentUser={currentUser} bankAccounts={bankAccounts} userOrders={orders.filter(o => o.userEmail === currentUser.email)} onTopUpInstant={() => {}} onSubmitTopUpOrder={handleSubmitTopUpOrder} onNavigateToCatalog={() => window.location.hash = '#catalog'} />
+          <WalletView currentUser={currentUser} bankAccounts={bankAccounts} walletHistory={walletHistory} onSubmitTopUpOrder={handleSubmitTopUpOrder} onNavigateToCatalog={() => window.location.hash = '#catalog'} />
         )}
         {activeTab === 'orders' && (
           <MyOrders orders={orders} currentUserEmail={currentUser?.email} onOpenWhatsAppSupport={() => {}} />
@@ -441,13 +464,32 @@ export default function App() {
           <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
         )}
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
-          <AdminPanel orders={orders} products={products} emailConfig={emailConfig} registeredUsers={registeredUsers} activeSubTab={adminSubTab} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={() => {}} onUpdateProduct={() => {}} onDeleteProduct={() => {}} onUpdateEmailConfig={setEmailConfig} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
+          <AdminPanel orders={orders} products={products} emailConfig={emailConfig} registeredUsers={registeredUsers} activeSubTab={adminSubTab} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={() => {}} onUpdateProduct={() => {}} onDeleteProduct={() => {}} onUpdateEmailConfig={setEmailConfig} pendingTopUps={pendingTopUps} onUpdateTopUpStatus={handleUpdateTopUpStatus} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
             const user = registeredUsers.find(u => u.email === email);
             if (user) {
-              const newBalance = isSetExact ? amount : (user.walletBalanceUSD || 0) + amount;
-              await supabase.from('profiles').update({ wallet_balance_usd: newBalance }).eq('id', user.uid);
-              fetchAllUsersForAdmin();
-              showToast(`💰 Saldo de ${email} actualizado a $${newBalance}`);
+              let adjustment = amount;
+              if (isSetExact) {
+                const { data: balanceData } = await supabase.rpc('get_wallet_balance', { p_user_id: user.uid });
+                const currentBalance = Number(balanceData || 0);
+                adjustment = amount - currentBalance;
+              }
+              
+              if (adjustment !== 0) {
+                const { error } = await supabase.from('wallet_transactions').insert({
+                  user_id: user.uid,
+                  amount: adjustment,
+                  type: 'admin_adjustment',
+                  status: 'Aprobado',
+                  admin_note: isSetExact ? `Ajuste manual exacto a $${amount}` : `Ajuste manual de $${amount > 0 ? '+' : ''}${amount}`
+                });
+                
+                if (error) {
+                  showToast(`❌ Error al ajustar saldo: ${error.message}`);
+                } else {
+                  fetchAllUsersForAdmin();
+                  showToast(`💰 Ajuste de saldo aplicado a ${email}`);
+                }
+              }
             }
           }} />
         )}

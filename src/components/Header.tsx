@@ -31,6 +31,7 @@ interface HeaderProps {
     subTab?: 'orders' | 'catalog' | 'email' | 'wallets'
   ) => void;
   pendingOrdersCount: number;
+  pendingTopUps?: any[];
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -42,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
   adminSubTab = 'orders',
   setActiveTab,
   pendingOrdersCount,
+  pendingTopUps = [],
 }) => {
   const [showAuthMenu, setShowAuthMenu] = useState(false);
   const isAdmin = currentUser?.role === 'admin';
@@ -56,6 +58,14 @@ export const Header: React.FC<HeaderProps> = ({
           🟢 ACREDITACIÓN INSTANTÁNEA ECUADOR
         </span>
       </div>
+
+      {/* PERSISTENT ADMIN ALERT FOR PENDING WALLET TOP UPS */}
+      {isAdmin && pendingTopUps.length > 0 && (
+        <div className="bg-amber-500 text-black px-4 py-2.5 text-xs font-black uppercase flex items-center justify-center gap-3 animate-in fade-in shadow-[0_0_15px_rgba(245,158,11,0.5)] z-50">
+          <span className="w-2.5 h-2.5 rounded-full bg-black animate-ping"></span>
+          <span>¡ALERTA! Tienes {pendingTopUps.length} solicitud(es) de recarga de billetera pendiente(s) de revisión.</span>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-1.5 sm:gap-4">

@@ -59,11 +59,27 @@ export interface UserProfile {
   email: string;
   avatar: string;
   role: 'client' | 'admin';
-  walletBalanceUSD: number;
+  // walletBalanceUSD is no longer a static column in DB. It should be calculated dynamically.
+  // We keep the property in the frontend type to hold the computed value after fetching transactions.
+  walletBalanceUSD?: number; 
   playerIdDefault?: string;
   gamerTag?: string;
   phone?: string;
   preferredBank?: string;
+}
+
+export type WalletTransactionType = 'top_up' | 'purchase' | 'refund' | 'admin_adjustment';
+export type WalletTransactionStatus = 'Pendiente' | 'Aprobado' | 'Rechazado';
+
+export interface WalletTransaction {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: WalletTransactionType;
+  status: WalletTransactionStatus;
+  receipt_url?: string;
+  admin_note?: string;
+  created_at: string;
 }
 
 export interface EmailAlertConfig {
