@@ -375,7 +375,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer shadow-xl ${
               isSavedSuccess
                 ? 'bg-emerald-400 text-black shadow-[0_0_30px_rgba(52,211,153,0.5)]'
-                : 'bg-white hover:bg-zinc-200 text-black shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:shadow-[0_0_35px_rgba(255,255,255,0.3)] active:scale-95'
+                : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-95'
             }`}
           >
             {isSavedSuccess ? (
