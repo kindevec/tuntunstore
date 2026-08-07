@@ -126,11 +126,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         <div className="md:col-span-4 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
-          <div className="relative mb-5 group/avatarbtn">
+          <div className="relative mb-5">
             <img
               src={avatar}
               alt={name}
-              className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover ring-4 ring-emerald-500/30 shadow-2xl transition-transform group-hover/avatarbtn:scale-105"
+              className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover ring-4 ring-emerald-500/30 shadow-2xl transition-transform hover:scale-105"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = PRESET_AVATARS[0].url;
               }}
@@ -138,26 +138,29 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <span className="absolute -bottom-3 -right-3 bg-emerald-500 text-black p-2 rounded-xl text-xs font-black shadow-lg pointer-events-none z-10">
               <Sparkles className="w-5 h-5" />
             </span>
-            <button
-              type="button"
-              onClick={() => setIsAvatarStudioOpen(!isAvatarStudioOpen)}
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-2xl opacity-0 group-hover/avatarbtn:opacity-100 transition-opacity backdrop-blur-sm cursor-pointer border border-white/10"
-            >
-              <ImageIcon className="w-6 h-6 text-white mb-1" />
-              <span className="text-white text-[10px] font-black uppercase tracking-wider">Editar Avatar</span>
-            </button>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black text-white line-clamp-1">{currentUser.name}</h2>
           <p className="text-xs text-zinc-400 font-mono mt-1 mb-4">{currentUser.email}</p>
           
-          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-            currentUser.role === 'admin' 
-              ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' 
-              : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
-          }`}>
-            {currentUser.role === 'admin' ? '⭐ Administrador' : 'Cliente Verificado'}
-          </span>
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+              currentUser.role === 'admin' 
+                ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' 
+                : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+            }`}>
+              {currentUser.role === 'admin' ? '⭐ Administrador' : 'Cliente Verificado'}
+            </span>
+            
+            <button
+              type="button"
+              onClick={() => setIsAvatarStudioOpen(!isAvatarStudioOpen)}
+              className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/20 hover:border-indigo-400 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              Editar Avatar
+            </button>
+          </div>
         </div>
 
         {/* BENTO 2: Wallet Banner (col-8) */}
