@@ -381,38 +381,41 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
       {/* Wallet Banner Card (Visible for clients) */}
       {!isAdmin && onOpenWalletModal && (
-        <div className="hidden sm:flex bg-gradient-to-r from-emerald-950/80 via-black to-emerald-950/80 p-4 rounded-2xl border border-emerald-500/30 items-center justify-between gap-4 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40 shrink-0">
+        <div 
+          onClick={onOpenWalletModal}
+          className="bg-gradient-to-r from-emerald-950/80 via-black to-emerald-950/80 p-4 rounded-2xl border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_0_20px_rgba(16,185,129,0.15)] cursor-pointer hover:border-emerald-500/60 hover:shadow-[0_0_25px_rgba(16,185,129,0.25)] transition-all group"
+        >
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40 shrink-0 group-hover:scale-105 group-hover:bg-emerald-500 group-hover:text-black transition-all">
               <Wallet className="w-6 h-6" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-white uppercase">Mi Billetera Virtual TunTun</span>
-                <span className="text-[10px] bg-emerald-500 text-black font-black px-2 py-0.5 rounded-full uppercase">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] sm:text-xs font-black text-white uppercase">Mi Billetera Virtual TunTun</span>
+                <span className="text-[9px] sm:text-[10px] bg-emerald-500 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">
                   Acreditación Inmediata ⚡
                 </span>
               </div>
-              <p className="text-xs text-zinc-400 font-medium">
+              <p className="text-[10px] sm:text-xs text-zinc-400 font-medium mt-1 leading-tight">
                 Paga tus recargas de diamantes al instante usando tu saldo depositado sin esperar verificación bancaria.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-white/10 pt-3 sm:pt-0">
-            <div className="text-left sm:text-right">
+            <div className="text-left sm:text-right flex-1 sm:flex-initial">
               <span className="text-[10px] text-emerald-400/80 uppercase font-black block">Saldo Disponible</span>
               <span className="text-xl font-black text-emerald-300 font-mono">
                 ${(currentUser?.walletBalanceUSD ?? 0).toFixed(2)} USD
               </span>
             </div>
-            <button
-              onClick={onOpenWalletModal}
-              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all cursor-pointer whitespace-nowrap"
+            <div
+              className="px-4 py-2.5 rounded-xl bg-emerald-500 text-black font-black text-[11px] sm:text-xs uppercase flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all whitespace-nowrap shrink-0"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Recargar Saldo</span>
-            </button>
+              <span className="hidden sm:inline">Recargar Saldo</span>
+              <span className="sm:hidden">Recargar</span>
+            </div>
           </div>
         </div>
       )}
