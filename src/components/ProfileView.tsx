@@ -104,108 +104,158 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   };
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto animate-in fade-in duration-300">
       
-      {/* Page Title & Breadcrumb Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-900/30 pb-6">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold uppercase tracking-wider mb-1">
-            <span>Página Independiente</span>
-            <span>•</span>
-            <span>Cuenta Verificada</span>
-          </div>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <User className="w-8 h-8 text-emerald-400" />
-            Mi Perfil de Usuario
-          </h1>
-          <p className="text-sm text-zinc-400 font-medium mt-1">
-            Administra tus datos personales, ID predeterminado de Free Fire y preferencias de pago.
-          </p>
+      {/* Page Title */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-emerald-400 font-bold uppercase tracking-wider mb-2">
+          <span>Página Independiente</span>
+          <span>•</span>
+          <span>Cuenta Verificada</span>
         </div>
-
-        {/* Balance Card Banner */}
-        <div 
-          onClick={onNavigateToWallet}
-          className="bg-gradient-to-r from-emerald-950/80 to-zinc-900 p-4 rounded-2xl border border-emerald-500/40 hover:border-emerald-400 flex items-center justify-between gap-4 cursor-pointer group shadow-[0_0_20px_rgba(16,185,129,0.15)] transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 group-hover:scale-110 transition-transform">
-              <Wallet className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-[10px] text-emerald-400 font-black uppercase tracking-wider">Billetera USD</p>
-              <p className="text-lg font-black text-emerald-300">
-                ${(currentUser.walletBalanceUSD || 0).toFixed(2)} USD
-              </p>
-            </div>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-emerald-500 text-black flex items-center justify-center group-hover:translate-x-1 transition-transform">
-            <ArrowRight className="w-4 h-4 stroke-[3]" />
-          </div>
-        </div>
+        <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight flex items-center gap-3">
+          Mi Perfil
+        </h1>
+        <p className="text-sm text-zinc-400 font-medium mt-2">
+          Administra tu identidad digital, datos de Free Fire y preferencias de seguridad.
+        </p>
       </div>
 
-      {/* Main Profile Layout Card */}
-      <div className="bg-zinc-900 border border-emerald-500/30 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-5">
         
-        {/* Profile Identity Banner */}
-        <div className="bg-gradient-to-r from-emerald-950 via-zinc-900 to-cyan-950 p-6 sm:p-8 border-b border-white/10 flex flex-col sm:flex-row items-center gap-6">
-          <div className="relative group">
+        {/* BENTO 1: Identity Card (col-4) */}
+        <div className="md:col-span-4 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <div className="relative mb-5">
             <img
               src={useCustomUrl && customAvatarUrl ? customAvatarUrl : avatar}
               alt={name}
-              className="w-24 h-24 rounded-2xl object-cover ring-4 ring-emerald-500/40 shadow-2xl"
+              className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover ring-4 ring-emerald-500/30 shadow-2xl transition-transform group-hover:scale-105"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = PRESET_AVATARS[0].url;
               }}
             />
-            <span className="absolute -bottom-2 -right-2 bg-emerald-500 text-black p-1.5 rounded-lg text-xs font-black shadow-lg">
-              <Sparkles className="w-4 h-4" />
+            <span className="absolute -bottom-3 -right-3 bg-emerald-500 text-black p-2 rounded-xl text-xs font-black shadow-lg">
+              <Sparkles className="w-5 h-5" />
             </span>
           </div>
 
-          <div className="text-center sm:text-left space-y-1.5 flex-1">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h2 className="text-2xl font-black text-white">{currentUser.name}</h2>
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                currentUser.role === 'admin' 
-                  ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' 
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-              }`}>
-                {currentUser.role === 'admin' ? '⭐ Administrador' : 'Cliente Verificado'}
-              </span>
-            </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white line-clamp-1">{currentUser.name}</h2>
+          <p className="text-xs text-zinc-400 font-mono mt-1 mb-4">{currentUser.email}</p>
+          
+          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+            currentUser.role === 'admin' 
+              ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' 
+              : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+          }`}>
+            {currentUser.role === 'admin' ? '⭐ Administrador' : 'Cliente Verificado'}
+          </span>
+        </div>
 
-            <p className="text-xs text-zinc-400 font-mono">{currentUser.email}</p>
-
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-1 text-xs">
-              {playerIdDefault && (
-                <span className="bg-zinc-800/60 px-3 py-1 rounded-xl border border-amber-500/30 text-amber-300 font-mono font-bold flex items-center gap-1.5">
-                  <Gamepad2 className="w-3.5 h-3.5 text-amber-400" />
-                  ID FF: {playerIdDefault}
-                </span>
-              )}
-              {gamerTag && (
-                <span className="bg-zinc-800/60 px-3 py-1 rounded-xl border border-cyan-500/30 text-cyan-300 font-semibold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                  {gamerTag}
-                </span>
-              )}
+        {/* BENTO 2: Wallet Banner (col-8) */}
+        <div 
+          onClick={onNavigateToWallet}
+          className="md:col-span-8 bg-gradient-to-br from-emerald-950/80 to-zinc-900/80 backdrop-blur-xl border border-emerald-500/30 rounded-3xl p-6 sm:p-8 flex items-center justify-between cursor-pointer group shadow-[0_0_30px_rgba(16,185,129,0.1)] hover:shadow-[0_0_40px_rgba(16,185,129,0.2)] transition-all overflow-hidden relative"
+        >
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
+          
+          <div className="flex items-center gap-5 sm:gap-6 z-10">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-black transition-all">
+              <Wallet className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
+            <div>
+              <p className="text-xs text-emerald-400 font-black uppercase tracking-wider mb-1">Billetera Virtual</p>
+              <p className="text-3xl sm:text-4xl font-black text-emerald-300 tracking-tight">
+                ${(currentUser.walletBalanceUSD || 0).toFixed(2)} USD
+              </p>
+            </div>
+          </div>
+          
+          <div className="hidden sm:flex w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 items-center justify-center group-hover:bg-emerald-500 group-hover:text-black group-hover:translate-x-2 transition-all z-10 border border-emerald-500/30">
+            <ArrowRight className="w-5 h-5 stroke-[3]" />
           </div>
         </div>
 
-        {/* Profile Edit Form */}
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+        {/* BENTO 3: Personal Data (col-6) */}
+        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg space-y-5 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
+            <User className="w-4 h-4 text-emerald-400" /> Datos Personales
+          </h3>
           
-          {/* Avatar Selector Section */}
-          <div className="space-y-3 bg-zinc-900/60 p-4 sm:p-5 rounded-2xl border border-white/5">
-            <label className="block text-xs font-black text-zinc-200 uppercase flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-emerald-400" />
-              Selecciona tu Avatar de Perfil
-            </label>
-            
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 pt-1">
+          <div>
+            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nombre Completo</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Teléfono / WhatsApp</label>
+            <input
+              type="text"
+              placeholder="Ej: 0990084680"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
+            />
+          </div>
+        </div>
+
+        {/* BENTO 4: Gaming Data (col-6) */}
+        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg space-y-5 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
+            <Gamepad2 className="w-4 h-4 text-amber-400" /> Perfil Gamer
+          </h3>
+          
+          <div>
+            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">ID de Free Fire (Predeterminado)</label>
+            <input
+              type="text"
+              placeholder="Ej: 284910293"
+              value={playerIdDefault}
+              onChange={(e) => setPlayerIdDefault(e.target.value)}
+              className="w-full bg-black/50 border border-amber-500/30 rounded-2xl px-4 py-3.5 text-sm text-amber-300 font-mono font-bold placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nickname / Gamer Tag</label>
+            <input
+              type="text"
+              placeholder="Ej: ꧁⚡PRO_GAMER⚡꧂"
+              value={gamerTag}
+              onChange={(e) => setGamerTag(e.target.value)}
+              className="w-full bg-black/50 border border-cyan-500/30 rounded-2xl px-4 py-3.5 text-sm text-cyan-300 font-semibold placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* BENTO 5: Avatar Studio (col-12) */}
+        <div className="md:col-span-12 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-indigo-400" /> Avatar Studio
+            </h3>
+            <button
+              type="button"
+              onClick={() => setUseCustomUrl(!useCustomUrl)}
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-bold bg-indigo-500/10 px-4 py-2 rounded-xl transition-colors"
+            >
+              {useCustomUrl ? '← Ver Galería Predeterminada' : '+ Usar URL Personalizada'}
+            </button>
+          </div>
+
+          {!useCustomUrl ? (
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
               {PRESET_AVATARS.map((p) => (
                 <button
                   key={p.id}
@@ -214,180 +264,116 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     setAvatar(p.url);
                     setUseCustomUrl(false);
                   }}
-                  className={`p-1.5 rounded-xl border transition-all overflow-hidden cursor-pointer ${
+                  className={`p-2 rounded-2xl border transition-all overflow-hidden cursor-pointer relative group/avatar ${
                     !useCustomUrl && avatar === p.url
-                      ? 'border-emerald-400 bg-emerald-500/20 ring-2 ring-emerald-500/50 scale-105 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                      : 'border-white/10 hover:border-white/30 opacity-70 hover:opacity-100'
+                      ? 'border-indigo-400 bg-indigo-500/10 ring-2 ring-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
+                      : 'border-white/5 bg-black/40 hover:border-white/20'
                   }`}
                 >
-                  <img src={p.url} alt={p.name} className="w-full h-14 rounded-lg object-cover" />
-                  <span className="block text-[9px] font-bold text-center text-zinc-300 mt-1 truncate">
+                  <img src={p.url} alt={p.name} className="w-full aspect-square rounded-xl object-cover" />
+                  <span className="block text-[10px] font-bold text-center text-zinc-400 mt-2 truncate group-hover/avatar:text-zinc-200 transition-colors">
                     {p.name.split(' ')[0]}
                   </span>
                 </button>
               ))}
             </div>
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setUseCustomUrl(!useCustomUrl)}
-                className="text-xs text-emerald-400 hover:underline font-bold flex items-center gap-1"
-              >
-                {useCustomUrl ? '← Usar avatares predeterminados' : '+ Ingresar URL de imagen personalizada'}
-              </button>
-
-              {useCustomUrl && (
-                <input
-                  type="url"
-                  placeholder="https://ejemplo.com/mi-foto-de-perfil.jpg"
-                  value={customAvatarUrl}
-                  onChange={(e) => setCustomAvatarUrl(e.target.value)}
-                  className="w-full mt-2 bg-zinc-800 border border-emerald-500/40 rounded-xl px-4 py-2.5 text-xs text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400"
-                />
-              )}
+          ) : (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">URL de la imagen</label>
+              <input
+                type="url"
+                placeholder="https://ejemplo.com/mi-foto.jpg"
+                value={customAvatarUrl}
+                onChange={(e) => setCustomAvatarUrl(e.target.value)}
+                className="w-full bg-black/50 border border-indigo-500/40 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+              />
             </div>
+          )}
+        </div>
+
+        {/* BENTO 6: Finance & Account (col-8) */}
+        <div className="md:col-span-8 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col justify-center space-y-6 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <div>
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-4">
+              <Building2 className="w-4 h-4 text-teal-400" /> Banco Frecuente
+            </h3>
+            <select
+              value={preferredBank}
+              onChange={(e) => setPreferredBank(e.target.value)}
+              className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/50 font-semibold cursor-pointer transition-all"
+            >
+              {PREFERRED_BANKS.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Form Fields Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-xs font-black text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
-                <User className="w-4 h-4 text-emerald-400" />
-                Nombre Completo
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400 font-semibold"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
-                <Mail className="w-4 h-4 text-emerald-400" />
-                Correo Electrónico (Google ID)
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400 font-semibold"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
-                <Gamepad2 className="w-4 h-4 text-amber-400" />
-                ID de Jugador Free Fire (Predeterminado)
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: 284910293"
-                value={playerIdDefault}
-                onChange={(e) => setPlayerIdDefault(e.target.value)}
-                className="w-full bg-zinc-800 border border-amber-500/40 rounded-xl px-4 py-3 text-sm text-amber-300 font-mono font-bold placeholder-zinc-400 focus:outline-none focus:border-amber-400"
-              />
-              <p className="text-[11px] text-zinc-500 mt-1">Este ID se ingresará automáticamente en tus pedidos de diamantes.</p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-black text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-cyan-400" />
-                Nickname / Gamer Tag
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: ꧁⚡PRO_GAMER⚡꧂"
-                value={gamerTag}
-                onChange={(e) => setGamerTag(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-cyan-300 font-semibold placeholder-zinc-400 focus:outline-none focus:border-cyan-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
-                <Phone className="w-4 h-4 text-emerald-400" />
-                Teléfono de Contacto / WhatsApp
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: 0990084680"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-emerald-400 font-semibold"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-black text-zinc-300 uppercase mb-1.5 flex items-center gap-1.5">
-                <Building2 className="w-4 h-4 text-amber-400" />
-                Banco Frecuente para Pagos
-              </label>
-              <select
-                value={preferredBank}
-                onChange={(e) => setPreferredBank(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-emerald-400 font-semibold cursor-pointer"
-              >
-                {PREFERRED_BANKS.map((b) => (
-                  <option key={b} value={b}>
-                    {b}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Account Security Info & Actions */}
-          <div className="p-4 bg-zinc-800/60 rounded-2xl border border-zinc-700 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
+          <div className="pt-2">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" /> Seguridad de Cuenta
+            </h3>
+            <div className="flex items-center gap-3 bg-black/30 p-4 rounded-2xl border border-white/5">
+              <Mail className="w-5 h-5 text-zinc-400" />
               <div>
-                <p className="text-xs font-black text-white uppercase">Estado de Seguridad de la Cuenta</p>
-                <p className="text-[11px] text-zinc-400">Protegido con verificación OAuth de Google en TunTun Store 🇪🇨.</p>
+                <p className="text-xs text-zinc-300 font-mono">{email}</p>
+                <p className="text-[10px] text-emerald-400/80 font-bold uppercase mt-0.5">Google OAuth Verificado</p>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={onLogout}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 hover:text-white font-bold text-xs uppercase flex items-center justify-center gap-2 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              Cerrar Sesión
-            </button>
           </div>
+        </div>
 
-          {/* Submit Save Button */}
-          <div className="pt-4 flex items-center justify-end border-t border-white/10">
-            <button
-              type="submit"
-              disabled={isSavedSuccess}
-              className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-xl ${
-                isSavedSuccess
-                  ? 'bg-emerald-400 text-black shadow-[0_0_25px_rgba(52,211,153,0.5)]'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-95'
-              }`}
-            >
-              {isSavedSuccess ? (
-                <>
-                  <Check className="w-5 h-5 stroke-[3]" />
-                  <span>¡Perfil Actualizado Exitosamente!</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  <span>Guardar Cambios de Perfil</span>
-                </>
-              )}
-            </button>
-          </div>
+        {/* BENTO 7: Danger Zone (col-4) */}
+        <div className="md:col-span-4 bg-rose-950/20 backdrop-blur-xl border border-rose-900/30 rounded-3xl p-6 sm:p-8 shadow-lg flex flex-col items-center justify-center relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          <LogOut className="w-10 h-10 text-rose-500/50 mb-4 group-hover:scale-110 transition-transform" />
+          <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2 text-center">
+            Sesión Activa
+          </h3>
+          <p className="text-xs text-rose-300/70 text-center mb-6">
+            Si estás en un dispositivo público, recuerda cerrar sesión.
+          </p>
+          
+          <button
+            type="button"
+            onClick={onLogout}
+            className="w-full px-4 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500 border border-rose-500/30 hover:border-rose-500 text-rose-400 hover:text-black font-black text-xs uppercase flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(244,63,94,0.4)]"
+          >
+            <LogOut className="w-4 h-4" />
+            Cerrar Sesión
+          </button>
+        </div>
 
-        </form>
-      </div>
+        {/* BENTO 8: Submit Area (col-12) */}
+        <div className="md:col-span-12 mt-4 flex justify-end">
+          <button
+            type="submit"
+            disabled={isSavedSuccess}
+            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer shadow-xl ${
+              isSavedSuccess
+                ? 'bg-emerald-400 text-black shadow-[0_0_30px_rgba(52,211,153,0.5)]'
+                : 'bg-white hover:bg-zinc-200 text-black shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:shadow-[0_0_35px_rgba(255,255,255,0.3)] active:scale-95'
+            }`}
+          >
+            {isSavedSuccess ? (
+              <>
+                <Check className="w-5 h-5 stroke-[3]" />
+                <span>¡Guardado con Éxito!</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                <span>Guardar Cambios</span>
+              </>
+            )}
+          </button>
+        </div>
+
+      </form>
     </div>
   );
 };
