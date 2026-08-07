@@ -1188,7 +1188,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
                           {topUp.receipt_url && (
                             <button
-                              onClick={() => setSelectedReceiptUrl(`https://nizsowkikjovtdzzwgnm.supabase.co/storage/v1/object/public/receipts/${topUp.receipt_url}`)}
+                              onClick={() => {
+                                const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co';
+                                setSelectedReceiptUrl(`${baseUrl}/storage/v1/object/public/receipts/${topUp.receipt_url}`);
+                              }}
                               className="px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-black rounded-xl uppercase flex items-center gap-2 border border-blue-500/30 transition-colors w-full sm:w-auto justify-center"
                             >
                               <Eye className="w-4 h-4" /> Ver Baucher
