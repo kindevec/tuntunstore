@@ -85,7 +85,7 @@ export default function App() {
         });
     }
 
-    const channel = supabase.channel('wallet_transactions_changes')
+    const channel = supabase.channel('global_realtime_changes')
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
@@ -94,6 +94,7 @@ export default function App() {
         const newRecord = payload.new as any;
         const oldRecord = payload.old as any;
         
+        // Admin Top-up Badge Logic
         if (currentUser.role === 'admin') {
           if (newRecord && newRecord.type === 'top_up' && newRecord.status === 'Pendiente') {
             setPendingTopUps(prev => {
@@ -107,15 +108,49 @@ export default function App() {
           if (payload.eventType === 'DELETE' && oldRecord) {
              setPendingTopUps(prev => prev.filter(t => t.id !== oldRecord.id));
           }
-        } else {
+          
+          // Refresh user list for admin if a transaction goes through
+          if (newRecord && newRecord.status === 'Aprobado') {
+             fetchAllUsersForAdmin();
+          }
+        } 
+        
+        // Client Logic
+        if (newRecord && newRecord.user_id === currentUser.uid) {
+          // If a top-up was approved, show a toast
           if (payload.eventType === 'UPDATE' && 
-              newRecord.user_id === currentUser.uid && 
               newRecord.type === 'top_up' && 
               newRecord.status === 'Aprobado' &&
-              oldRecord.status !== 'Aprobado') {
+              oldRecord && oldRecord.status !== 'Aprobado') {
             showToast(`✅ ¡Tu recarga ha sido Aprobada! Tu saldo ha sido acreditado.`);
           }
+          // Refresh user profile to get new balance and history
+          fetchUserProfile(currentUser.uid);
         }
+      })
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'orders' 
+      }, (payload) => {
+        const newRecord = payload.new as any;
+        
+        if (currentUser.role === 'admin') {
+          fetchOrders('admin', currentUser.uid);
+        } else {
+          // Si es un cliente y la orden es suya, actualizar
+          if (newRecord && newRecord.user_id === currentUser.uid) {
+             fetchOrders('client', currentUser.uid);
+          }
+        }
+      })
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'products' 
+      }, () => {
+        // Al actualizar, crear o borrar productos, refrescar el catálogo
+        fetchInitialData();
       })
       .subscribe();
 
