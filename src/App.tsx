@@ -383,6 +383,7 @@ export default function App() {
     updateCurrentActiveUser(updatedProfile);
     const { error } = await supabase.from('profiles').update({
       name: updatedProfile.name,
+      avatar_url: updatedProfile.avatar,
       player_id_default: updatedProfile.playerIdDefault || null,
       gamer_tag: updatedProfile.gamerTag || null,
       phone: updatedProfile.phone || null,
