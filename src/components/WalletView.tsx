@@ -66,8 +66,8 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
   const handleBankTopUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (finalAmount <= 0) {
-      setErrorMessage('Ingresa un monto válido mayor a 0.');
+    if (finalAmount < 1) {
+      setErrorMessage('El monto mínimo de recarga es de $1 USD.');
       return;
     }
     if (!receiptFile || !selectedBank) {
@@ -295,13 +295,15 @@ export const WalletView: React.FC<WalletViewProps> = ({
                 {selectedBank ? (
                   <>
                     <div>
-                      <p className="text-[10px] text-zinc-400 uppercase font-black mb-1">Banco Seleccionado</p>
+                      <p className="text-[10px] text-zinc-400 uppercase font-black mb-1">
+                        {selectedBank.notes || 'Banco Seleccionado'}
+                      </p>
                       <p className="font-black text-lg text-white uppercase">{selectedBank.bankName}</p>
                     </div>
 
                     <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-zinc-500 uppercase font-black block">Número de Cuenta</span>
+                        <span className="text-[10px] text-zinc-500 uppercase font-black block">Número de Cuenta / ID</span>
                         <span className="font-mono text-base font-black text-white">{selectedBank.accountNumber}</span>
                       </div>
                       <button
@@ -324,6 +326,21 @@ export const WalletView: React.FC<WalletViewProps> = ({
                         {copiedField === 'holder' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                       </button>
                     </div>
+
+                    {selectedBank.holderId && (
+                      <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+                        <div>
+                          <span className="text-[10px] text-zinc-500 uppercase font-black block">Cédula / Correo (Binance)</span>
+                          <span className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-none">{selectedBank.holderId}</span>
+                        </div>
+                        <button
+                          onClick={() => handleCopy(selectedBank.holderId, 'holderId')}
+                          className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
+                        >
+                          {copiedField === 'holderId' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="py-8 text-center">

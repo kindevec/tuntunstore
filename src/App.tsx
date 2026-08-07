@@ -172,19 +172,40 @@ export default function App() {
       })));
     }
     
-    const { data: bankData } = await supabase.from('bank_accounts').select('*').eq('active', true);
-    if (bankData) {
-      setBankAccounts(bankData.map(b => ({
-        id: b.id,
-        bankName: b.bank_name,
-        accountType: b.account_type,
-        accountNumber: b.account_number,
-        holderName: b.holder_name,
-        holderId: b.holder_id,
-        email: b.email,
-        active: b.active
-      })));
-    }
+    // Hardcoded official bank accounts for Ecuador and Exterior
+    const officialBanks: BankAccount[] = [
+      {
+        id: 'bg-1',
+        bankName: 'Banco Guayaquil',
+        accountType: 'Ahorro',
+        accountNumber: '0023309772',
+        holderName: 'Betsy Cruz Villacreses',
+        holderId: '0954637872',
+        logoColor: 'bg-rose-600',
+        notes: 'Método de pago para Ecuador 🇪🇨'
+      },
+      {
+        id: 'bp-1',
+        bankName: 'Banco Pichincha',
+        accountType: 'Ahorro',
+        accountNumber: '2214495881',
+        holderName: 'Betsy Cruz Villacreses',
+        holderId: '0954637872',
+        logoColor: 'bg-yellow-500',
+        notes: 'Método de pago para Ecuador 🇪🇨'
+      },
+      {
+        id: 'binance-1',
+        bankName: 'Binance (USDT)',
+        accountType: 'Binance Pay ID / Email',
+        accountNumber: '1149560568',
+        holderName: 'Betsy Cruz Villacreses',
+        holderId: 'cruzbetsy340@gmail.com',
+        logoColor: 'bg-yellow-400',
+        notes: 'Método de pago exterior 🌐'
+      }
+    ];
+    setBankAccounts(officialBanks);
   };
 
   const fetchOrders = async (userRole: string, userId: string) => {
@@ -530,7 +551,7 @@ export default function App() {
       </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
       {currentUser?.role !== 'admin' && activeTab !== 'login' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
-      {activeTab !== 'login' && activeTab !== 'catalog' && activeTab !== 'orders' && activeTab !== 'wallet' && <Footer onSelectTab={handleSelectTab} />}
+      {activeTab !== 'login' && activeTab !== 'orders' && activeTab !== 'wallet' && <Footer onSelectTab={handleSelectTab} />}
       {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
     </div>
   );

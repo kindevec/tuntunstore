@@ -37,7 +37,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
   const finalAmount = customAmount ? parseFloat(customAmount) || 0 : selectedAmount;
 
   const handleInstantTopUp = () => {
-    if (finalAmount <= 0) return;
+    if (finalAmount < 1) return;
     onTopUpInstant(finalAmount);
     setIsSuccess(true);
     setTimeout(() => {
@@ -48,7 +48,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
   const handleBankTopUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (finalAmount <= 0 || !receiptImage) return;
+    if (finalAmount < 1 || !receiptImage) return;
 
     const now = new Date();
     const dateStr = now.toISOString().replace('T', ' ').substring(0, 16);
@@ -263,7 +263,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
                     <button
                       type="button"
                       onClick={handleInstantTopUp}
-                      disabled={isSuccess || finalAmount <= 0}
+                      disabled={isSuccess || finalAmount < 1}
                       className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all cursor-pointer"
                     >
                       {isSuccess ? (
@@ -336,7 +336,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({
 
                     <button
                       type="submit"
-                      disabled={isSuccess || !receiptImage || finalAmount <= 0}
+                      disabled={isSuccess || !receiptImage || finalAmount < 1}
                       className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all cursor-pointer disabled:opacity-50"
                     >
                       {isSuccess ? (
