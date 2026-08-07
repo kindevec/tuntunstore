@@ -15,7 +15,8 @@ import {
   LogIn,
   Clock,
   Mail,
-  DollarSign
+  DollarSign,
+  Bell
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -138,14 +139,16 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Balance Badge Pill or Admin Mode Indicator */}
             {isAdmin ? (
               <button
-                onClick={() => setActiveTab('admin', 'wallets')}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-950/80 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] transition-all cursor-pointer"
-                title="Ir a Gestión de Billeteras y Usuarios"
+                onClick={() => setActiveTab('admin', 'orders')}
+                className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] transition-all cursor-pointer relative group"
+                title="Notificaciones y Pedidos"
               >
-                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider hidden xs:inline">
-                  PANEL ADMIN
-                </span>
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0 group-hover:rotate-12 transition-transform" />
+                {pendingOrdersCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-amber-400 text-black font-black text-[9px] sm:text-[10px] flex items-center justify-center rounded-full shadow-sm">
+                    {pendingOrdersCount}
+                  </span>
+                )}
               </button>
             ) : currentUser ? (
               <button

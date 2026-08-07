@@ -20,19 +20,21 @@ interface WhatsAppButtonProps {
 export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, hasBottomNav = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [userQuery, setUserQuery] = useState('');
+  const [selectedOption, setSelectedOption] = useState<'id' | 'bank' | null>(null);
 
   const defaultPhone = '593968729952'; // Ecuador phone format +593 96 872 9952
   const finalMsg = userQuery || customMessage || '¡Hola TunTun Store! Quisiera realizar una consulta sobre una recarga de diamantes.';
 
-  const handleOpenWhatsApp = () => {
-    const encoded = encodeURIComponent(finalMsg);
+  const handleOpenWhatsApp = (overrideMsg?: string) => {
+    const msgToEncode = overrideMsg || finalMsg;
+    const encoded = encodeURIComponent(msgToEncode);
     window.open(`https://wa.me/${defaultPhone}?text=${encoded}`, '_blank');
   };
 
   return (
     <div
       id="whatsapp-floating-widget"
-      className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-5'} md:bottom-6 right-4 md:right-6 z-40 transition-all duration-300`}
+      className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-5'} md:bottom-6 right-4 md:right-6 z-40 transition-all duration-300 flex flex-col items-end`}
     >
       
       {/* Expanded Quick Chat Drawer */}
@@ -72,27 +74,41 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
           <div className="space-y-1.5 text-xs">
             <button
               onClick={() => {
+                setSelectedOption('id');
                 setUserQuery('¡Hola TunTun Store! Necesito ayuda para ingresar mi ID de Free Fire.');
               }}
-              className="w-full text-left p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-[11px] font-bold uppercase transition-colors border border-white/5"
+              className={`w-full text-left p-2.5 rounded-xl text-[11px] font-bold uppercase transition-all border ${selectedOption === 'id' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border-white/5'}`}
             >
               ❓ ¿Cómo encuentro mi ID de juego?
             </button>
+            {selectedOption === 'id' && (
+              <div className="p-2.5 bg-black rounded-lg border border-emerald-500/20 text-[10.5px] text-zinc-400 font-medium animate-in fade-in zoom-in-95 leading-relaxed">
+                <strong className="text-emerald-400 block mb-0.5">Respuesta rápida:</strong>
+                Ve a tu perfil en Free Fire, toca el ícono de copiar junto a tu número de ID (debajo de tu nombre). Si aún tienes dudas, haz clic abajo en "Abrir WhatsApp Directo" para ayudarte personalmente.
+              </div>
+            )}
 
             <button
               onClick={() => {
+                setSelectedOption('bank');
                 setUserQuery('¡Hola TunTun Store! Quisiera confirmar el número de cuenta de Banco Pichincha.');
               }}
-              className="w-full text-left p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-[11px] font-bold uppercase transition-colors border border-white/5"
+              className={`w-full text-left p-2.5 rounded-xl text-[11px] font-bold uppercase transition-all border ${selectedOption === 'bank' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border-white/5'}`}
             >
               🏦 Confirmar cuentas bancarias
             </button>
+            {selectedOption === 'bank' && (
+              <div className="p-2.5 bg-black rounded-lg border border-emerald-500/20 text-[10.5px] text-zinc-400 font-medium animate-in fade-in zoom-in-95 leading-relaxed">
+                <strong className="text-emerald-400 block mb-0.5">Respuesta rápida:</strong>
+                Trabajamos con Banco Pichincha, Guayaquil, Mi Vecino y Produbanco. Para pasarte los datos exactos y confirmar tu depósito, haz clic abajo en "Abrir WhatsApp Directo".
+              </div>
+            )}
           </div>
 
           <div className="pt-1">
             <button
               id="btn-open-whatsapp-direct"
-              onClick={handleOpenWhatsApp}
+              onClick={() => handleOpenWhatsApp()}
               className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 cursor-pointer"
             >
               <WhatsAppIcon className="w-4 h-4" />
