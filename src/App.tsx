@@ -241,6 +241,7 @@ export default function App() {
         status: o.status,
         paymentMethod: o.payment_method,
         isWalletTopUp: o.is_wallet_top_up,
+        redemptionCode: o.redemption_code || null,
         statusHistory: (o.order_status_history || []).map((h: any) => ({
           status: h.status,
           timestamp: h.created_at,
@@ -403,7 +404,7 @@ export default function App() {
   const handleCreateOrder = async (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>) => {
     if (!currentUser) return;
     
-    const { error } = await supabase.rpc('purchase_with_wallet_v2', {
+    const { data, error } = await supabase.rpc('purchase_with_wallet_v2', {
       p_player_id: newOrderData.playerId,
       p_player_tag: newOrderData.playerTag || '',
       p_product_id: newOrderData.productId,
@@ -417,7 +418,12 @@ export default function App() {
       return;
     }
     
-    showToast(`⚡ ¡Pedido pagado con Saldo Billetera! Tu recarga de diamantes está en proceso.`);
+    const result = data as any;
+    if (result?.has_code) {
+      showToast(`🎉 ¡Compra completada! Tu código de recarga está disponible en "Mis Pedidos".`);
+    } else {
+      showToast(`⚡ ¡Pedido registrado! Recibirás tu código pronto.`);
+    }
     
     await fetchUserProfile(currentUser.uid);
     await fetchOrders(currentUser.role, currentUser.uid); 

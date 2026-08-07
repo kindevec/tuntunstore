@@ -30,6 +30,8 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [viewingReceiptUrl, setViewingReceiptUrl] = useState<string | null>(null);
+  const [revealedCodes, setRevealedCodes] = useState<Record<string, boolean>>({});
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
   const filteredOrders = orders.filter((o) => {
     if (statusFilter !== 'all' && o.status !== statusFilter) return false;
@@ -155,6 +157,47 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                         {copiedId === order.playerId ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                       </button>
                     </div>
+
+                    {/* Código de Recarga */}
+                    {order.redemptionCode && (
+                      <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="text-[10px] text-amber-400 font-black uppercase tracking-wider mb-1">🔑 Código de Recarga</p>
+                            <p className={`font-mono font-bold text-sm ${revealedCodes[order.id] ? 'text-amber-300' : 'text-zinc-500'}`}>
+                              {revealedCodes[order.id] ? order.redemptionCode : '•••• •••• •••• ••••'}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); setRevealedCodes(prev => ({ ...prev, [order.id]: !prev[order.id] })); }}
+                              className="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase hover:bg-amber-500/30 transition-all cursor-pointer"
+                            >
+                              {revealedCodes[order.id] ? 'Ocultar' : 'Mostrar'}
+                            </button>
+                            {revealedCodes[order.id] && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(order.redemptionCode!);
+                                  setCopiedCodeId(order.id);
+                                  setTimeout(() => setCopiedCodeId(null), 2000);
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer ${
+                                  copiedCodeId === order.id
+                                    ? 'bg-emerald-500 text-black'
+                                    : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                                }`}
+                              >
+                                {copiedCodeId === order.id ? '✓ Copiado' : 'Copiar'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-zinc-700 p-3 sm:p-4 rounded-xl border border-zinc-600/50 shadow-sm">

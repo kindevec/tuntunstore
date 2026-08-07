@@ -51,6 +51,7 @@ export interface Order {
     note?: string;
   }[];
   adminNotes?: string;
+  redemptionCode?: string;
 }
 
 export interface UserProfile {

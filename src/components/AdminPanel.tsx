@@ -24,16 +24,20 @@ import {
   Save, 
   Sparkles,
   Send,
-  AlertCircle
+  AlertCircle,
+  Code,
+  Upload,
+  Package
 } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
 interface AdminPanelProps {
   orders: Order[];
   products: Product[];
   emailConfig: EmailAlertConfig;
   registeredUsers?: UserProfile[];
-  activeSubTab?: 'orders' | 'catalog' | 'email' | 'wallets';
-  onSubTabChange?: (tab: 'orders' | 'catalog' | 'email' | 'wallets') => void;
+  activeSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes';
+  onSubTabChange?: (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes') => void;
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus, note?: string) => void;
   onAddProduct: (product: Omit<Product, 'id'>) => void;
   onUpdateProduct: (product: Product) => void;
@@ -60,10 +64,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   pendingTopUps = [],
   onUpdateTopUpStatus,
 }) => {
-  const [internalTab, setInternalTab] = useState<'orders' | 'catalog' | 'email' | 'wallets'>('orders');
+  const [internalTab, setInternalTab] = useState<'orders' | 'catalog' | 'email' | 'wallets' | 'codes'>('orders');
   const activeTab = activeSubTab || internalTab;
 
-  const handleTabChange = (tab: 'orders' | 'catalog' | 'email' | 'wallets') => {
+  const handleTabChange = (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes') => {
     setInternalTab(tab);
     if (onSubTabChange) {
       onSubTabChange(tab);
@@ -98,6 +102,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Test Email Notification Modal State
   const [showTestEmailModal, setShowTestEmailModal] = useState(false);
   const [testEmailSentSuccess, setTestEmailSentSuccess] = useState(false);
+
+  const [codesProductId, setCodesProductId] = useState<string>('');
+  const [codesText, setCodesText] = useState('');
+  const [codesStats, setCodesStats] = useState<Array<{product_id: string, product_name: string, total: number, available: number, used: number}>>([]);
+  const [isUploadingCodes, setIsUploadingCodes] = useState(false);
+
+  const fetchCodesStats = async () => {
+    const { data: statsData } = await supabase
+      .from('redemption_codes')
+      .select('product_id, is_used, products(name)')
+      .order('created_at', { ascending: false });
+    
+    if (statsData) {
+      const statsMap: Record<string, {product_id: string, product_name: string, total: number, available: number, used: number}> = {};
+      statsData.forEach((code: any) => {
+        const pid = code.product_id;
+        if (!statsMap[pid]) {
+          statsMap[pid] = { product_id: pid, product_name: code.products?.name || 'Producto', total: 0, available: 0, used: 0 };
+        }
+        statsMap[pid].total++;
+        if (code.is_used) statsMap[pid].used++;
+        else statsMap[pid].available++;
+      });
+      setCodesStats(Object.values(statsMap));
+    }
+  };
+
+  const handleUploadCodes = async () => {
+    if (!codesProductId || !codesText.trim()) return;
+    setIsUploadingCodes(true);
+    
+    const codes = codesText.split('\n').map(c => c.trim()).filter(c => c.length > 0);
+    if (codes.length === 0) {
+      setIsUploadingCodes(false);
+      return;
+    }
+    
+    const rows = codes.map(code => ({
+      product_id: codesProductId,
+      code: code,
+      is_used: false,
+    }));
+    
+    const { error } = await supabase.from('redemption_codes').insert(rows);
+    
+    if (error) {
+      alert(`Error al subir códigos: ${error.message}`);
+    } else {
+      alert(`✅ ${codes.length} códigos subidos exitosamente.`);
+      setCodesText('');
+      fetchCodesStats();
+    }
+    setIsUploadingCodes(false);
+  };
 
   // Stats Calculations
   const totalSalesUSD = orders
@@ -286,6 +344,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         >
           <Mail className="w-4 h-4" />
           <span>Alertas Correo</span>
+        </button>
+
+        <button
+          onClick={() => { handleTabChange('codes'); fetchCodesStats(); }}
+          className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
+            activeTab === 'codes'
+              ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
+          }`}
+        >
+          <Code className="w-4 h-4" />
+          <span>Códigos</span>
         </button>
       </div>
 
@@ -1445,6 +1515,92 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         </div>
       )}
+      {/* TAB CÓDIGOS */}
+      {activeTab === 'codes' && (
+        <div className="space-y-6">
+          <h2 className="text-xl font-black text-white uppercase tracking-wider flex items-center gap-2">
+            🔑 Gestión de Códigos de Recarga
+          </h2>
+          
+          {/* Upload Section */}
+          <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider">Subir Códigos Nuevos</h3>
+            
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Seleccionar Producto</label>
+              <select
+                value={codesProductId}
+                onChange={(e) => setCodesProductId(e.target.value)}
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-amber-500 font-semibold cursor-pointer"
+              >
+                <option value="">-- Selecciona un producto --</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} — ${p.priceUSD} USD</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Códigos (uno por línea)</label>
+              <textarea
+                value={codesText}
+                onChange={(e) => setCodesText(e.target.value)}
+                rows={6}
+                placeholder="ABCD-1234-EFGH&#10;IJKL-5678-MNOP&#10;QRST-9012-UVWX"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-amber-500 font-mono placeholder-zinc-600 resize-none"
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-zinc-500">
+                {codesText.split('\n').filter(c => c.trim().length > 0).length} códigos detectados
+              </p>
+              <button
+                onClick={handleUploadCodes}
+                disabled={!codesProductId || !codesText.trim() || isUploadingCodes}
+                className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-black font-black text-xs uppercase flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+              >
+                {isUploadingCodes ? 'Subiendo...' : '⬆ Subir Códigos'}
+              </button>
+            </div>
+          </div>
+          
+          {/* Stats Section */}
+          <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider">Inventario de Códigos por Producto</h3>
+            
+            {codesStats.length === 0 ? (
+              <p className="text-sm text-zinc-500 text-center py-8">No hay códigos cargados aún.</p>
+            ) : (
+              <div className="space-y-3">
+                {codesStats.map((stat) => (
+                  <div key={stat.product_id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-black/30 rounded-xl border border-white/5">
+                    <div>
+                      <p className="text-sm font-bold text-white">{stat.product_name}</p>
+                      <p className="text-[10px] text-zinc-500 font-mono">ID: {stat.product_id.slice(0, 8)}...</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <p className="text-lg font-black text-emerald-400">{stat.available}</p>
+                        <p className="text-[9px] text-zinc-500 uppercase font-bold">Disponibles</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-black text-zinc-500">{stat.used}</p>
+                        <p className="text-[9px] text-zinc-500 uppercase font-bold">Usados</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-black text-white">{stat.total}</p>
+                        <p className="text-[9px] text-zinc-500 uppercase font-bold">Total</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {selectedReceiptUrl && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl max-w-4xl w-full border border-emerald-500/30 space-y-4 shadow-2xl text-white">
