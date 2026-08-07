@@ -34,12 +34,12 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
   return (
     <div
       id="whatsapp-floating-widget"
-      className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-5'} md:bottom-6 right-4 md:right-6 z-[100] transition-all duration-300 flex flex-col items-end`}
+      className={`fixed ${hasBottomNav ? 'bottom-28' : 'bottom-24'} right-0 z-[100] transition-all duration-300 flex flex-col items-end`}
     >
       
       {/* Expanded Quick Chat Drawer */}
       {isOpen && (
-        <div className="mb-3 w-80 bg-zinc-950 border border-emerald-500/30 text-white rounded-2xl shadow-2xl p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2">
+        <div className="mb-3 mr-4 w-80 bg-zinc-950 border border-emerald-500/30 text-white rounded-2xl shadow-2xl p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2">
           
           <div className="flex items-center justify-between border-b border-white/10 pb-2">
             <div className="flex items-center gap-2">
@@ -79,7 +79,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
               }}
               className={`w-full text-left p-2.5 rounded-xl text-[11px] font-bold uppercase transition-all border ${selectedOption === 'id' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border-white/5'}`}
             >
-              ❓ ¿Cómo encuentro mi ID de juego?
+              🎮 ¿Cómo encuentro mi ID de juego?
             </button>
             {selectedOption === 'id' && (
               <div className="p-2.5 bg-black rounded-lg border border-emerald-500/20 text-[10.5px] text-zinc-400 font-medium animate-in fade-in zoom-in-95 leading-relaxed">
@@ -119,18 +119,21 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
         </div>
       )}
 
-      {/* Main Floating Trigger Button */}
-      <button
-        id="whatsapp-floating-btn"
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative group hover:scale-110 active:scale-95 transition-transform duration-300 cursor-pointer drop-shadow-[0_4px_10px_rgba(37,211,102,0.4)]"
-        title="Atención por WhatsApp"
-      >
-        <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-red-500 ring-2 ring-black animate-ping z-10"></span>
-        <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-red-500 ring-2 ring-black z-10"></span>
-        {/* Official WhatsApp Color: #25D366 */}
-        <WhatsAppIcon className="w-14 h-14 sm:w-16 sm:h-16 text-[#25D366]" />
-      </button>
+      {/* Glassmorphism Bubble Container */}
+      <div className="bg-zinc-900/60 backdrop-blur-lg border border-r-0 border-white/10 shadow-2xl rounded-l-3xl p-2 sm:p-3 flex items-center justify-center">
+        {/* Main Floating Trigger Button */}
+        <button
+          id="whatsapp-floating-btn"
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative group hover:scale-110 active:scale-95 transition-transform duration-300 cursor-pointer drop-shadow-[0_4px_10px_rgba(37,211,102,0.4)]"
+          title="Atención por WhatsApp"
+        >
+          <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-red-500 ring-2 ring-black animate-ping z-10"></span>
+          <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-red-500 ring-2 ring-black z-10"></span>
+          {/* Official WhatsApp Color: #25D366 */}
+          <WhatsAppIcon className="w-14 h-14 sm:w-16 sm:h-16 text-[#25D366]" />
+        </button>
+      </div>
 
     </div>
   );
