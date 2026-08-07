@@ -73,8 +73,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [name, setName] = useState(currentUser.name || '');
   const [email, setEmail] = useState(currentUser.email || '');
   const [avatar, setAvatar] = useState(currentUser.avatar || PRESET_AVATARS[0].url);
-  const [customAvatarUrl, setCustomAvatarUrl] = useState('');
-  const [useCustomUrl, setUseCustomUrl] = useState(false);
   const [playerIdDefault, setPlayerIdDefault] = useState(currentUser.playerIdDefault || '');
   const [gamerTag, setGamerTag] = useState(currentUser.gamerTag || '');
   const [phone, setPhone] = useState(currentUser.phone || '');
@@ -83,13 +81,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalAvatar = useCustomUrl && customAvatarUrl.trim() ? customAvatarUrl.trim() : avatar;
 
     const updated: UserProfile = {
       ...currentUser,
       name: name.trim() || currentUser.name,
       email: email.trim() || currentUser.email,
-      avatar: finalAvatar,
+      avatar: avatar,
       playerIdDefault: playerIdDefault.trim(),
       gamerTag: gamerTag.trim(),
       phone: phone.trim(),
@@ -129,7 +126,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           
           <div className="relative mb-5">
             <img
-              src={useCustomUrl && customAvatarUrl ? customAvatarUrl : avatar}
+              src={avatar}
               alt={name}
               className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover ring-4 ring-emerald-500/30 shadow-2xl transition-transform group-hover:scale-105"
               onError={(e) => {
@@ -245,50 +242,29 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
               <ImageIcon className="w-4 h-4 text-indigo-400" /> Avatar Studio
             </h3>
-            <button
-              type="button"
-              onClick={() => setUseCustomUrl(!useCustomUrl)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-bold bg-indigo-500/10 px-4 py-2 rounded-xl transition-colors"
-            >
-              {useCustomUrl ? '← Ver Galería Predeterminada' : '+ Usar URL Personalizada'}
-            </button>
           </div>
 
-          {!useCustomUrl ? (
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-              {PRESET_AVATARS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => {
-                    setAvatar(p.url);
-                    setUseCustomUrl(false);
-                  }}
-                  className={`p-2 rounded-2xl border transition-all overflow-hidden cursor-pointer relative group/avatar ${
-                    !useCustomUrl && avatar === p.url
-                      ? 'border-indigo-400 bg-indigo-500/10 ring-2 ring-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
-                      : 'border-white/5 bg-black/40 hover:border-white/20'
-                  }`}
-                >
-                  <img src={p.url} alt={p.name} className="w-full aspect-square rounded-xl object-cover" />
-                  <span className="block text-[10px] font-bold text-center text-zinc-400 mt-2 truncate group-hover/avatar:text-zinc-200 transition-colors">
-                    {p.name.split(' ')[0]}
-                  </span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">URL de la imagen</label>
-              <input
-                type="url"
-                placeholder="https://ejemplo.com/mi-foto.jpg"
-                value={customAvatarUrl}
-                onChange={(e) => setCustomAvatarUrl(e.target.value)}
-                className="w-full bg-black/50 border border-indigo-500/40 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all"
-              />
-            </div>
-          )}
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+            {PRESET_AVATARS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  setAvatar(p.url);
+                }}
+                className={`p-2 rounded-2xl border transition-all overflow-hidden cursor-pointer relative group/avatar ${
+                  avatar === p.url
+                    ? 'border-indigo-400 bg-indigo-500/10 ring-2 ring-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
+                    : 'border-white/5 bg-black/40 hover:border-white/20'
+                }`}
+              >
+                <img src={p.url} alt={p.name} className="w-full aspect-square rounded-xl object-cover" />
+                <span className="block text-[10px] font-bold text-center text-zinc-400 mt-2 truncate group-hover/avatar:text-zinc-200 transition-colors">
+                  {p.name.split(' ')[0]}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* BENTO 6: Finance & Account (col-8) */}
