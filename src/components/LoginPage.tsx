@@ -90,25 +90,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden">
+    <div className="min-h-screen lg:h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-x-hidden lg:overflow-hidden">
       
       {/* LEFT COLUMN: Clean Form Panel */}
-      <div className="w-full lg:w-1/2 flex flex-col p-4 sm:p-10 lg:p-16 relative z-10 h-full overflow-y-auto lg:overflow-hidden custom-scrollbar">
+      <div className="w-full lg:w-1/2 flex flex-col p-4 sm:p-10 lg:p-16 relative z-10 min-h-screen lg:min-h-0 lg:h-full lg:overflow-hidden custom-scrollbar">
         
         {/* Subtle ambient glow for mobile */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/8 rounded-full blur-[100px] pointer-events-none lg:hidden" />
         <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-emerald-900/20 to-transparent pointer-events-none lg:hidden" />
 
-        {/* Top: Back button */}
-        <div className="relative z-10 shrink-0 mb-4 lg:mb-0">
-          <button
-            onClick={onBackToCatalog}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-500 hover:text-emerald-400 transition-colors cursor-pointer group lg:bg-transparent lg:border-none lg:px-0 lg:py-0 bg-white/5 border border-white/5 px-3 py-1.5 rounded-full backdrop-blur-md"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            <span>Regresar</span>
-          </button>
-        </div>
 
         {/* Center: Logo + Brand + Form */}
         <div className="flex-1 flex flex-col justify-center items-center w-full max-w-md mx-auto relative z-10">
