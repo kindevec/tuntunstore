@@ -22,7 +22,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
   };
 
   return (
-    <footer id="footer-main" className="fixed bottom-0 left-0 w-full z-0 bg-[#050505] text-zinc-400 text-xs py-6 md:py-4 px-4 sm:px-6 lg:px-8">
+    <footer id="footer-main" className="fixed bottom-0 left-0 w-full z-0 bg-[#050505] text-zinc-400 text-xs pt-6 pb-24 md:py-4 px-4 sm:px-6 lg:px-8">
       {/* Smooth gradient fade into footer */}
       <div className="absolute top-0 left-0 w-full h-16 sm:h-24 bg-gradient-to-t from-[#050505] to-transparent -translate-y-full pointer-events-none" />
       <div className="max-w-7xl mx-auto space-y-4 relative z-10">

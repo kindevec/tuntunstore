@@ -463,7 +463,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
       <div 
-        className="relative z-10 flex-1 flex flex-col bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-[margin-bottom] duration-300" 
+        className="relative z-10 flex-1 flex flex-col bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
         style={{ marginBottom: `${footerHeight}px` }}
       >
       {toastMessage && (
