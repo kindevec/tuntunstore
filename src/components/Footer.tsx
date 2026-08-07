@@ -50,7 +50,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
 
           {/* Quick Links */}
           <div className="space-y-2 col-span-1">
-            <p className="font-black text-zinc-500 text-xs uppercase tracking-widest">Páginas Independientes</p>
+            <p className="font-black text-zinc-500 text-sm uppercase tracking-widest">Páginas Independientes</p>
             <ul className="space-y-1.5 font-bold uppercase text-[11px]">
               <li>
                 <button onClick={() => onSelectTab('catalog')} className="hover:text-emerald-400 transition-colors cursor-pointer">
@@ -82,7 +82,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
 
           {/* Payment Methods */}
           <div className="space-y-2 col-span-1">
-            <p className="font-black text-zinc-500 text-xs uppercase tracking-widest">Métodos de Pago Oficiales</p>
+            <p className="font-black text-zinc-500 text-sm uppercase tracking-widest">Métodos de Pago Oficiales</p>
             <ul className="space-y-1.5 text-zinc-400 font-bold text-[11px]">
               <li className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-rose-500"></span> BANCO GUAYAQUIL / APP DEUNA
@@ -98,7 +98,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
 
           {/* Security & Guarantees */}
           <div className="space-y-2 col-span-2 md:col-span-1">
-            <p className="font-black text-zinc-500 text-xs uppercase tracking-widest">Garantía de Servicio</p>
+            <p className="font-black text-zinc-500 text-sm uppercase tracking-widest">Garantía de Servicio</p>
             <p className="text-zinc-400 text-xs font-medium">
               Todas las cargas se procesan directamente con tu <strong className="text-zinc-300">ID de Jugador</strong>. Nunca solicitaremos tu clave ni datos de acceso a tu cuenta.
             </p>
