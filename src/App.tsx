@@ -432,7 +432,8 @@ export default function App() {
   const activePendingOrdersCount = orders.filter((o) => o.status === 'Pendiente' || o.status === 'En proceso').length;
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
+      <div className="relative z-10 flex-1 flex flex-col bg-zinc-900 mb-[600px] md:mb-[400px] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
       {toastMessage && (
         <div id="toast-notification-bar" className="fixed top-20 right-4 z-50 bg-zinc-800 text-white border-2 border-emerald-500 px-5 py-3.5 rounded-2xl shadow flex items-center gap-3 animate-in fade-in">
           <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
@@ -442,7 +443,7 @@ export default function App() {
       {activeTab !== 'login' && (
         <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} pendingTopUps={pendingTopUps} />
       )}
-      <main className="flex-1 pb-[600px] md:pb-[400px]">
+      <main className="flex-1">
         {activeTab === 'catalog' && (
           <div>
             <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />
@@ -494,6 +495,7 @@ export default function App() {
           }} />
         )}
       </main>
+      </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
       {currentUser?.role !== 'admin' && activeTab !== 'login' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
       {activeTab !== 'login' && <Footer onSelectTab={handleSelectTab} />}
