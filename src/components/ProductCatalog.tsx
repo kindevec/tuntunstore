@@ -53,7 +53,11 @@ const CyanProductCard: React.FC<{
         setIsVisible(entry.isIntersecting);
       },
       {
-        threshold: 0.7, // 70% of the card must be visible to trigger
+        // An extremely thin active zone (2% of the screen height) right in the dead center.
+        // Because the zone is thinner than the physical gap between cards,
+        // it is impossible for two rows to intersect this line simultaneously.
+        rootMargin: '-49% 0px -49% 0px', 
+        threshold: 0, 
       }
     );
 
@@ -377,7 +381,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
       {/* Wallet Banner Card (Visible for clients) */}
       {!isAdmin && onOpenWalletModal && (
-        <div className="bg-gradient-to-r from-emerald-950/80 via-black to-emerald-950/80 p-4 rounded-2xl border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+        <div className="hidden sm:flex bg-gradient-to-r from-emerald-950/80 via-black to-emerald-950/80 p-4 rounded-2xl border border-emerald-500/30 items-center justify-between gap-4 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40 shrink-0">
               <Wallet className="w-6 h-6" />
