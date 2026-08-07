@@ -175,63 +175,65 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         </div>
 
-        {/* BENTO 3: Personal Data (col-6) */}
-        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg space-y-5 relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
-            <User className="w-4 h-4 text-emerald-400" /> Datos Personales
-          </h3>
+        {/* Flat Section: Personal Data & Gaming Data (col-12) */}
+        <div className="md:col-span-12 border-y border-white/10 py-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           
-          <div>
-            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nombre Completo</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
-            />
+          {/* Datos Personales */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
+              <User className="w-4 h-4 text-emerald-400" /> Datos Personales
+            </h3>
+            
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nombre Completo</label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Teléfono / WhatsApp</label>
+              <input
+                type="text"
+                placeholder="Ej: 0990084680"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Teléfono / WhatsApp</label>
-            <input
-              type="text"
-              placeholder="Ej: 0990084680"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
-            />
-          </div>
-        </div>
+          {/* Perfil Gamer */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
+              <Gamepad2 className="w-4 h-4 text-amber-400" /> Perfil Gamer
+            </h3>
+            
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">ID de Free Fire (Predeterminado)</label>
+              <input
+                type="text"
+                placeholder="Ej: 284910293"
+                value={playerIdDefault}
+                onChange={(e) => setPlayerIdDefault(e.target.value)}
+                className="w-full bg-black/50 border border-amber-500/30 rounded-2xl px-4 py-3.5 text-sm text-amber-300 font-mono font-bold placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all"
+              />
+            </div>
 
-        {/* BENTO 4: Gaming Data (col-6) */}
-        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg space-y-5 relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
-            <Gamepad2 className="w-4 h-4 text-amber-400" /> Perfil Gamer
-          </h3>
-          
-          <div>
-            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">ID de Free Fire (Predeterminado)</label>
-            <input
-              type="text"
-              placeholder="Ej: 284910293"
-              value={playerIdDefault}
-              onChange={(e) => setPlayerIdDefault(e.target.value)}
-              className="w-full bg-black/50 border border-amber-500/30 rounded-2xl px-4 py-3.5 text-sm text-amber-300 font-mono font-bold placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nickname / Gamer Tag</label>
-            <input
-              type="text"
-              placeholder="Ej: ꧁⚡PRO_GAMER⚡꧂"
-              value={gamerTag}
-              onChange={(e) => setGamerTag(e.target.value)}
-              className="w-full bg-black/50 border border-cyan-500/30 rounded-2xl px-4 py-3.5 text-sm text-cyan-300 font-semibold placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition-all"
-            />
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nickname / Gamer Tag</label>
+              <input
+                type="text"
+                placeholder="Ej: ꧁⚡PRO_GAMER⚡꧂"
+                value={gamerTag}
+                onChange={(e) => setGamerTag(e.target.value)}
+                className="w-full bg-black/50 border border-cyan-500/30 rounded-2xl px-4 py-3.5 text-sm text-cyan-300 font-semibold placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition-all"
+              />
+            </div>
           </div>
         </div>
 
