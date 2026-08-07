@@ -433,7 +433,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
-      <div className="relative z-10 flex-1 flex flex-col bg-zinc-900 mb-[600px] md:mb-[400px] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className="relative z-10 flex-1 flex flex-col bg-zinc-900 mb-[450px] md:mb-[250px] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
       {toastMessage && (
         <div id="toast-notification-bar" className="fixed top-20 right-4 z-50 bg-zinc-800 text-white border-2 border-emerald-500 px-5 py-3.5 rounded-2xl shadow flex items-center gap-3 animate-in fade-in">
           <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
