@@ -76,7 +76,7 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
   };
 
   return (
-    <section id="my-orders-section" className="py-6 sm:py-10 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 pb-28 sm:pb-16">
+    <section id="my-orders-section" className="py-6 sm:py-10 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
       
       {/* Header Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-900/30 pb-4 sm:pb-6">

@@ -456,8 +456,6 @@ export default function App() {
       {activeTab !== 'admin' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
       {activeTab !== 'login' && <Footer onSelectTab={handleSelectTab} />}
       {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
-      {/* Spacer for bottom navigation */}
-      {activeTab !== 'login' && <div className="h-24 md:hidden" />}
     </div>
   );
 }
