@@ -131,6 +131,8 @@ export default function App() {
       const footerElement = document.getElementById('footer-main');
       if (footerElement) {
         setFooterHeight(footerElement.offsetHeight);
+      } else {
+        setFooterHeight(0);
       }
     };
 
@@ -149,7 +151,7 @@ export default function App() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [activeTab]);
 
   const fetchInitialData = async () => {
     const { data: prodData } = await supabase.from('products').select('*').eq('active', true).order('price_usd', { ascending: true });
@@ -528,7 +530,7 @@ export default function App() {
       </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
       {currentUser?.role !== 'admin' && activeTab !== 'login' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
-      {activeTab !== 'login' && <Footer onSelectTab={handleSelectTab} />}
+      {activeTab !== 'login' && activeTab !== 'catalog' && activeTab !== 'orders' && <Footer onSelectTab={handleSelectTab} />}
       {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
     </div>
   );
