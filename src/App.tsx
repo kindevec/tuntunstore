@@ -515,64 +515,73 @@ export default function App() {
         const result = await Tesseract.recognize(receiptFile, 'spa');
         const text = result.data.text;
         
-        // 4. Validate Date (Super Forgiving for OCR)
-        const today = new Date();
-        const d = today.getDate().toString().padStart(2, '0');
-        const d_single = today.getDate().toString();
-        const m = (today.getMonth() + 1).toString().padStart(2, '0');
-        const m_single = (today.getMonth() + 1).toString();
-        const y = today.getFullYear().toString();
-        const shortY = y.substring(2);
-        
-        // Month representations
-        const shortM = today.toLocaleString('es', {month:'short'}).substring(0,3).toLowerCase().replace(/\./g, '');
-        const longM = today.toLocaleString('es', {month:'long'}).toLowerCase();
-        
-        // Month map (for numeric matching)
-        const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-        const shortMonth = monthNames[today.getMonth()];
+        // 4. Validate Date (Super Forgiving for OCR, allows up to 3 days ago)
+        const generateDateStrings = (date: Date) => {
+          const d = date.getDate().toString().padStart(2, '0');
+          const d_single = date.getDate().toString();
+          const m = (date.getMonth() + 1).toString().padStart(2, '0');
+          const m_single = (date.getMonth() + 1).toString();
+          const y = date.getFullYear().toString();
+          const shortY = y.substring(2);
+          
+          const shortM = date.toLocaleString('es', {month:'short'}).substring(0,3).toLowerCase().replace(/\./g, '');
+          const longM = date.toLocaleString('es', {month:'long'}).toLowerCase();
+          const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+          const shortMonth = monthNames[date.getMonth()];
+          
+          return {
+            strings: [
+              `${d}/${m}/${y}`, `${d}-${m}-${y}`, `${y}-${m}-${d}`, 
+              `${d}/${m}/${shortY}`, `${d}-${m}-${shortY}`,
+              `${d_single}/${m_single}/${y}`, `${d_single}-${m_single}-${y}`,
+              `${d_single}/${m_single}/${shortY}`, `${d_single}-${m_single}-${shortY}`,
+              `${d} ${shortMonth} ${y}`, `${d} ${shortMonth} ${shortY}`,
+              `${d_single} ${shortMonth} ${y}`, `${d_single} ${shortMonth} ${shortY}`,
+              `${d} de ${longM} de ${y}`, `${d} ${longM} ${y}`,
+              `${d}${m}${y}`, `${d}${m}${shortY}`
+            ],
+            d, d_single, m, m_single, y, shortY, shortMonth, longM
+          };
+        };
 
-        // Generate all valid date strings for today
-        const validDateStrings = [
-          `${d}/${m}/${y}`, `${d}-${m}-${y}`, `${y}-${m}-${d}`, 
-          `${d}/${m}/${shortY}`, `${d}-${m}-${shortY}`,
-          `${d_single}/${m_single}/${y}`, `${d_single}-${m_single}-${y}`,
-          `${d_single}/${m_single}/${shortY}`, `${d_single}-${m_single}-${shortY}`,
-          `${d} ${shortMonth} ${y}`, `${d} ${shortMonth} ${shortY}`,
-          `${d_single} ${shortMonth} ${y}`, `${d_single} ${shortMonth} ${shortY}`,
-          `${d} de ${longM} de ${y}`, `${d} ${longM} ${y}`,
-          `${d}${m}${y}`, `${d}${m}${shortY}`
-        ];
+        const today = new Date();
+        const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+        const twoDaysAgo = new Date(today); twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+        
+        const datesToCheck = [today, yesterday, twoDaysAgo].map(generateDateStrings);
 
         // Clean text to handle common OCR mistakes
         let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
         cleanText = cleanText.replace(/o/g, '0'); // Often '0' is read as 'O'
         cleanText = cleanText.replace(/\|/g, '1').replace(/l/g, '1'); // '1' read as 'l' or '|'
 
-        let isToday = false;
-        for (const dateStr of validDateStrings) {
-           // Allow spaces around separators and handle OCR replacing separators with spaces
-           const flexibleStr = dateStr.replace(/[\/\-]/g, ' ?[\\/\\- ] ?'); 
-           const regex = new RegExp(flexibleStr, 'i');
-           if (regex.test(cleanText)) {
-             isToday = true;
-             break;
-           }
-        }
+        let isValidDate = false;
         
-        // Ultimate fallback: check if day, month and year exist somewhere in the text
-        // (Only if it's a very bad scan but has all parts)
-        if (!isToday) {
-           if (
-             (cleanText.includes(d) || cleanText.includes(d_single)) && 
-             (cleanText.includes(m) || cleanText.includes(shortMonth) || cleanText.includes(longM)) && 
-             (cleanText.includes(y) || cleanText.includes(` ${shortY} `))
-           ) {
-             isToday = true;
+        for (const dateObj of datesToCheck) {
+           if (isValidDate) break;
+           
+           for (const dateStr of dateObj.strings) {
+             const flexibleStr = dateStr.replace(/[\/\-]/g, ' ?[\\/\\- ] ?'); 
+             const regex = new RegExp(flexibleStr, 'i');
+             if (regex.test(cleanText)) {
+               isValidDate = true;
+               break;
+             }
+           }
+           
+           if (!isValidDate) {
+             // Fallback parts match
+             if (
+               (cleanText.includes(dateObj.d) || cleanText.includes(dateObj.d_single)) && 
+               (cleanText.includes(dateObj.m) || cleanText.includes(dateObj.shortMonth) || cleanText.includes(dateObj.longM)) && 
+               (cleanText.includes(dateObj.y) || cleanText.includes(` ${dateObj.shortY} `) || cleanText.includes(` ${dateObj.shortY}`) || cleanText.includes(`${dateObj.shortY} `))
+             ) {
+               isValidDate = true;
+             }
            }
         }
 
-        if (!isToday) {
+        if (!isValidDate) {
            // Let's see if we found ANY date to give a better error message
            const anyDateRegex = /\b(\d{1,2}) ?[\/\- de]* ?([a-z]{3,9}|\d{1,2}) ?[\/\- del]* ?(\d{2,4})\b/g;
            const matches = [...cleanText.matchAll(anyDateRegex)];
@@ -580,7 +589,7 @@ export default function App() {
            if (matches.length === 0) {
               verificationWarnings.push('⚠️ Fecha no detectada: El OCR no pudo encontrar ninguna fecha clara en el comprobante.');
            } else {
-              verificationWarnings.push(`⚠️ Posible fecha antigua: La fecha en el comprobante no parece ser de hoy (${d}/${m}/${y}).`);
+              verificationWarnings.push(`⚠️ Fecha antigua: El comprobante parece ser antiguo (fuera del rango válido de 3 días).`);
            }
         }
         
