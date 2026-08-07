@@ -34,7 +34,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
   return (
     <div
       id="whatsapp-floating-widget"
-      className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-5'} md:bottom-6 right-4 md:right-6 z-40 transition-all duration-300 flex flex-col items-end`}
+      className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-5'} md:bottom-6 right-4 md:right-6 z-[100] transition-all duration-300 flex flex-col items-end`}
     >
       
       {/* Expanded Quick Chat Drawer */}
