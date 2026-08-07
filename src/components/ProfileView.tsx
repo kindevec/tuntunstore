@@ -120,302 +120,284 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-5 relative z-10">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-5">
         
-        {/* BENTO 1: Identity Card (col-12 md:col-4) */}
-        <div className="md:col-span-4 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+        {/* HEADER: Identity Card (col-12) */}
+        <div className="md:col-span-12 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center text-center sm:text-left gap-6 shadow-xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           
-          <div className="relative mb-5">
-            <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full animate-pulse z-0" />
+          <div className="relative shrink-0">
             <img
               src={avatar}
               alt={name}
-              className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover ring-2 ring-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-3 relative z-10"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-emerald-500/30 shadow-2xl transition-transform hover:scale-105"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = PRESET_AVATARS[0].url;
               }}
             />
-            <span className="absolute -bottom-3 -right-3 bg-gradient-to-r from-emerald-400 to-emerald-500 text-black p-2 rounded-xl text-xs font-black shadow-lg pointer-events-none z-20 transform transition-transform group-hover:scale-110">
-              <Sparkles className="w-5 h-5" />
+            <span className="absolute -bottom-2 -right-2 bg-emerald-500 text-black p-1.5 rounded-lg text-xs font-black shadow-lg pointer-events-none z-10">
+              <Sparkles className="w-4 h-4" />
             </span>
           </div>
 
-          <h2 className="relative z-10 text-xl sm:text-2xl font-black text-white line-clamp-1">{currentUser.name}</h2>
-          <p className="relative z-10 text-xs text-zinc-400 font-mono mt-1 mb-4">{currentUser.email}</p>
-          
-          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
-            <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider w-full sm:w-auto shadow-inner ${
-              currentUser.role === 'admin' 
-                ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' 
-                : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
-            }`}>
-              {currentUser.role === 'admin' ? '⭐ Administrador' : 'Cliente Verificado'}
-            </span>
+          <div className="flex-1 relative z-10">
+            <h2 className="text-2xl sm:text-3xl font-black text-white line-clamp-1">{currentUser.name}</h2>
+            <p className="text-sm text-zinc-400 font-mono mt-1 mb-4">{currentUser.email}</p>
             
-            <button
-              type="button"
-              onClick={() => setIsAvatarStudioOpen(!isAvatarStudioOpen)}
-              className="px-4 py-2 rounded-xl w-full sm:w-auto text-[10px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-            >
-              <ImageIcon className="w-4 h-4" />
-              Editar Avatar
-            </button>
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                currentUser.role === 'admin' 
+                  ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' 
+                  : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+              }`}>
+                {currentUser.role === 'admin' ? '⭐ Administrador' : 'Cliente Verificado'}
+              </span>
+              
+              <button
+                type="button"
+                onClick={() => setIsAvatarStudioOpen(!isAvatarStudioOpen)}
+                className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/20 hover:border-indigo-400 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                Editar Avatar
+              </button>
+            </div>
+          </div>
+          
+          <div className="hidden md:flex shrink-0 w-24 h-24 items-center justify-center rounded-2xl bg-white/5 border border-white/5 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-colors">
+            <ShieldCheck className="w-10 h-10 text-emerald-500/40 group-hover:text-emerald-400 transition-colors" />
           </div>
         </div>
 
-        {/* BENTO 2: Wallet Banner (col-12 md:col-8) */}
+        {/* BANNER: Wallet (col-12) */}
         <div 
           onClick={onNavigateToWallet}
-          className="md:col-span-8 bg-gradient-to-br from-zinc-900 to-[#0a1f16] backdrop-blur-xl border border-emerald-500/20 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between cursor-pointer group shadow-2xl hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] hover:border-emerald-500/40 transition-all duration-500 overflow-hidden relative gap-6"
+          className="md:col-span-12 bg-gradient-to-r from-emerald-950/80 via-zinc-900/80 to-zinc-900/80 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between cursor-pointer group shadow-lg hover:shadow-xl hover:border-emerald-400/50 transition-all overflow-hidden relative gap-4"
         >
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none group-hover:bg-emerald-500/20 transition-colors duration-700" />
+          <div className="absolute -left-10 -top-10 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
           
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6 z-10">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 group-hover:rotate-6 group-hover:bg-emerald-500 group-hover:text-black transition-all duration-500 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
-              <Wallet className="w-8 h-8 sm:w-10 sm:h-10" />
+          <div className="flex items-center gap-4 sm:gap-5 z-10 w-full sm:w-auto">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30 group-hover:bg-emerald-500 group-hover:text-black group-hover:scale-105 transition-all shrink-0">
+              <Wallet className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
-            <div>
-              <p className="text-[11px] sm:text-xs text-emerald-400/80 font-black uppercase tracking-[0.2em] mb-1.5 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Billetera Virtual
-              </p>
-              <p className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-emerald-200 tracking-tight">
-                ${(currentUser.walletBalanceUSD || 0).toFixed(2)} USD
+            <div className="flex-1">
+              <p className="text-[10px] sm:text-xs text-emerald-400 font-black uppercase tracking-wider mb-0.5">Billetera Virtual TunTun</p>
+              <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <span className="text-emerald-400 mr-1">$</span>{(currentUser.walletBalanceUSD || 0).toFixed(2)}
               </p>
             </div>
           </div>
           
-          <div className="w-full sm:w-12 h-12 rounded-2xl sm:rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-black group-hover:translate-x-2 transition-all duration-300 z-10 border border-emerald-500/30">
-            <ArrowRight className="w-5 h-5 stroke-[3] hidden sm:block" />
-            <span className="sm:hidden font-black uppercase tracking-wider text-xs flex items-center gap-2">Ir a Billetera <ArrowRight className="w-4 h-4" /></span>
+          <div className="z-10 w-full sm:w-auto">
+            <div className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 group-hover:bg-emerald-500 group-hover:text-black transition-all font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+              <span>Gestionar Saldo</span>
+              <ArrowRight className="w-4 h-4 stroke-[3]" />
+            </div>
           </div>
         </div>
 
-        {/* BENTO 3: Avatar Studio (col-12) */}
-        <div className={`md:col-span-12 transition-all duration-500 ease-in-out ${isAvatarStudioOpen ? 'opacity-100 max-h-[1000px] mb-2' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-          <div className="bg-zinc-900/60 backdrop-blur-xl border border-indigo-500/20 rounded-3xl p-6 sm:p-8 shadow-2xl relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-transparent rounded-3xl pointer-events-none" />
-            
-            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
-              <span className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                <ImageIcon className="w-4 h-4" />
-              </span>
-              Estudio de Avatar
+        {/* BENTO 5: Avatar Studio (col-12) */}
+        <div className={`md:col-span-12 grid transition-all duration-500 ease-in-out ${isAvatarStudioOpen ? 'grid-rows-[1fr] opacity-100 mb-4' : 'grid-rows-[0fr] opacity-0 mb-0'}`}>
+          <div className="overflow-hidden">
+            <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-lg relative group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-indigo-400" /> Avatar Studio
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+                {PRESET_AVATARS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setAvatar(p.url);
+                    }}
+                    className={`p-2 rounded-2xl border transition-all overflow-hidden cursor-pointer relative group/avatar ${
+                      avatar === p.url
+                        ? 'border-indigo-400 bg-indigo-500/10 ring-2 ring-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]'
+                        : 'border-white/5 bg-black/40 hover:border-white/20'
+                    }`}
+                  >
+                    <img src={p.url} alt={p.name} className="w-full aspect-square rounded-xl object-cover" />
+                    <span className="block text-[10px] font-bold text-center text-zinc-400 mt-2 truncate group-hover/avatar:text-zinc-200 transition-colors">
+                      {p.name.split(' ')[0]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Flat Section: Personal Data & Gaming Data (col-12) */}
+        <div className="md:col-span-12 border-y border-white/10 py-8 grid grid-cols-1 md:grid-cols-2 gap-0">
+          
+          {/* Datos Personales */}
+          <div className="space-y-4 md:border-r md:border-white/10 md:pr-12 max-md:border-b max-md:border-white/10 max-md:pb-8">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
+              <User className="w-4 h-4 text-emerald-400" /> Datos Personales
             </h3>
-
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-5">
-              {PRESET_AVATARS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setAvatar(p.url)}
-                  className={`p-2 rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer relative group/avatar ${
-                    avatar === p.url
-                      ? 'border-indigo-400 bg-indigo-500/20 ring-2 ring-indigo-500/40 shadow-[0_0_20px_rgba(99,102,241,0.3)] scale-105'
-                      : 'border-white/5 bg-black/60 hover:border-indigo-500/30 hover:scale-105'
-                  }`}
-                >
-                  <img src={p.url} alt={p.name} className="w-full aspect-square rounded-xl object-cover shadow-inner" />
-                  <span className={`block text-[10px] font-bold text-center mt-2 truncate transition-colors ${avatar === p.url ? 'text-indigo-300' : 'text-zinc-500 group-hover/avatar:text-zinc-300'}`}>
-                    {p.name.split(' ')[0]}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* BENTO 4: Datos Personales (col-12 md:col-6) */}
-        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl" />
-          <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3 mb-8">
-            <span className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400">
-              <User className="w-5 h-5" />
-            </span>
-            Datos Personales
-          </h3>
-          
-          <div className="space-y-5 relative z-10">
+            
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 pl-1">Nombre Completo</label>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nombre Completo</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-bold transition-all shadow-inner"
+                className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 pl-1">Teléfono / WhatsApp</label>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Teléfono / WhatsApp</label>
               <input
                 type="text"
                 placeholder="Ej: 0990084680"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-bold transition-all shadow-inner"
+                className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-semibold transition-all"
               />
             </div>
           </div>
-        </div>
 
-        {/* BENTO 5: Perfil Gamer (col-12 md:col-6) */}
-        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative group">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl" />
-          <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3 mb-8">
-            <span className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-400">
-              <Gamepad2 className="w-5 h-5" />
-            </span>
-            Perfil Gamer
-          </h3>
-          
-          <div className="space-y-5 relative z-10">
+          {/* Perfil Gamer */}
+          <div className="space-y-4 md:pl-12 max-md:pt-8">
+            <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-6">
+              <Gamepad2 className="w-4 h-4 text-amber-400" /> Perfil Gamer
+            </h3>
+            
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 pl-1">ID de Jugador (Principal)</label>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">ID de Free Fire (Predeterminado)</label>
               <input
                 type="text"
                 placeholder="Ej: 284910293"
                 value={playerIdDefault}
                 onChange={(e) => setPlayerIdDefault(e.target.value)}
-                className="w-full bg-amber-500/5 border border-amber-500/20 rounded-2xl px-5 py-4 text-sm text-amber-300 font-mono font-bold placeholder-amber-500/30 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all shadow-inner"
+                className="w-full bg-black/50 border border-amber-500/30 rounded-2xl px-4 py-3.5 text-sm text-amber-300 font-mono font-bold placeholder-zinc-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 pl-1">Gamer Tag (Apodo)</label>
+              <label className="block text-[11px] font-bold text-zinc-400 uppercase mb-2">Nickname / Gamer Tag</label>
               <input
                 type="text"
                 placeholder="Ej: ꧁⚡PRO_GAMER⚡꧂"
                 value={gamerTag}
                 onChange={(e) => setGamerTag(e.target.value)}
-                className="w-full bg-cyan-500/5 border border-cyan-500/20 rounded-2xl px-5 py-4 text-sm text-cyan-300 font-bold placeholder-cyan-500/30 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all shadow-inner"
+                className="w-full bg-black/50 border border-cyan-500/30 rounded-2xl px-4 py-3.5 text-sm text-cyan-300 font-semibold placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 transition-all"
               />
             </div>
           </div>
         </div>
 
-        {/* BENTO 6: Banco Frecuente (col-12 md:col-6) */}
-        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative group">
-          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl" />
-          <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3 mb-8">
-            <span className="w-10 h-10 rounded-2xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 text-teal-400">
-              <Building2 className="w-5 h-5" />
-            </span>
-            Banco Frecuente
-          </h3>
-          
-          <div className="relative z-10">
-            <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 pl-1">Método Preferido</label>
-            <select
-              value={preferredBank}
-              onChange={(e) => setPreferredBank(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-zinc-100 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 font-bold cursor-pointer transition-all shadow-inner appearance-none"
-            >
-              {PREFERRED_BANKS.map((b) => (
-                <option key={b} value={b} className="bg-zinc-900 text-white">
-                  {b}
-                </option>
-              ))}
-            </select>
-            {/* Custom arrow for select */}
-            <div className="absolute right-4 top-[42px] pointer-events-none text-zinc-500">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
-          </div>
 
-          <div className="mt-8 p-5 bg-black/40 border border-white/5 rounded-2xl">
-            <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2 mb-3">
-              <ShieldCheck className="w-4 h-4" /> Nivel de Cuenta
-            </h4>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 p-[2px]">
-                <div className="w-full h-full bg-black rounded-full flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-emerald-400" />
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-zinc-300 font-mono mb-1">{email}</p>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Google OAuth Verificado</span>
+        {/* Flat Section: Finance & Security (col-12) */}
+        <div className="md:col-span-12 border-b border-white/10 pb-8 grid grid-cols-1 md:grid-cols-2 gap-0">
+          
+          {/* Banco Frecuente & Seguridad */}
+          <div className="space-y-6 md:border-r md:border-white/10 md:pr-12 max-md:border-b max-md:border-white/10 max-md:pb-8">
+            <div>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-4">
+                <Building2 className="w-4 h-4 text-teal-400" /> Banco Frecuente
+              </h3>
+              <select
+                value={preferredBank}
+                onChange={(e) => setPreferredBank(e.target.value)}
+                className="w-full bg-black/50 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500/50 font-semibold cursor-pointer transition-all"
+              >
+                {PREFERRED_BANKS.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="pt-2">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" /> Seguridad de Cuenta
+              </h3>
+              <div className="flex items-center gap-3 bg-black/30 p-4 rounded-2xl border border-white/5">
+                <Mail className="w-5 h-5 text-zinc-400" />
+                <div>
+                  <p className="text-xs text-zinc-300 font-mono">{email}</p>
+                  <p className="text-[10px] text-emerald-400/80 font-bold uppercase mt-0.5">Google OAuth Verificado</p>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* BENTO 7: Seguridad y Sesión (col-12 md:col-6) */}
-        <div className="md:col-span-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col justify-between">
-          <div className="space-y-4">
-            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3 mb-6">
-              <span className="w-10 h-10 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 text-rose-400">
-                <Key className="w-5 h-5" />
-              </span>
-              Seguridad y Acceso
-            </h3>
+          {/* Danger Zone & Password */}
+          <div className="flex flex-col justify-center gap-6 md:pl-12 max-md:pt-8">
             
-            <button
-              type="button"
-              className="w-full px-5 py-4 rounded-2xl bg-black/40 hover:bg-black/60 border border-white/5 hover:border-white/10 text-zinc-300 hover:text-white font-black text-xs uppercase flex items-center justify-between transition-all cursor-pointer shadow-sm group"
-            >
-              <div className="flex items-center gap-3">
-                <Key className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
-                <span>Actualizar Contraseña</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
-            </button>
-            
-            <button
-              type="button"
-              onClick={onLogout}
-              className="w-full px-5 py-4 rounded-2xl bg-rose-500/5 hover:bg-rose-500/10 border border-rose-500/20 hover:border-rose-500/40 text-rose-400 hover:text-rose-300 font-black text-xs uppercase flex items-center justify-between transition-all cursor-pointer shadow-sm group"
-            >
-              <div className="flex items-center gap-3">
-                <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                <span>Cerrar Sesión Segura</span>
-              </div>
-              <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-            </button>
-          </div>
-          
-          <div className="mt-6 text-center">
-            <p className="text-[10px] text-zinc-500 font-semibold">
-              Todas las conexiones están encriptadas de extremo a extremo.
-            </p>
+            {/* Security / Change Password */}
+            <div className="flex flex-col items-center text-center">
+              <Key className="w-8 h-8 text-zinc-500 mb-3" />
+              <h3 className="text-xs font-black text-white uppercase tracking-wider mb-2">
+                Seguridad
+              </h3>
+              <p className="text-[10px] text-zinc-400 mb-4 px-2">
+                Actualiza tu contraseña para mantener tu cuenta segura.
+              </p>
+              <button
+                type="button"
+                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-800/50 hover:bg-zinc-700 border border-white/5 hover:border-white/10 text-zinc-300 hover:text-white font-black text-[10px] uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+              >
+                <Key className="w-3.5 h-3.5" />
+                Cambiar Contraseña
+              </button>
+            </div>
+
+            <hr className="border-white/5" />
+
+            {/* Danger Zone / Logout */}
+            <div className="flex flex-col items-center text-center">
+              <LogOut className="w-8 h-8 text-rose-500/40 mb-3" />
+              <h3 className="text-xs font-black text-rose-100 uppercase tracking-wider mb-2">
+                Sesión Activa
+              </h3>
+              <p className="text-[10px] text-rose-200/50 mb-4 px-2">
+                Si estás en un dispositivo público, recuerda cerrar sesión.
+              </p>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="w-full px-4 py-2.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500 border border-rose-500/20 hover:border-rose-500 text-rose-400 hover:text-black font-black text-[10px] uppercase flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Cerrar Sesión
+              </button>
+            </div>
           </div>
         </div>
 
         {/* BENTO 8: Submit Area (col-12) */}
-        <div className="md:col-span-12 mt-4 pt-6 border-t border-white/5 flex justify-end">
+        <div className="md:col-span-12 mt-4 flex justify-end">
           <button
             type="submit"
             disabled={isSavedSuccess}
-            className={`w-full sm:w-auto px-12 py-5 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer shadow-2xl relative overflow-hidden group ${
+            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all cursor-pointer shadow-xl ${
               isSavedSuccess
-                ? 'bg-emerald-400 text-black shadow-[0_0_40px_rgba(52,211,153,0.5)] scale-[0.98]'
-                : 'bg-emerald-500 text-black hover:bg-emerald-400 hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] hover:-translate-y-1 active:scale-[0.98]'
+                ? 'bg-emerald-400 text-black shadow-[0_0_30px_rgba(52,211,153,0.5)]'
+                : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black hover:shadow-[0_0_25px_rgba(16,185,129,0.4)] active:scale-95'
             }`}
           >
-            {/* Shimmer effect */}
-            {!isSavedSuccess && (
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
+            {isSavedSuccess ? (
+              <>
+                <Check className="w-5 h-5 stroke-[3]" />
+                <span>¡Guardado con Éxito!</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                <span>Guardar Cambios</span>
+              </>
             )}
-            
-            <span className="relative z-10 flex items-center gap-3">
-              {isSavedSuccess ? (
-                <>
-                  <Check className="w-5 h-5 stroke-[3]" />
-                  <span>¡Cambios Guardados!</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  <span>Guardar Mi Perfil</span>
-                </>
-              )}
-            </span>
           </button>
         </div>
 
