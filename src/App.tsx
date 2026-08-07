@@ -515,40 +515,73 @@ export default function App() {
         const result = await Tesseract.recognize(receiptFile, 'spa');
         const text = result.data.text;
         
-        // 4. Validate Date
-        const dateRegex = /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b|\b(\d{4})[\/\-](\d{2})[\/\-](\d{2})\b/g;
-        const matches = [...text.matchAll(dateRegex)];
+        // 4. Validate Date (Super Forgiving for OCR)
+        const today = new Date();
+        const d = today.getDate().toString().padStart(2, '0');
+        const d_single = today.getDate().toString();
+        const m = (today.getMonth() + 1).toString().padStart(2, '0');
+        const m_single = (today.getMonth() + 1).toString();
+        const y = today.getFullYear().toString();
+        const shortY = y.substring(2);
         
-        if (matches.length === 0) {
-          verificationWarnings.push('⚠️ Fecha no detectada: No se pudo encontrar una fecha legible en el comprobante.');
-        } else {
-          const today = new Date();
-          const d = today.getDate().toString().padStart(2, '0');
-          const m = (today.getMonth() + 1).toString().padStart(2, '0');
-          const y = today.getFullYear().toString();
-          
-          const todayStr1 = `${d}/${m}/${y}`;
-          const todayStr2 = `${d}-${m}-${y}`;
-          const todayStr3 = `${y}-${m}-${d}`;
-          const todayStr4 = `${d} ${today.toLocaleString('es', {month:'short'}).substring(0,3)} ${y}`; // e.g. 07 ago 2026
-          
-          let isToday = false;
-          for (const match of matches) {
-            const matchText = match[0];
-            if (matchText.includes(todayStr1) || matchText.includes(todayStr2) || matchText.includes(todayStr3)) {
-              isToday = true;
-              break;
-            }
-          }
-          
-          // Also simple fallback string check if regex missed some text forms
-          if (!isToday && (text.includes(todayStr1) || text.includes(todayStr2) || text.toLowerCase().includes(todayStr4.toLowerCase()))) {
-            isToday = true;
-          }
-          
-          if (!isToday) {
-            verificationWarnings.push('⚠️ Posible fecha antigua: La fecha detectada en el comprobante no coincide con el día de hoy.');
-          }
+        // Month representations
+        const shortM = today.toLocaleString('es', {month:'short'}).substring(0,3).toLowerCase().replace(/\./g, '');
+        const longM = today.toLocaleString('es', {month:'long'}).toLowerCase();
+        
+        // Month map (for numeric matching)
+        const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        const shortMonth = monthNames[today.getMonth()];
+
+        // Generate all valid date strings for today
+        const validDateStrings = [
+          `${d}/${m}/${y}`, `${d}-${m}-${y}`, `${y}-${m}-${d}`, 
+          `${d}/${m}/${shortY}`, `${d}-${m}-${shortY}`,
+          `${d_single}/${m_single}/${y}`, `${d_single}-${m_single}-${y}`,
+          `${d_single}/${m_single}/${shortY}`, `${d_single}-${m_single}-${shortY}`,
+          `${d} ${shortMonth} ${y}`, `${d} ${shortMonth} ${shortY}`,
+          `${d_single} ${shortMonth} ${y}`, `${d_single} ${shortMonth} ${shortY}`,
+          `${d} de ${longM} de ${y}`, `${d} ${longM} ${y}`,
+          `${d}${m}${y}`, `${d}${m}${shortY}`
+        ];
+
+        // Clean text to handle common OCR mistakes
+        let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+        cleanText = cleanText.replace(/o/g, '0'); // Often '0' is read as 'O'
+        cleanText = cleanText.replace(/\|/g, '1').replace(/l/g, '1'); // '1' read as 'l' or '|'
+
+        let isToday = false;
+        for (const dateStr of validDateStrings) {
+           // Allow spaces around separators and handle OCR replacing separators with spaces
+           const flexibleStr = dateStr.replace(/[\/\-]/g, ' ?[\\/\\- ] ?'); 
+           const regex = new RegExp(flexibleStr, 'i');
+           if (regex.test(cleanText)) {
+             isToday = true;
+             break;
+           }
+        }
+        
+        // Ultimate fallback: check if day, month and year exist somewhere in the text
+        // (Only if it's a very bad scan but has all parts)
+        if (!isToday) {
+           if (
+             (cleanText.includes(d) || cleanText.includes(d_single)) && 
+             (cleanText.includes(m) || cleanText.includes(shortMonth) || cleanText.includes(longM)) && 
+             (cleanText.includes(y) || cleanText.includes(` ${shortY} `))
+           ) {
+             isToday = true;
+           }
+        }
+
+        if (!isToday) {
+           // Let's see if we found ANY date to give a better error message
+           const anyDateRegex = /\b(\d{1,2}) ?[\/\- de]* ?([a-z]{3,9}|\d{1,2}) ?[\/\- del]* ?(\d{2,4})\b/g;
+           const matches = [...cleanText.matchAll(anyDateRegex)];
+           
+           if (matches.length === 0) {
+              verificationWarnings.push('⚠️ Fecha no detectada: El OCR no pudo encontrar ninguna fecha clara en el comprobante.');
+           } else {
+              verificationWarnings.push(`⚠️ Posible fecha antigua: La fecha en el comprobante no parece ser de hoy (${d}/${m}/${y}).`);
+           }
         }
         
       } catch (error) {
