@@ -114,25 +114,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div className="flex-1 flex flex-col justify-center items-center w-full max-w-md mx-auto relative z-10">
           
           {/* ----------------- MOBILE LOGO (Premium Animated) ----------------- */}
-          <div className="relative flex justify-center w-full mb-6 pt-4 lg:hidden">
+          <div className="relative flex justify-center w-full mb-10 pt-4 lg:hidden">
             {/* Outer Glow / Halo */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-emerald-500/30 blur-[60px] rounded-full animate-pulse pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] bg-emerald-500/30 blur-[70px] rounded-full animate-pulse pointer-events-none" />
             {/* Animated Rotating Rings */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin" style={{ animationDuration: '4s' }} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140px] h-[140px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 sm:w-64 sm:h-64 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin" style={{ animationDuration: '4s' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] sm:w-[272px] sm:h-[272px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
             
             {/* The Logo Itself */}
-            <div className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_40px_rgba(16,185,129,0.3)] ring-4 ring-black/50">
-              <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
+            <div className="relative z-10 w-48 h-48 sm:w-56 sm:h-56 rounded-full p-2 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_50px_rgba(16,185,129,0.3)] ring-4 ring-black/50">
+              <div className="w-full h-full rounded-full p-[3px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
                 <img
                   src="/logo.jpeg"
                   alt="TunTun Store"
-                  className="w-full h-full object-cover rounded-full border-2 border-black"
+                  className="w-full h-full object-cover rounded-full border-[3px] border-black"
                 />
               </div>
               {/* Micro-badge on logo */}
-              <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-black p-1 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] border-2 border-black">
-                <ShieldCheck className="w-3 h-3" />
+              <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-black p-2 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.5)] border-2 border-black">
+                <ShieldCheck className="w-5 h-5" />
               </div>
             </div>
           </div>
