@@ -75,33 +75,37 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
           </span>
         );
     }
-  };
-
-  return (
-    <section id="my-orders-section" className="py-6 sm:py-10 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+  }  return (
+    <section id="my-orders-section" className="py-6 sm:py-10 px-3 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-6 sm:space-y-10">
       
       {/* Header Title */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-900/30 pb-4 sm:pb-6">
-        <div>
-          <span className="text-emerald-400 font-black text-[10px] sm:text-xs uppercase tracking-widest block">Seguimiento en Tiempo Real</span>
-          <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mt-1">
-            Mis Pedidos de Recargas 📋
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-emerald-900/30 pb-6 sm:pb-8">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="font-black text-[10px] sm:text-xs uppercase tracking-widest">Seguimiento en Tiempo Real</span>
+          </div>
+          <h2 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 uppercase tracking-tight">
+            Mis Pedidos
           </h2>
-          <p className="text-zinc-400 text-xs sm:text-sm mt-1 uppercase font-semibold tracking-wider">
-            Consulta el avance de acreditación de tus diamantes cargados a tu ID de jugador.
+          <p className="text-zinc-400 text-xs sm:text-sm uppercase font-semibold tracking-wider max-w-lg">
+            Revisa el estado de tus compras y obtén tus códigos de canje al instante.
           </p>
         </div>
 
-        {/* Status Filters - Touch scrollable on mobile */}
-        <div className="w-full md:w-auto flex items-center gap-1.5 bg-zinc-950 p-1.5 rounded-xl border border-emerald-500/20 overflow-x-auto text-[11px] sm:text-xs font-black uppercase tracking-wider scrollbar-none">
+        {/* Status Filters */}
+        <div className="w-full md:w-auto flex items-center gap-1.5 bg-zinc-900/80 backdrop-blur-md p-1.5 rounded-2xl border border-zinc-800 shadow-xl overflow-x-auto text-[11px] sm:text-xs font-black uppercase tracking-wider scrollbar-none">
           {(['all', 'Pendiente', 'En proceso', 'Completado'] as const).map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-lg transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-4 sm:px-5 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 statusFilter === st
-                  ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]'
-                  : 'text-zinc-400 hover:text-white'
+                  ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
               }`}
             >
               {st === 'all' ? 'Todos' : st}
@@ -117,88 +121,107 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
             <div
               key={order.id}
               id={`order-card-${order.id}`}
-              className="bg-zinc-800 border border-zinc-700 hover:border-emerald-500/40 rounded-2xl overflow-hidden shadow-2xl transition-all relative group"
+              className="bg-[#131315] border border-zinc-800/80 hover:border-emerald-500/30 rounded-[24px] overflow-hidden shadow-2xl transition-all relative group"
             >
-              {/* Subtle top glow line */}
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent group-hover:via-emerald-400 transition-colors" />
+              {/* Top ambient glow */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent group-hover:via-emerald-400/50 transition-colors" />
 
-              {/* Order Card Top Bar */}
-              <div className="bg-emerald-600 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-700">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="font-mono text-xs sm:text-sm font-black text-white bg-black/20 px-3 py-1.5 rounded-lg border border-white/20 shrink-0">
-                    #{order.id}
-                  </span>
+              {/* Order Card Header */}
+              <div className="bg-gradient-to-r from-zinc-900 to-[#131315] p-5 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="bg-zinc-950 p-2 sm:p-3 rounded-2xl border border-zinc-800 shadow-inner flex flex-col items-center justify-center shrink-0 min-w-[70px]">
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase mb-0.5">Orden</span>
+                    <span className="font-mono text-sm sm:text-base font-black text-white">#{order.id}</span>
+                  </div>
                   <div className="min-w-0">
-                    <span className="text-sm sm:text-base font-black uppercase text-white block truncate">{order.productName}</span>
-                    <span className="text-[10px] sm:text-xs font-bold text-emerald-100 block">{order.date}</span>
+                    <span className="text-base sm:text-xl font-black uppercase text-zinc-100 block truncate tracking-tight">{order.productName}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-zinc-500 block uppercase tracking-widest">{order.date}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t border-emerald-700/50 sm:border-0">
+                <div className="flex items-center justify-between sm:justify-end gap-5 w-full sm:w-auto pt-4 sm:pt-0 border-t border-zinc-800 sm:border-0">
                   {getStatusBadge(order.status)}
-                  <span className="text-lg sm:text-xl font-black text-white shrink-0">${order.priceUSD.toFixed(2)} USD</span>
+                  <div className="bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                    <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight shrink-0 flex items-center gap-1">
+                      <span className="text-xs text-emerald-500/70 font-bold -mt-2">$</span>
+                      {order.priceUSD.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Order Content */}
-              <div className="p-4 sm:p-6 space-y-6">
+              <div className="p-5 sm:p-8 space-y-6 bg-[#0a0a0b]/40">
                 
-
-
                 {/* Product Instructions */}
-                <div className="bg-zinc-700/50 p-4 sm:p-5 rounded-xl border border-zinc-600/50 space-y-4">
-                  <span className="text-[10px] sm:text-xs font-black text-amber-400/80 uppercase tracking-widest block">
+                <div className="bg-[#18181b] p-5 sm:p-7 rounded-2xl border border-zinc-800/80 shadow-lg relative overflow-hidden">
+                  {/* Decorative background element */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+
+                  <span className="text-[10px] sm:text-xs font-black text-amber-500 uppercase tracking-widest block mb-5 flex items-center gap-2">
+                    <DiamondIcon size="sm" variant="gold" />
                     Instrucciones del producto
                   </span>
 
-                  <div className="text-zinc-300 text-sm space-y-3 font-semibold">
-                    <p>1. Accede al sitio oficial de canje de Free Fire <a href="https://redeempins.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300">https://redeempins.com/</a></p>
+                  <div className="text-zinc-300 text-sm sm:text-base space-y-4 font-medium relative z-10">
+                    <p className="flex items-start gap-2">
+                      <span className="text-zinc-500 font-black">1.</span> 
+                      <span>Accede al sitio oficial de canje de Free Fire <a href="https://redeempins.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold underline decoration-emerald-500/30 underline-offset-4 hover:text-emerald-300 hover:decoration-emerald-400 transition-colors">https://redeempins.com/</a></span>
+                    </p>
                     
-                    <div className="bg-zinc-900 border border-amber-500/30 p-3 rounded-lg flex flex-col gap-2 shadow-inner">
-                      <p>2. Copia este código:</p>
+                    <div className="bg-zinc-950 border border-amber-500/20 p-4 sm:p-5 rounded-xl shadow-inner ml-0 sm:ml-5 flex flex-col gap-3">
+                      <p className="flex items-start gap-2 text-zinc-400">
+                        <span className="text-amber-500/50 font-black">2.</span>
+                        Copia este código:
+                      </p>
+                      
                       {order.redemptionCode ? (
-                        <div className="flex items-center justify-between bg-black p-2 rounded border border-zinc-700">
-                          <span className="font-mono text-emerald-400 font-black tracking-widest text-sm sm:text-lg">{order.redemptionCode}</span>
+                        <div className="flex items-center justify-between bg-[#0a0a0b] p-2.5 rounded-lg border border-zinc-800 shadow-sm group">
+                          <span className="font-mono text-emerald-400 font-black tracking-[0.2em] text-lg sm:text-2xl px-3">{order.redemptionCode}</span>
                           <button 
                             onClick={() => {
                               navigator.clipboard.writeText(order.redemptionCode || '');
                               setCopiedCodeId(order.id);
                               setTimeout(() => setCopiedCodeId(null), 2000);
                             }}
-                            className="bg-zinc-800 hover:bg-zinc-700 p-2 rounded text-zinc-300 transition-colors"
+                            className={`p-3 rounded-md transition-all flex items-center justify-center ${
+                              copiedCodeId === order.id 
+                                ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]' 
+                                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white group-hover:border-zinc-600'
+                            }`}
                             title="Copiar código"
                           >
-                            {copiedCodeId === order.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                            {copiedCodeId === order.id ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                           </button>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 bg-black/50 p-2 rounded border border-zinc-800/80">
-                           <Clock className="w-4 h-4 text-amber-500/50" />
-                           <span className="text-amber-500/50 text-xs italic">El código estará disponible cuando se complete tu pedido.</span>
+                        <div className="flex items-center justify-center gap-3 bg-[#0a0a0b] p-4 rounded-lg border border-zinc-800/80 border-dashed">
+                           <RefreshCw className="w-5 h-5 text-amber-500/40 animate-spin-slow" />
+                           <span className="text-amber-500/60 text-sm font-semibold">El código estará disponible cuando se complete tu pedido.</span>
                         </div>
                       )}
                     </div>
                     
-                    <p>3. Pon tu ID de Free Fire.</p>
-                    <p>4. Toca «Verificar ID».</p>
-                    <p>5. Toca «Canjear».</p>
-                    <p>6. Entra al juego y disfruta tus diamantes.</p>
+                    <p className="flex items-start gap-2 text-zinc-400"><span className="text-zinc-600 font-black">3.</span> Pon tu ID de Free Fire.</p>
+                    <p className="flex items-start gap-2 text-zinc-400"><span className="text-zinc-600 font-black">4.</span> Toca <strong className="text-zinc-300 px-1">«Verificar ID»</strong>.</p>
+                    <p className="flex items-start gap-2 text-zinc-400"><span className="text-zinc-600 font-black">5.</span> Toca <strong className="text-zinc-300 px-1">«Canjear»</strong>.</p>
+                    <p className="flex items-start gap-2"><span className="text-emerald-500/50 font-black">6.</span> <span className="text-zinc-100 font-bold">Entra al juego y disfruta tus diamantes. 🎉</span></p>
                   </div>
                 </div>
 
                 {/* Footer Action Bar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-zinc-800">
-                  <span className="text-xs text-zinc-400 uppercase font-bold text-center sm:text-left flex items-center justify-center sm:justify-start gap-1.5">
-                    <ShieldAlert className="w-4 h-4 text-emerald-500/70" />
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                  <span className="text-[11px] text-zinc-500 uppercase font-bold text-center sm:text-left flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-emerald-500/40" />
                     ¿Dudas con este pedido? Contacta a soporte por WhatsApp.
                   </span>
 
                   <button
                     onClick={() => onOpenWhatsAppSupport(order)}
-                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-emerald-500 text-black font-black uppercase text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:bg-emerald-400 hover:scale-[1.02] transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-800 text-zinc-200 font-black uppercase text-xs flex items-center justify-center gap-2.5 border border-zinc-700 hover:bg-emerald-500 hover:text-black hover:border-emerald-400 transition-all cursor-pointer shadow-lg group"
                   >
-                    <MessageCircle className="w-4 h-4 shrink-0" />
-                    <span>Consultar WhatsApp (Pedido #{order.id})</span>
+                    <MessageCircle className="w-4 h-4 text-emerald-400 group-hover:text-black shrink-0 transition-colors" />
+                    <span>Soporte WhatsApp</span>
                   </button>
                 </div>
 
@@ -206,35 +229,16 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
             </div>
           ))
         ) : (
-          <div className="bg-zinc-900/60 rounded-2xl p-8 sm:p-12 text-center border border-zinc-800 space-y-3 text-white">
-            <Clock className="w-10 h-10 sm:w-12 sm:h-12 text-zinc-500 mx-auto" />
-            <h3 className="text-base sm:text-lg font-black uppercase">No hay pedidos registrados</h3>
-            <p className="text-xs text-zinc-400 max-w-sm mx-auto uppercase">
-              Realiza tu primera recarga en el Catálogo para darle seguimiento aquí.
+          <div className="bg-[#131315] rounded-[32px] p-10 sm:p-16 text-center border border-zinc-800/80 shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
+            <Clock className="w-12 h-12 sm:w-16 sm:h-16 text-zinc-600 mx-auto mb-6" />
+            <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight mb-2">No hay pedidos registrados</h3>
+            <p className="text-sm text-zinc-400 max-w-sm mx-auto font-medium">
+              Realiza tu primera compra en el catálogo para darle seguimiento y obtener tus códigos aquí.
             </p>
           </div>
         )}
       </div>
-
-      {/* Receipt Preview Modal */}
-      {viewingReceiptUrl && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 p-4 rounded-2xl max-w-xl w-full border border-zinc-800 space-y-4">
-            <div className="flex items-center justify-between text-white border-b border-zinc-800 pb-2">
-              <span className="font-bold text-sm">Visualizador de Baucher Comprobante</span>
-              <button
-                onClick={() => setViewingReceiptUrl(null)}
-                className="p-1 text-zinc-400 hover:text-white"
-              >
-                Cerrar
-              </button>
-            </div>
-            <div className="overflow-hidden rounded-xl max-h-[70vh] bg-black flex items-center justify-center">
-              <img src={viewingReceiptUrl} alt="Baucher" className="max-h-[65vh] object-contain" />
-            </div>
-          </div>
-        </div>
-      )}
 
     </section>
   );
