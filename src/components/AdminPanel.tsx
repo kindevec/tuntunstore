@@ -163,6 +163,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setCodesStats(Object.values(statsMap));
   };
 
+  useEffect(() => {
+    fetchCodesStats();
+  }, [products]);
+
   const handleUploadCodes = async () => {
     if (!codesProductId || !codesText.trim()) return;
     setIsUploadingCodes(true);
