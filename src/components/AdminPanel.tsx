@@ -172,11 +172,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     fetchCodesStats();
   }, [products]);
 
-  const handleUploadCodes = async () => {
-    if (!codesProductId || !codesText.trim()) return;
+  const handleUploadCodes = async (preSanitizedCodes?: string[]) => {
+    if (!codesProductId) return;
     setIsUploadingCodes(true);
     
-    const codes = codesText.split('\n').map(c => c.trim()).filter(c => c.length > 0);
+    // Use pre-sanitized codes from the new component, or fall back to parsing codesText
+    const codes = preSanitizedCodes && preSanitizedCodes.length > 0
+      ? preSanitizedCodes
+      : codesText.split('\n').map(c => c.trim()).filter(c => c.length > 0);
+      
     if (codes.length === 0) {
       setIsUploadingCodes(false);
       return;

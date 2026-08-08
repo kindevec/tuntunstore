@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
+import { Upload, X, AlertTriangle, CheckCircle2, FileText, Trash2, Shield, Sparkles } from 'lucide-react';
 
 export interface Product {
   id: string;
@@ -20,9 +21,29 @@ export interface AdminCodesTabProps {
   setCodesProductId: (id: string) => void;
   codesText: string;
   setCodesText: (text: string) => void;
-  handleUploadCodes: () => void;
+  handleUploadCodes: (codes?: string[]) => void;
   isUploadingCodes: boolean;
   codesStats: CodeStat[];
+}
+
+// Sanitize and parse raw text into unique, cleaned codes
+function parseCodes(raw: string): { valid: string[]; duplicates: string[]; empty: number } {
+  const lines = raw.split(/[\n,;]+/).map(l => l.trim().toUpperCase()).filter(Boolean);
+  const seen = new Set<string>();
+  const valid: string[] = [];
+  const duplicates: string[] = [];
+  let empty = 0;
+
+  for (const line of lines) {
+    if (!line) { empty++; continue; }
+    if (seen.has(line)) {
+      duplicates.push(line);
+    } else {
+      seen.add(line);
+      valid.push(line);
+    }
+  }
+  return { valid, duplicates, empty };
 }
 
 export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
@@ -35,24 +56,144 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
   isUploadingCodes,
   codesStats,
 }) => {
+  const [chips, setChips] = useState<string[]>([]);
+  const [duplicatesFound, setDuplicatesFound] = useState<string[]>([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+
+  const selectedProduct = useMemo(
+    () => products.find(p => p.id === codesProductId),
+    [products, codesProductId]
+  );
+
+  // Process raw text into chips
+  const processInput = useCallback((raw: string) => {
+    const { valid, duplicates } = parseCodes(raw);
+    setChips(valid);
+    setDuplicatesFound(duplicates);
+    setCodesText(valid.join('\n'));
+    setShowConfirmation(false);
+  }, [setCodesText]);
+
+  // Handle paste event on the input area
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text');
+    // Merge with existing chips
+    const combined = [...chips, ...pasted.split(/[\n,;]+/).map(l => l.trim().toUpperCase()).filter(Boolean)];
+    const uniqueSet = new Set<string>();
+    const newDups: string[] = [];
+    const uniqueCodes: string[] = [];
+    for (const c of combined) {
+      if (uniqueSet.has(c)) { newDups.push(c); } else { uniqueSet.add(c); uniqueCodes.push(c); }
+    }
+    setChips(uniqueCodes);
+    setDuplicatesFound(newDups);
+    setCodesText(uniqueCodes.join('\n'));
+    setShowConfirmation(false);
+  }, [chips, setCodesText]);
+
+  // Handle file drop or selection
+  const handleFile = useCallback((file: File) => {
+    if (!file.name.match(/\.(txt|csv)$/i)) {
+      alert('Solo se permiten archivos .txt o .csv');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const combined = [...chips, ...text.split(/[\n,;]+/).map(l => l.trim().toUpperCase()).filter(Boolean)];
+      const uniqueSet = new Set<string>();
+      const newDups: string[] = [];
+      const uniqueCodes: string[] = [];
+      for (const c of combined) {
+        if (uniqueSet.has(c)) { newDups.push(c); } else { uniqueSet.add(c); uniqueCodes.push(c); }
+      }
+      setChips(uniqueCodes);
+      setDuplicatesFound(newDups);
+      setCodesText(uniqueCodes.join('\n'));
+      setShowConfirmation(false);
+    };
+    reader.readAsText(file);
+  }, [chips, setCodesText]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFile(file);
+  }, [handleFile]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const removeChip = useCallback((index: number) => {
+    setChips(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      setCodesText(updated.join('\n'));
+      return updated;
+    });
+    setShowConfirmation(false);
+  }, [setCodesText]);
+
+  const clearAll = useCallback(() => {
+    setChips([]);
+    setDuplicatesFound([]);
+    setCodesText('');
+    setShowConfirmation(false);
+  }, [setCodesText]);
+
+  // Two-step flow
+  const handleStep1 = () => {
+    if (!codesProductId || chips.length === 0) return;
+    setShowConfirmation(true);
+  };
+
+  const handleStep2Confirm = () => {
+    handleUploadCodes(chips);
+    setChips([]);
+    setDuplicatesFound([]);
+    setShowConfirmation(false);
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-wider flex items-center gap-2">
         🔑 Gestión de Códigos de Recarga
       </h2>
-      
-      {/* Upload Section */}
-      <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-4 md:p-6 space-y-4">
-        <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Subir Códigos Nuevos</h3>
-        
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* UPLOAD SECTION - Modern Redesign                    */}
+      {/* ═══════════════════════════════════════════════════ */}
+      <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-4 md:p-6 space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
+            <Upload className="w-4 h-4 text-amber-400" />
+          </div>
+          <div>
+            <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Subir Códigos Nuevos</h3>
+            <p className="text-[10px] text-zinc-500">Pega, escribe o arrastra un archivo .txt / .csv</p>
+          </div>
+        </div>
+
+        {/* Product Selector */}
         <div>
           <label className="block text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase mb-2">
             Seleccionar Producto
           </label>
           <select
             value={codesProductId}
-            onChange={(e) => setCodesProductId(e.target.value)}
-            className="w-full bg-black/50 border border-white/10 rounded-xl px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm text-zinc-100 focus:outline-none focus:border-amber-500 font-semibold cursor-pointer"
+            onChange={(e) => { setCodesProductId(e.target.value); setShowConfirmation(false); }}
+            className="w-full bg-black/50 border border-white/10 rounded-xl px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm text-zinc-100 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 font-semibold cursor-pointer transition-all"
           >
             <option value="">-- Selecciona un producto --</option>
             {products.map((p) => (
@@ -60,35 +201,222 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
             ))}
           </select>
         </div>
-        
-        <div>
-          <label className="block text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase mb-2">
-            Códigos (uno por línea)
-          </label>
-          <textarea
-            value={codesText}
-            onChange={(e) => setCodesText(e.target.value)}
-            rows={6}
-            placeholder="ABCD-1234-EFGH&#10;IJKL-5678-MNOP&#10;QRST-9012-UVWX"
-            className="w-full bg-black/50 border border-white/10 rounded-xl px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm text-zinc-100 focus:outline-none focus:border-amber-500 font-mono placeholder-zinc-600 resize-none"
-          />
+
+        {/* ── Drag & Drop Zone + Paste Area ── */}
+        <div
+          ref={dropZoneRef}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={`relative rounded-xl border-2 border-dashed transition-all duration-300 ${
+            isDragging
+              ? 'border-amber-400 bg-amber-500/10 shadow-[0_0_30px_rgba(251,191,36,0.15)]'
+              : 'border-white/10 hover:border-white/20 bg-black/30'
+          }`}
+        >
+          {/* Drag overlay */}
+          {isDragging && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-amber-500/10 backdrop-blur-sm">
+              <FileText className="w-10 h-10 text-amber-400 mb-2 animate-bounce" />
+              <p className="text-sm font-black text-amber-400 uppercase">Suelta el archivo aquí</p>
+            </div>
+          )}
+
+          <div className="p-4 space-y-3">
+            {/* Chip display area */}
+            {chips.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                {chips.map((code, idx) => (
+                  <span
+                    key={`${code}-${idx}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] md:text-[11px] font-mono font-bold group hover:bg-emerald-500/25 transition-all"
+                  >
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                    {code}
+                    <button
+                      onClick={() => removeChip(idx)}
+                      className="ml-0.5 text-emerald-400/50 hover:text-rose-400 transition-colors cursor-pointer"
+                      title="Eliminar código"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-zinc-800/80 flex items-center justify-center mb-3">
+                  <FileText className="w-5 h-5 text-zinc-500" />
+                </div>
+                <p className="text-xs text-zinc-400 font-semibold mb-1">Arrastra un archivo .txt o .csv aquí</p>
+                <p className="text-[10px] text-zinc-600">o pega los códigos en el campo de abajo</p>
+              </div>
+            )}
+
+            {/* Hidden textarea for paste input */}
+            <textarea
+              value=""
+              onPaste={handlePaste}
+              onChange={(e) => {
+                // If user types directly, also process
+                const raw = e.target.value;
+                if (raw.includes('\n') || raw.length > 5) {
+                  processInput([...chips, raw].join('\n'));
+                  e.target.value = '';
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const target = e.target as HTMLTextAreaElement;
+                  const val = target.value.trim().toUpperCase();
+                  if (val) {
+                    if (chips.includes(val)) {
+                      setDuplicatesFound(prev => [...prev, val]);
+                    } else {
+                      setChips(prev => [...prev, val]);
+                      setCodesText([...chips, val].join('\n'));
+                    }
+                    target.value = '';
+                    setShowConfirmation(false);
+                  }
+                }
+              }}
+              rows={2}
+              placeholder={chips.length > 0 ? 'Pega más códigos o escribe uno y presiona Enter...' : 'Pega los códigos aquí (Ctrl+V) o escribe uno y presiona Enter...'}
+              className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-amber-500/40 font-mono placeholder-zinc-600 resize-none"
+            />
+
+            {/* File picker button */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-white/5 text-[10px] font-bold text-zinc-300 uppercase flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <FileText className="w-3 h-3" />
+                Cargar archivo
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt,.csv"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFile(file);
+                  e.target.value = '';
+                }}
+              />
+              {chips.length > 0 && (
+                <button
+                  onClick={clearAll}
+                  className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-[10px] font-bold text-rose-400 uppercase flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Limpiar todo
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-        
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-          <p className="text-[10px] md:text-xs text-zinc-500">
-            {codesText.split('\n').filter(c => c.trim().length > 0).length} códigos detectados
-          </p>
+
+        {/* ── Duplicates Warning ── */}
+        {duplicatesFound.length > 0 && (
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[11px] font-bold text-amber-300">
+                {duplicatesFound.length} código{duplicatesFound.length > 1 ? 's' : ''} duplicado{duplicatesFound.length > 1 ? 's' : ''} eliminado{duplicatesFound.length > 1 ? 's' : ''}
+              </p>
+              <p className="text-[10px] text-amber-400/60 mt-0.5">
+                {duplicatesFound.slice(0, 5).join(', ')}{duplicatesFound.length > 5 ? ` y ${duplicatesFound.length - 5} más...` : ''}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Stats bar ── */}
+        <div className="flex flex-wrap items-center gap-3 text-[10px] md:text-[11px]">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            <span className="text-emerald-300 font-bold">{chips.length}</span>
+            <span className="text-emerald-400/60">válidos</span>
+          </div>
+          {duplicatesFound.length > 0 && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
+              <AlertTriangle className="w-3 h-3 text-amber-400" />
+              <span className="text-amber-300 font-bold">{duplicatesFound.length}</span>
+              <span className="text-amber-400/60">duplicados</span>
+            </div>
+          )}
+          {selectedProduct && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <Sparkles className="w-3 h-3 text-blue-400" />
+              <span className="text-blue-300 font-bold">{selectedProduct.name}</span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Two-Step Confirmation Flow ── */}
+        {!showConfirmation ? (
           <button
-            onClick={handleUploadCodes}
-            disabled={!codesProductId || !codesText.trim() || isUploadingCodes}
-            className="w-full sm:w-auto justify-center px-4 md:px-6 py-2.5 md:py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-black font-black text-[10px] md:text-xs uppercase flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+            onClick={handleStep1}
+            disabled={!codesProductId || chips.length === 0 || isUploadingCodes}
+            className="w-full sm:w-auto justify-center px-5 md:px-6 py-2.5 md:py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-700 disabled:text-zinc-500 text-black font-black text-[10px] md:text-xs uppercase flex items-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-amber-500/20"
           >
-            {isUploadingCodes ? 'Subiendo...' : '⬆ Subir Códigos'}
+            <Shield className="w-4 h-4" />
+            Revisar y Confirmar
           </button>
-        </div>
+        ) : (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3 animate-in">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                <Shield className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-black text-white">¿Confirmar subida?</p>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  Vas a subir <span className="text-amber-300 font-bold">{chips.length}</span> código{chips.length > 1 ? 's' : ''} para el producto{' '}
+                  <span className="text-amber-300 font-bold">{selectedProduct?.name}</span>.
+                  {duplicatesFound.length > 0 && (
+                    <> <span className="text-amber-400">{duplicatesFound.length}</span> duplicado{duplicatesFound.length > 1 ? 's' : ''} ya fueron omitidos.</>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={handleStep2Confirm}
+                disabled={isUploadingCodes}
+                className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[10px] md:text-xs uppercase flex items-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-emerald-500/20"
+              >
+                {isUploadingCodes ? (
+                  <>
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Subiendo...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    Confirmar subida de {chips.length} código{chips.length > 1 ? 's' : ''}
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setShowConfirmation(false)}
+                disabled={isUploadingCodes}
+                className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-[10px] md:text-xs uppercase transition-all cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-      
-      {/* Stats Section */}
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* INVENTORY STATS SECTION                            */}
+      {/* ═══════════════════════════════════════════════════ */}
       <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-4 md:p-6 space-y-4">
         <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Inventario de Códigos por Producto</h3>
         
