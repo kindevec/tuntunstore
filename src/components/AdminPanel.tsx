@@ -413,7 +413,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           filteredOrders={filteredOrders}
           handleCopyPlayerId={handleCopyPlayerId}
           copiedPlayerId={copiedPlayerId}
-          onUpdateOrderStatus={handleUpdateOrderStatus}
+          onUpdateOrderStatus={onUpdateOrderStatus}
           setSelectedReceiptUrl={setSelectedReceiptUrl}
         />
       )}
@@ -422,9 +422,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {activeTab === 'catalog' && (
         <AdminCatalogTab
           products={products}
-          onAddProduct={handleCreateProduct}
-          onUpdateProduct={handleUpdateProduct}
-          onDeleteProduct={handleDeleteProduct}
+          onAddProduct={onAddProduct}
+          onUpdateProduct={onUpdateProduct}
+          onDeleteProduct={onDeleteProduct}
         />
       )}
 
@@ -432,7 +432,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {activeTab === 'email' && (
         <AdminEmailTab
           emailConfig={emailConfig}
-          onUpdateEmailConfig={handleUpdateEmailConfig}
+          onUpdateEmailConfig={onUpdateEmailConfig}
           triggerTestEmailAlert={triggerTestEmailAlert}
           testEmailSentSuccess={testEmailSentSuccess}
         />
@@ -443,7 +443,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <AdminWalletsTab
           registeredUsers={registeredUsers}
           pendingTopUps={pendingTopUps}
-          onUpdateTopUpStatus={handleUpdateTopUpStatus}
+          onUpdateTopUpStatus={onUpdateTopUpStatus}
           setSelectedReceiptUrl={setSelectedReceiptUrl}
           handleViewUserHistory={handleViewUserHistory}
         />
