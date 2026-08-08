@@ -556,8 +556,10 @@ export default function App() {
         cleanText = cleanText.replace(/\|/g, '1').replace(/l/g, '1'); // '1' read as 'l' or '|'
 
         let isValidDate = false;
+        let matchedDateLabel = '';
         
-        for (const dateObj of datesToCheck) {
+        for (let i = 0; i < datesToCheck.length; i++) {
+           const dateObj = datesToCheck[i];
            if (isValidDate) break;
            
            for (const dateStr of dateObj.strings) {
@@ -565,6 +567,7 @@ export default function App() {
              const regex = new RegExp(flexibleStr, 'i');
              if (regex.test(cleanText)) {
                isValidDate = true;
+               matchedDateLabel = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : 'Hace 2 días';
                break;
              }
            }
@@ -577,8 +580,13 @@ export default function App() {
                (cleanText.includes(dateObj.y) || cleanText.includes(` ${dateObj.shortY} `) || cleanText.includes(` ${dateObj.shortY}`) || cleanText.includes(`${dateObj.shortY} `))
              ) {
                isValidDate = true;
+               matchedDateLabel = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : 'Hace 2 días';
              }
            }
+        }
+        
+        if (isValidDate && matchedDateLabel !== 'Hoy') {
+           verificationWarnings.push(`⚠️ Fecha antigua: El comprobante detectado es de ${matchedDateLabel}.`);
         }
 
         if (!isValidDate) {
@@ -589,8 +597,17 @@ export default function App() {
            if (matches.length === 0) {
               verificationWarnings.push('⚠️ Fecha no detectada: El OCR no pudo encontrar ninguna fecha clara en el comprobante.');
            } else {
-              verificationWarnings.push(`⚠️ Fecha antigua: El comprobante parece ser antiguo (fuera del rango válido de 3 días).`);
+              const detectedDate = matches[0][0].trim();
+              verificationWarnings.push(`⚠️ Fecha muy antigua: Se detectó "${detectedDate}" pero está fuera de los 3 días válidos.`);
            }
+        }
+        
+        // Validate if it is actually a receipt
+        const receiptKeywords = ['transferencia', 'depósito', 'deposito', 'comprobante', 'pago', 'monto', 'banco', 'cuenta', 'referencia', 'documento', 'saldo', 'exitoso', 'aprobado', 'detalles'];
+        const isReceipt = receiptKeywords.some(kw => cleanText.includes(kw));
+        
+        if (!isReceipt) {
+           verificationWarnings.push('⚠️ Imagen Sospechosa: El texto no contiene palabras típicas de un comprobante bancario (pago, transferencia, etc.).');
         }
         
       } catch (error) {
