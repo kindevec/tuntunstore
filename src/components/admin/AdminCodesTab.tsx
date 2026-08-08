@@ -28,7 +28,7 @@ export interface AdminCodesTabProps {
 
 // Sanitize and parse raw text into unique, cleaned codes
 function parseCodes(raw: string): { valid: string[]; duplicates: string[]; empty: number } {
-  const lines = raw.split(/[\n,;]+/).map(l => l.trim().toUpperCase()).filter(Boolean);
+  const lines = raw.split(/[\n,;\s]+/).map(l => l.trim().toUpperCase()).filter(Boolean);
   const seen = new Set<string>();
   const valid: string[] = [];
   const duplicates: string[] = [];
@@ -83,7 +83,7 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
     e.preventDefault();
     const pasted = e.clipboardData.getData('text');
     // Merge with existing chips
-    const combined = [...chips, ...pasted.split(/[\n,;]+/).map(l => l.trim().toUpperCase()).filter(Boolean)];
+    const combined = [...chips, ...pasted.split(/[\n,;\s]+/).map(l => l.trim().toUpperCase()).filter(Boolean)];
     const uniqueSet = new Set<string>();
     const newDups: string[] = [];
     const uniqueCodes: string[] = [];
@@ -105,7 +105,7 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
-      const combined = [...chips, ...text.split(/[\n,;]+/).map(l => l.trim().toUpperCase()).filter(Boolean)];
+      const combined = [...chips, ...text.split(/[\n,;\s]+/).map(l => l.trim().toUpperCase()).filter(Boolean)];
       const uniqueSet = new Set<string>();
       const newDups: string[] = [];
       const uniqueCodes: string[] = [];
@@ -189,7 +189,7 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
           </div>
           <div>
             <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Subir Códigos Nuevos</h3>
-            <p className="text-[10px] text-zinc-500">Pega, escribe o arrastra un archivo .txt / .csv</p>
+            <p className="text-[10px] text-zinc-500">Pega los códigos o escríbelos manualmente</p>
           </div>
         </div>
 
@@ -278,8 +278,7 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
                 <div className="w-12 h-12 rounded-full bg-zinc-800/80 flex items-center justify-center mb-3">
                   <FileText className="w-5 h-5 text-zinc-500" />
                 </div>
-                <p className="text-xs text-zinc-400 font-semibold mb-1">Arrastra un archivo .txt o .csv aquí</p>
-                <p className="text-[10px] text-zinc-600">o pega los códigos en el campo de abajo</p>
+                <p className="text-xs text-zinc-400 font-semibold mb-1">Pega tus códigos en el campo de abajo</p>
               </div>
             )}
 
@@ -317,26 +316,8 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
               className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-amber-500/40 font-mono placeholder-zinc-600 resize-none"
             />
 
-            {/* File picker button */}
+            {/* Clear All button */}
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-white/5 text-[10px] font-bold text-zinc-300 uppercase flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <FileText className="w-3 h-3" />
-                Cargar archivo
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".txt,.csv"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFile(file);
-                  e.target.value = '';
-                }}
-              />
               {chips.length > 0 && (
                 <button
                   onClick={clearAll}
