@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Order, OrderStatus, Product, EmailAlertConfig, UserProfile } from '../types';
 import { DiamondIcon } from './DiamondIcon';
 import { 
