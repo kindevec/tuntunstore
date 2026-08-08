@@ -143,91 +143,7 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
               {/* Order Content */}
               <div className="p-4 sm:p-6 space-y-6">
                 
-                {/* Details Grid - Responsive 2 columns on mobile */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-xs">
-                  <div className="bg-zinc-700 p-3 sm:p-4 rounded-xl border border-zinc-600/50 col-span-2 sm:col-span-1 shadow-sm">
-                    <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">ID del Jugador:</span>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono font-black text-sm sm:text-base text-zinc-100 truncate">{order.playerId}</span>
-                      <button
-                        onClick={() => handleCopy(order.playerId)}
-                        className="p-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0 cursor-pointer"
-                        title="Copiar ID"
-                      >
-                        {copiedId === order.playerId ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
 
-                    {/* Código de Recarga */}
-                    {order.redemptionCode && (
-                      <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex-1">
-                            <p className="text-[10px] text-amber-400 font-black uppercase tracking-wider mb-1">🔑 Código de Recarga</p>
-                            <p className={`font-mono font-bold text-sm ${revealedCodes[order.id] ? 'text-amber-300' : 'text-zinc-500'}`}>
-                              {revealedCodes[order.id] ? order.redemptionCode : '•••• •••• •••• ••••'}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setRevealedCodes(prev => ({ ...prev, [order.id]: !prev[order.id] })); }}
-                              className="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase hover:bg-amber-500/30 transition-all cursor-pointer"
-                            >
-                              {revealedCodes[order.id] ? 'Ocultar' : 'Mostrar'}
-                            </button>
-                            {revealedCodes[order.id] && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigator.clipboard.writeText(order.redemptionCode!);
-                                  setCopiedCodeId(order.id);
-                                  setTimeout(() => setCopiedCodeId(null), 2000);
-                                }}
-                                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer ${
-                                  copiedCodeId === order.id
-                                    ? 'bg-emerald-500 text-black'
-                                    : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
-                                }`}
-                              >
-                                {copiedCodeId === order.id ? '✓ Copiado' : 'Copiar'}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="bg-zinc-700 p-3 sm:p-4 rounded-xl border border-zinc-600/50 shadow-sm">
-                    <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Total Diamantes:</span>
-                    <span className="font-black text-sm sm:text-base text-emerald-400 block">
-                      {order.diamondsTotal.toLocaleString()} 💎
-                    </span>
-                  </div>
-
-                  <div className="bg-zinc-700 p-3 sm:p-4 rounded-xl border border-zinc-600/50 shadow-sm">
-                    <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Banco Utilizado:</span>
-                    <span className="font-black text-sm text-zinc-100 block truncate">{order.bankName}</span>
-                  </div>
-
-                  <div className="bg-zinc-700 p-3 sm:p-4 rounded-xl border border-zinc-600/50 col-span-2 sm:col-span-1 flex items-center justify-between shadow-sm">
-                    <div className="min-w-0 pr-2">
-                      <span className="text-zinc-400 font-extrabold uppercase text-[10px] block mb-1">Comprobante:</span>
-                      <span className="font-bold text-zinc-300 text-xs truncate block">
-                        {order.receiptFileName || 'Ver imagen'}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setViewingReceiptUrl(order.receiptUrl)}
-                      className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 font-black text-xs flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
-                    >
-                      <ImageIcon className="w-4 h-4" />
-                      <span>Ver</span>
-                    </button>
-                  </div>
-                </div>
 
                 {/* Product Instructions */}
                 <div className="bg-zinc-700/50 p-4 sm:p-5 rounded-xl border border-zinc-600/50 space-y-4">
@@ -242,33 +158,18 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                       <p>2. Copia este código:</p>
                       {order.redemptionCode ? (
                         <div className="flex items-center justify-between bg-black p-2 rounded border border-zinc-700">
-                          {revealedCodes[order.id] ? (
-                            <span className="font-mono text-emerald-400 font-black tracking-widest text-sm sm:text-lg">{order.redemptionCode}</span>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-zinc-600 font-black tracking-widest text-sm sm:text-lg select-none blur-[2px]">XXXX-XXXX-XXXX</span>
-                              <button
-                                onClick={() => setRevealedCodes(prev => ({...prev, [order.id]: true}))}
-                                className="text-[10px] text-amber-400 font-black uppercase bg-amber-400/10 px-2 py-1 rounded border border-amber-400/20 hover:bg-amber-400/20 transition-colors"
-                              >
-                                Mostrar
-                              </button>
-                            </div>
-                          )}
-                          
-                          {revealedCodes[order.id] && (
-                            <button 
-                              onClick={() => {
-                                navigator.clipboard.writeText(order.redemptionCode || '');
-                                setCopiedCodeId(order.id);
-                                setTimeout(() => setCopiedCodeId(null), 2000);
-                              }}
-                              className="bg-zinc-800 hover:bg-zinc-700 p-2 rounded text-zinc-300 transition-colors"
-                              title="Copiar código"
-                            >
-                              {copiedCodeId === order.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                            </button>
-                          )}
+                          <span className="font-mono text-emerald-400 font-black tracking-widest text-sm sm:text-lg">{order.redemptionCode}</span>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(order.redemptionCode || '');
+                              setCopiedCodeId(order.id);
+                              setTimeout(() => setCopiedCodeId(null), 2000);
+                            }}
+                            className="bg-zinc-800 hover:bg-zinc-700 p-2 rounded text-zinc-300 transition-colors"
+                            title="Copiar código"
+                          >
+                            {copiedCodeId === order.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                          </button>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 bg-black/50 p-2 rounded border border-zinc-800/80">
