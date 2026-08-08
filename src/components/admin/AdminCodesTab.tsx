@@ -21,7 +21,7 @@ export interface AdminCodesTabProps {
   setCodesProductId: (id: string) => void;
   codesText: string;
   setCodesText: (text: string) => void;
-  handleUploadCodes: (codes?: string[]) => void;
+  handleUploadCodes: (codes?: string[]) => Promise<{ success: boolean; error?: string; count?: number } | void>;
   isUploadingCodes: boolean;
   codesStats: CodeStat[];
 }
@@ -60,6 +60,7 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
   const [duplicatesFound, setDuplicatesFound] = useState<string[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [notification, setNotification] = useState<{type: 'success'|'error', message: string} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
@@ -158,11 +159,18 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
     setShowConfirmation(true);
   };
 
-  const handleStep2Confirm = () => {
-    handleUploadCodes(chips);
-    setChips([]);
-    setDuplicatesFound([]);
-    setShowConfirmation(false);
+  const handleStep2Confirm = async () => {
+    const result = await handleUploadCodes(chips);
+    if (result && result.success) {
+      setChips([]);
+      setDuplicatesFound([]);
+      setShowConfirmation(false);
+      setNotification({ type: 'success', message: `¡${result.count} códigos subidos exitosamente!` });
+      setTimeout(() => setNotification(null), 5000);
+    } else if (result && result.error) {
+      setNotification({ type: 'error', message: `Error al subir: ${result.error}` });
+      setTimeout(() => setNotification(null), 6000);
+    }
   };
 
   return (
@@ -184,6 +192,28 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
             <p className="text-[10px] text-zinc-500">Pega, escribe o arrastra un archivo .txt / .csv</p>
           </div>
         </div>
+
+        {/* ── Notification Banner ── */}
+        {notification && (
+          <div className={`flex items-start gap-3 p-4 rounded-xl border animate-in slide-in-from-top-2 ${
+            notification.type === 'success' 
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+              : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+          }`}>
+            {notification.type === 'success' ? (
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+            )}
+            <p className="text-sm font-bold mt-0.5">{notification.message}</p>
+            <button 
+              onClick={() => setNotification(null)}
+              className="ml-auto p-1 hover:bg-black/20 rounded-lg transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Product Selector */}
         <div>

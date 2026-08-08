@@ -173,7 +173,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   }, [products]);
 
   const handleUploadCodes = async (preSanitizedCodes?: string[]) => {
-    if (!codesProductId) return;
+    if (!codesProductId) return { success: false, error: 'No product selected' };
     setIsUploadingCodes(true);
     
     // Use pre-sanitized codes from the new component, or fall back to parsing codesText
@@ -183,7 +183,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       
     if (codes.length === 0) {
       setIsUploadingCodes(false);
-      return;
+      return { success: false, error: 'No codes provided' };
     }
     
     const rows = codes.map(code => ({
@@ -194,14 +194,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     
     const { error } = await supabase.from('redemption_codes').insert(rows);
     
+    setIsUploadingCodes(false);
+    
     if (error) {
-      alert(`Error al subir códigos: ${error.message}`);
+      return { success: false, error: error.message };
     } else {
-      alert(`✅ ${codes.length} códigos subidos exitosamente.`);
       setCodesText('');
       fetchCodesStats();
+      return { success: true, count: codes.length };
     }
-    setIsUploadingCodes(false);
   };
 
   // Stats Calculations
