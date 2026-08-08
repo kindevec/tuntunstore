@@ -229,63 +229,59 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                   </div>
                 </div>
 
-                {/* Status Progress Timeline */}
+                {/* Product Instructions */}
                 <div className="bg-zinc-700/50 p-4 sm:p-5 rounded-xl border border-zinc-600/50 space-y-4">
-                  <span className="text-[10px] sm:text-xs font-black text-emerald-400/80 uppercase tracking-widest block">
-                    Línea de Tiempo de Acreditación
+                  <span className="text-[10px] sm:text-xs font-black text-amber-400/80 uppercase tracking-widest block">
+                    Instrucciones del producto
                   </span>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="text-zinc-300 text-sm space-y-3 font-semibold">
+                    <p>1. Accede al sitio oficial de canje de Free Fire <a href="https://redeempins.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300">https://redeempins.com/</a></p>
                     
-                    {/* Step 1: Registered */}
-                    <div className="p-3 sm:p-4 rounded-xl bg-zinc-900 border border-emerald-500/30 flex items-start gap-3 shadow-inner">
-                      <div className="p-1.5 rounded-full bg-emerald-500/20 text-emerald-400 shrink-0">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="font-black text-zinc-100 text-xs uppercase mb-0.5">1. Pedido Registrado</p>
-                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Comprobante recibido.</p>
-                      </div>
+                    <div className="bg-zinc-900 border border-amber-500/30 p-3 rounded-lg flex flex-col gap-2 shadow-inner">
+                      <p>2. Copia este código:</p>
+                      {order.redemptionCode ? (
+                        <div className="flex items-center justify-between bg-black p-2 rounded border border-zinc-700">
+                          {revealedCodes[order.id] ? (
+                            <span className="font-mono text-emerald-400 font-black tracking-widest text-sm sm:text-lg">{order.redemptionCode}</span>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-zinc-600 font-black tracking-widest text-sm sm:text-lg select-none blur-[2px]">XXXX-XXXX-XXXX</span>
+                              <button
+                                onClick={() => setRevealedCodes(prev => ({...prev, [order.id]: true}))}
+                                className="text-[10px] text-amber-400 font-black uppercase bg-amber-400/10 px-2 py-1 rounded border border-amber-400/20 hover:bg-amber-400/20 transition-colors"
+                              >
+                                Mostrar
+                              </button>
+                            </div>
+                          )}
+                          
+                          {revealedCodes[order.id] && (
+                            <button 
+                              onClick={() => {
+                                navigator.clipboard.writeText(order.redemptionCode || '');
+                                setCopiedCodeId(order.id);
+                                setTimeout(() => setCopiedCodeId(null), 2000);
+                              }}
+                              className="bg-zinc-800 hover:bg-zinc-700 p-2 rounded text-zinc-300 transition-colors"
+                              title="Copiar código"
+                            >
+                              {copiedCodeId === order.id ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 bg-black/50 p-2 rounded border border-zinc-800/80">
+                           <Clock className="w-4 h-4 text-amber-500/50" />
+                           <span className="text-amber-500/50 text-xs italic">El código estará disponible cuando se complete tu pedido.</span>
+                        </div>
+                      )}
                     </div>
-
-                    {/* Step 2: Processing */}
-                    <div className={`p-3 sm:p-4 rounded-xl border flex items-start gap-3 shadow-inner ${
-                      order.status === 'En proceso' || order.status === 'Completado'
-                        ? 'bg-zinc-700 border-emerald-500/30'
-                        : 'bg-zinc-800 border-zinc-600/50 opacity-60'
-                    }`}>
-                      <div className={`p-1.5 rounded-full shrink-0 ${
-                        order.status === 'En proceso'
-                          ? 'bg-sky-500/20 text-sky-400 animate-pulse'
-                          : order.status === 'Completado'
-                          ? 'bg-emerald-500/20 text-emerald-400'
-                          : 'bg-zinc-800 text-zinc-500'
-                      }`}>
-                        <RefreshCw className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className={`font-black text-xs uppercase mb-0.5 ${order.status === 'En proceso' || order.status === 'Completado' ? 'text-zinc-100' : 'text-zinc-500'}`}>2. En Proceso</p>
-                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Cargando diamantes al ID.</p>
-                      </div>
-                    </div>
-
-                    {/* Step 3: Completed */}
-                    <div className={`p-3 sm:p-4 rounded-xl border flex items-start gap-3 shadow-inner ${
-                      order.status === 'Completado'
-                        ? 'bg-emerald-950/20 border-emerald-500/50'
-                        : 'bg-zinc-800 border-zinc-700/50 opacity-60'
-                    }`}>
-                      <div className={`p-1.5 rounded-full shrink-0 ${
-                        order.status === 'Completado' ? 'bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-zinc-800 text-zinc-500'
-                      }`}>
-                        <DiamondIcon size="sm" variant={order.status === 'Completado' ? 'emerald' : 'gold'} />
-                      </div>
-                      <div>
-                        <p className={`font-black text-xs uppercase mb-0.5 ${order.status === 'Completado' ? 'text-zinc-100' : 'text-zinc-500'}`}>3. Entregado</p>
-                        <p className="text-[10px] text-zinc-400 uppercase font-bold">Verifica en tu juego.</p>
-                      </div>
-                    </div>
-
+                    
+                    <p>3. Pon tu ID de Free Fire.</p>
+                    <p>4. Toca «Verificar ID».</p>
+                    <p>5. Toca «Canjear».</p>
+                    <p>6. Entra al juego y disfruta tus diamantes.</p>
                   </div>
                 </div>
 
