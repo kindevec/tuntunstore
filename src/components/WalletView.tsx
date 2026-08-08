@@ -68,58 +68,58 @@ export const WalletView: React.FC<WalletViewProps> = ({
     if (!selectedBank) return null;
 
     return (
-      <div className={`bg-amber-950/40 border border-amber-500/30 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden ${isMobile ? 'mt-3 animate-in slide-in-from-top-2' : ''}`}>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+      <div className={`bg-amber-950/40 border border-amber-500/30 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden ${isMobile ? 'mt-2 animate-in slide-in-from-top-2' : ''}`}>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
         
-        <div className="flex items-center gap-2 mb-6">
-          <Building2 className="w-5 h-5 text-amber-400" />
-          <h3 className="font-black text-sm uppercase tracking-wider text-amber-400">Datos para Transferir</h3>
+        <div className="flex items-center gap-2 mb-3">
+          <Building2 className="w-4 h-4 text-amber-400" />
+          <h3 className="font-black text-xs uppercase tracking-wider text-amber-400">Datos para Transferir</h3>
         </div>
-        <div className="space-y-4">
-          <div>
-            <p className="text-[10px] text-zinc-400 uppercase font-black mb-1">
+        <div className="space-y-2">
+          <div className="mb-1">
+            <p className="text-[9px] text-zinc-400 uppercase font-black mb-0.5">
               {selectedBank.notes || 'Banco Seleccionado'}
             </p>
-            <p className="font-black text-lg text-white uppercase">{selectedBank.bankName}</p>
+            <p className="font-black text-sm text-white uppercase leading-tight">{selectedBank.bankName}</p>
           </div>
 
-          <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+          <div className="bg-black/40 p-2.5 rounded-lg border border-white/10 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-zinc-500 uppercase font-black block">Número de Cuenta / ID</span>
-              <span className="font-mono text-base font-black text-white">{selectedBank.accountNumber}</span>
+              <span className="text-[9px] text-zinc-500 uppercase font-black block mb-0.5">Número de Cuenta / ID</span>
+              <span className="font-mono text-sm font-black text-white leading-none">{selectedBank.accountNumber}</span>
             </div>
             <button
               onClick={() => handleCopy(selectedBank.accountNumber, 'num')}
-              className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
+              className="p-1.5 rounded-md bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
             >
-              {copiedField === 'num' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copiedField === 'num' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           </div>
 
-          <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+          <div className="bg-black/40 p-2.5 rounded-lg border border-white/10 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-zinc-500 uppercase font-black block">Titular de la Cuenta</span>
-              <span className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-none">{selectedBank.holderName}</span>
+              <span className="text-[9px] text-zinc-500 uppercase font-black block mb-0.5">Titular de la Cuenta</span>
+              <span className="font-bold text-xs text-white truncate max-w-[150px] sm:max-w-none leading-none">{selectedBank.holderName}</span>
             </div>
             <button
               onClick={() => handleCopy(selectedBank.holderName, 'holder')}
-              className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
+              className="p-1.5 rounded-md bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
             >
-              {copiedField === 'holder' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copiedField === 'holder' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           </div>
 
           {selectedBank.holderId && (
-            <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+            <div className="bg-black/40 p-2.5 rounded-lg border border-white/10 flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-zinc-500 uppercase font-black block">Cédula / Correo (Binance)</span>
-                <span className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-none">{selectedBank.holderId}</span>
+                <span className="text-[9px] text-zinc-500 uppercase font-black block mb-0.5">Cédula / Correo</span>
+                <span className="font-bold text-xs text-white truncate max-w-[150px] sm:max-w-none leading-none">{selectedBank.holderId}</span>
               </div>
               <button
                 onClick={() => handleCopy(selectedBank.holderId, 'holderId')}
-                className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
+                className="p-1.5 rounded-md bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
               >
-                {copiedField === 'holderId' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copiedField === 'holderId' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
           )}
