@@ -22,7 +22,7 @@ interface WalletViewProps {
   onNavigateToCatalog: () => void;
 }
 
-const PRESET_AMOUNTS = [1, 5, 10, 20, 50];
+const PRESET_AMOUNTS = [5, 10, 20, 50, 100];
 
 export const WalletView: React.FC<WalletViewProps> = ({
   currentUser,
@@ -66,8 +66,8 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
   const handleBankTopUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (finalAmount < 1) {
-      setErrorMessage('El monto mínimo de recarga es de $1 USD.');
+    if (finalAmount < 5) {
+      setErrorMessage('El monto mínimo de recarga es de $5 USD.');
       return;
     }
     if (!receiptFile || !selectedBank) {
@@ -203,7 +203,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
                         setSelectedAmount(0);
                       }}
                       className="w-24 pl-7 pr-3 py-2 bg-black border border-white/10 rounded-xl text-sm font-black text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                      min="1"
+                      min="5"
                       step="0.01"
                     />
                   </div>
