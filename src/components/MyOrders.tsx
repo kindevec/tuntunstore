@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Order, OrderStatus } from '../types';
 import { DiamondIcon } from './DiamondIcon';
 import { 
@@ -13,7 +13,9 @@ import {
   Image as ImageIcon,
   Search,
   Filter,
-  ShieldAlert
+  ShieldAlert,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface MyOrdersProps {
@@ -32,11 +34,20 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
   const [viewingReceiptUrl, setViewingReceiptUrl] = useState<string | null>(null);
   const [revealedCodes, setRevealedCodes] = useState<Record<string, boolean>>({});
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const filteredOrders = orders.filter((o) => {
     if (statusFilter !== 'all' && o.status !== statusFilter) return false;
     return true;
   });
+
+  useEffect(() => {
+    if (filteredOrders.length > 0) {
+      setExpandedOrderId(filteredOrders[0].id);
+    } else {
+      setExpandedOrderId(null);
+    }
+  }, [orders, statusFilter]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -123,111 +134,93 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
             <div
               key={order.id}
               id={`order-card-${order.id}`}
-              className="bg-[#131315] border border-zinc-800/80 hover:border-emerald-500/30 rounded-[24px] overflow-hidden shadow-2xl transition-all relative group"
+              className="bg-zinc-800 border border-zinc-700 hover:border-emerald-500/40 rounded-2xl overflow-hidden shadow-xl transition-all relative group"
             >
-              {/* Top ambient glow */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent group-hover:via-emerald-400/50 transition-colors" />
-
-              {/* Order Card Header */}
-              <div className="bg-gradient-to-r from-zinc-900 to-[#131315] p-5 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80">
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="bg-zinc-950 p-2 sm:p-3 rounded-2xl border border-zinc-800 shadow-inner flex flex-col items-center justify-center shrink-0 min-w-[70px]">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase mb-0.5">Orden</span>
-                    <span className="font-mono text-sm sm:text-base font-black text-white">#{order.id}</span>
-                  </div>
+              {/* Order Card Header - Restored Green Header */}
+              <div 
+                onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-700 cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="font-mono text-xs sm:text-sm font-black text-white bg-black/20 px-3 py-1.5 rounded-lg border border-white/20 shrink-0">
+                    #{order.id}
+                  </span>
                   <div className="min-w-0">
-                    <span className="text-base sm:text-xl font-black uppercase text-zinc-100 block truncate tracking-tight">{order.productName}</span>
-                    <span className="text-[10px] sm:text-xs font-bold text-zinc-500 block uppercase tracking-widest">{order.date}</span>
+                    <span className="text-sm sm:text-base font-black uppercase text-white block truncate">{order.productName}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-emerald-100 block">{order.date}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-5 w-full sm:w-auto pt-4 sm:pt-0 border-t border-zinc-800 sm:border-0">
+                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t border-emerald-700/50 sm:border-0">
                   {getStatusBadge(order.status)}
-                  <div className="bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
-                    <span className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight shrink-0 flex items-center gap-1">
-                      <span className="text-xs text-emerald-500/70 font-bold -mt-2">$</span>
-                      {order.priceUSD.toFixed(2)}
-                    </span>
-                  </div>
+                  <span className="text-lg sm:text-xl font-black text-white shrink-0 mr-2">${order.priceUSD.toFixed(2)} USD</span>
+                  {expandedOrderId === order.id ? (
+                    <ChevronUp className="w-5 h-5 text-emerald-200 shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-emerald-200 shrink-0" />
+                  )}
                 </div>
               </div>
 
-              {/* Order Content */}
-              <div className="p-5 sm:p-8 space-y-6 bg-[#0a0a0b]/40">
-                
-                {/* Product Instructions */}
-                <div className="bg-[#18181b] p-5 sm:p-7 rounded-2xl border border-zinc-800/80 shadow-lg relative overflow-hidden">
-                  {/* Decorative background element */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+              {/* Order Content - Simplified & Collapsible */}
+              {expandedOrderId === order.id && (
+                <div className="p-4 sm:p-6 space-y-5 bg-zinc-800">
+                  
+                  {/* Product Instructions */}
+                  <div className="text-zinc-300 text-sm space-y-4 font-semibold">
+                    <span className="text-[10px] sm:text-xs font-black text-emerald-400 uppercase tracking-widest block mb-2">
+                      Instrucciones de Canje
+                    </span>
 
-                  <span className="text-[10px] sm:text-xs font-black text-amber-500 uppercase tracking-widest block mb-5 flex items-center gap-2">
-                    <DiamondIcon size="sm" variant="gold" />
-                    Instrucciones del producto
-                  </span>
-
-                  <div className="text-zinc-300 text-sm sm:text-base space-y-4 font-medium relative z-10">
-                    <p className="flex items-start gap-2">
-                      <span className="text-zinc-500 font-black">1.</span> 
-                      <span>Accede al sitio oficial de canje de Free Fire <a href="https://redeempins.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold underline decoration-emerald-500/30 underline-offset-4 hover:text-emerald-300 hover:decoration-emerald-400 transition-colors">https://redeempins.com/</a></span>
-                    </p>
+                    <p>1. Ingresa al sitio oficial de Free Fire <a href="https://redeempins.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300">https://redeempins.com/</a></p>
                     
-                    <div className="bg-zinc-950 border border-amber-500/20 p-4 sm:p-5 rounded-xl shadow-inner ml-0 sm:ml-5 flex flex-col gap-3">
-                      <p className="flex items-start gap-2 text-zinc-400">
-                        <span className="text-amber-500/50 font-black">2.</span>
-                        Copia este código:
-                      </p>
+                    <div className="bg-zinc-900 border border-zinc-700 p-4 rounded-xl shadow-inner flex flex-col gap-3">
+                      <p className="text-zinc-400">2. Copia este código:</p>
                       
                       {order.redemptionCode ? (
-                        <div className="flex items-center justify-between bg-[#0a0a0b] p-2.5 rounded-lg border border-zinc-800 shadow-sm group">
-                          <span className="font-mono text-emerald-400 font-black tracking-[0.2em] text-lg sm:text-2xl px-3">{order.redemptionCode}</span>
+                        <div className="flex items-center justify-between bg-black p-3 rounded-lg border border-zinc-800">
+                          <span className="font-mono text-emerald-400 font-black tracking-widest text-lg sm:text-xl">{order.redemptionCode}</span>
                           <button 
                             onClick={() => {
                               navigator.clipboard.writeText(order.redemptionCode || '');
                               setCopiedCodeId(order.id);
                               setTimeout(() => setCopiedCodeId(null), 2000);
                             }}
-                            className={`p-3 rounded-md transition-all flex items-center justify-center ${
+                            className={`p-2.5 rounded-lg transition-all ${
                               copiedCodeId === order.id 
-                                ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]' 
-                                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white group-hover:border-zinc-600'
+                                ? 'bg-emerald-500 text-black' 
+                                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white'
                             }`}
                             title="Copiar código"
                           >
-                            {copiedCodeId === order.id ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                            {copiedCodeId === order.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                           </button>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center gap-3 bg-[#0a0a0b] p-4 rounded-lg border border-zinc-800/80 border-dashed">
-                           <RefreshCw className="w-5 h-5 text-amber-500/40 animate-spin-slow" />
-                           <span className="text-amber-500/60 text-sm font-semibold">El código estará disponible cuando se complete tu pedido.</span>
+                        <div className="flex items-center justify-center gap-2 bg-black/50 p-4 rounded-lg border border-zinc-800/80">
+                           <RefreshCw className="w-4 h-4 text-zinc-500 animate-spin-slow" />
+                           <span className="text-zinc-500 text-sm">El código se generará al completar el pedido.</span>
                         </div>
                       )}
                     </div>
                     
-                    <p className="flex items-start gap-2 text-zinc-400"><span className="text-zinc-600 font-black">3.</span> Pon tu ID de Free Fire.</p>
-                    <p className="flex items-start gap-2 text-zinc-400"><span className="text-zinc-600 font-black">4.</span> Toca <strong className="text-zinc-300 px-1">«Verificar ID»</strong>.</p>
-                    <p className="flex items-start gap-2 text-zinc-400"><span className="text-zinc-600 font-black">5.</span> Toca <strong className="text-zinc-300 px-1">«Canjear»</strong>.</p>
-                    <p className="flex items-start gap-2"><span className="text-emerald-500/50 font-black">6.</span> <span className="text-zinc-100 font-bold">Entra al juego y disfruta tus diamantes. 🎉</span></p>
+                    <p>3. Pon tu ID de Free Fire y toca «Verificar ID».</p>
+                    <p>4. Toca «Canjear» y entra al juego para disfrutar tus diamantes. 🎉</p>
                   </div>
+
+                  {/* Footer Action Bar */}
+                  <div className="pt-4 border-t border-zinc-700 flex justify-end">
+                    <button
+                      onClick={() => onOpenWhatsAppSupport(order)}
+                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-zinc-900 text-zinc-300 font-black uppercase text-xs flex items-center justify-center gap-2 border border-zinc-700 hover:bg-emerald-500 hover:text-black hover:border-emerald-400 transition-all cursor-pointer"
+                    >
+                      <MessageCircle className="w-4 h-4 shrink-0" />
+                      <span>Soporte WhatsApp</span>
+                    </button>
+                  </div>
+
                 </div>
-
-                {/* Footer Action Bar */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                  <span className="text-[11px] text-zinc-500 uppercase font-bold text-center sm:text-left flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-emerald-500/40" />
-                    ¿Dudas con este pedido? Contacta a soporte por WhatsApp.
-                  </span>
-
-                  <button
-                    onClick={() => onOpenWhatsAppSupport(order)}
-                    className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-800 text-zinc-200 font-black uppercase text-xs flex items-center justify-center gap-2.5 border border-zinc-700 hover:bg-emerald-500 hover:text-black hover:border-emerald-400 transition-all cursor-pointer shadow-lg group"
-                  >
-                    <MessageCircle className="w-4 h-4 text-emerald-400 group-hover:text-black shrink-0 transition-colors" />
-                    <span>Soporte WhatsApp</span>
-                  </button>
-                </div>
-
-              </div>
+              )}
             </div>
           ))
         ) : (
