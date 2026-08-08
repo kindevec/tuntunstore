@@ -141,8 +141,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
 
+    const statsMap: Record<string, {product_id: string, product_name: string, total: number, available: number, used: number}> = {};
+    
+    // Inicializar todos los productos con 0
+    products.forEach(p => {
+      statsMap[p.id] = { product_id: p.id, product_name: p.name, total: 0, available: 0, used: 0 };
+    });
+
     if (statsData) {
-      const statsMap: Record<string, {product_id: string, product_name: string, total: number, available: number, used: number}> = {};
       statsData.forEach((code: any) => {
         const pid = code.product_id;
         if (!statsMap[pid]) {
@@ -152,8 +158,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         if (code.is_used) statsMap[pid].used++;
         else statsMap[pid].available++;
       });
-      setCodesStats(Object.values(statsMap));
     }
+    
+    setCodesStats(Object.values(statsMap));
   };
 
   const handleUploadCodes = async () => {
