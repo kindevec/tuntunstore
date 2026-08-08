@@ -130,11 +130,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isUploadingCodes, setIsUploadingCodes] = useState(false);
 
   const fetchCodesStats = async () => {
-    const { data: statsData } = await supabase
+    const { data: statsData, error } = await supabase
       .from('redemption_codes')
       .select('product_id, is_used, products(name)')
       .order('created_at', { ascending: false });
     
+    if (error) {
+      console.error("Error fetching codes stats:", error);
+      alert(`Error al cargar inventario de códigos: ${error.message}`);
+      return;
+    }
+
     if (statsData) {
       const statsMap: Record<string, {product_id: string, product_name: string, total: number, available: number, used: number}> = {};
       statsData.forEach((code: any) => {
