@@ -64,6 +64,70 @@ export const WalletView: React.FC<WalletViewProps> = ({
     }
   };
 
+  const renderBankDetails = (isMobile: boolean) => {
+    if (!selectedBank) return null;
+
+    return (
+      <div className={`bg-amber-950/40 border border-amber-500/30 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden ${isMobile ? 'mt-3 animate-in slide-in-from-top-2' : ''}`}>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+        
+        <div className="flex items-center gap-2 mb-6">
+          <Building2 className="w-5 h-5 text-amber-400" />
+          <h3 className="font-black text-sm uppercase tracking-wider text-amber-400">Datos para Transferir</h3>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <p className="text-[10px] text-zinc-400 uppercase font-black mb-1">
+              {selectedBank.notes || 'Banco Seleccionado'}
+            </p>
+            <p className="font-black text-lg text-white uppercase">{selectedBank.bankName}</p>
+          </div>
+
+          <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-zinc-500 uppercase font-black block">Número de Cuenta / ID</span>
+              <span className="font-mono text-base font-black text-white">{selectedBank.accountNumber}</span>
+            </div>
+            <button
+              onClick={() => handleCopy(selectedBank.accountNumber, 'num')}
+              className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
+            >
+              {copiedField === 'num' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-zinc-500 uppercase font-black block">Titular de la Cuenta</span>
+              <span className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-none">{selectedBank.holderName}</span>
+            </div>
+            <button
+              onClick={() => handleCopy(selectedBank.holderName, 'holder')}
+              className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
+            >
+              {copiedField === 'holder' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {selectedBank.holderId && (
+            <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-zinc-500 uppercase font-black block">Cédula / Correo (Binance)</span>
+                <span className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-none">{selectedBank.holderId}</span>
+              </div>
+              <button
+                onClick={() => handleCopy(selectedBank.holderId, 'holderId')}
+                className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
+              >
+                {copiedField === 'holderId' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const handleBankTopUp = (e: React.FormEvent) => {
     e.preventDefault();
     if (finalAmount < 5) {
@@ -217,19 +281,27 @@ export const WalletView: React.FC<WalletViewProps> = ({
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {bankAccounts.map(bank => (
-                    <button
-                      key={bank.id}
-                      type="button"
-                      onClick={() => setSelectedBankId(bank.id)}
-                      className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                        selectedBank.id === bank.id
-                          ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
-                          : 'border-white/10 bg-black hover:bg-white/5'
-                      }`}
-                    >
-                      <span className="font-black text-xs uppercase text-white">{bank.bankName}</span>
-                      <span className="text-[10px] text-zinc-400 font-bold uppercase mt-1">{bank.accountType}</span>
-                    </button>
+                    <div key={bank.id} className="flex flex-col">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedBankId(bank.id)}
+                        className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
+                          selectedBank.id === bank.id
+                            ? 'border-amber-500 bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                            : 'border-white/10 bg-black hover:bg-white/5'
+                        }`}
+                      >
+                        <span className="font-black text-xs uppercase text-white">{bank.bankName}</span>
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase mt-1">{bank.accountType}</span>
+                      </button>
+                      
+                      {/* Accordion style details for Mobile only */}
+                      {selectedBank.id === bank.id && (
+                        <div className="lg:hidden">
+                          {renderBankDetails(true)}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -282,74 +354,16 @@ export const WalletView: React.FC<WalletViewProps> = ({
             </form>
           </div>
 
-          {/* Info Side (Datos del Banco) */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-amber-950/40 border border-amber-500/30 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-              
-              <div className="flex items-center gap-2 mb-6">
-                <Building2 className="w-5 h-5 text-amber-400" />
-                <h3 className="font-black text-sm uppercase tracking-wider text-amber-400">Datos para Transferir</h3>
+          {/* Info Side (Datos del Banco) - Desktop Only */}
+          <div className="hidden lg:block lg:col-span-5 space-y-6">
+            {selectedBank ? (
+              renderBankDetails(false)
+            ) : (
+              <div className="bg-amber-950/40 border border-amber-500/30 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden py-12 text-center">
+                <Building2 className="w-8 h-8 text-amber-500/30 mx-auto mb-2" />
+                <p className="text-zinc-500 font-bold text-xs uppercase">Cargando bancos...</p>
               </div>
-              <div className="space-y-4">
-                {selectedBank ? (
-                  <>
-                    <div>
-                      <p className="text-[10px] text-zinc-400 uppercase font-black mb-1">
-                        {selectedBank.notes || 'Banco Seleccionado'}
-                      </p>
-                      <p className="font-black text-lg text-white uppercase">{selectedBank.bankName}</p>
-                    </div>
-
-                    <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] text-zinc-500 uppercase font-black block">Número de Cuenta / ID</span>
-                        <span className="font-mono text-base font-black text-white">{selectedBank.accountNumber}</span>
-                      </div>
-                      <button
-                        onClick={() => handleCopy(selectedBank.accountNumber, 'num')}
-                        className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
-                      >
-                        {copiedField === 'num' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
-
-                    <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] text-zinc-500 uppercase font-black block">Titular de la Cuenta</span>
-                        <span className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-none">{selectedBank.holderName}</span>
-                      </div>
-                      <button
-                        onClick={() => handleCopy(selectedBank.holderName, 'holder')}
-                        className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
-                      >
-                        {copiedField === 'holder' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      </button>
-                    </div>
-
-                    {selectedBank.holderId && (
-                      <div className="bg-black/40 p-3 rounded-xl border border-white/10 flex items-center justify-between">
-                        <div>
-                          <span className="text-[10px] text-zinc-500 uppercase font-black block">Cédula / Correo (Binance)</span>
-                          <span className="font-bold text-sm text-white truncate max-w-[150px] sm:max-w-none">{selectedBank.holderId}</span>
-                        </div>
-                        <button
-                          onClick={() => handleCopy(selectedBank.holderId, 'holderId')}
-                          className="p-2 rounded-lg bg-amber-500 text-black hover:bg-amber-400 transition-colors cursor-pointer"
-                        >
-                          {copiedField === 'holderId' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="py-8 text-center">
-                    <Building2 className="w-8 h-8 text-amber-500/30 mx-auto mb-2" />
-                    <p className="text-zinc-500 font-bold text-xs uppercase">Cargando bancos...</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
         </div>
