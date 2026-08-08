@@ -1,13 +1,13 @@
 import React from 'react';
-import { ShoppingBag, ClipboardList, Wallet, UserCog, Mail, Sparkles } from 'lucide-react';
+import { ShoppingBag, ClipboardList, Wallet, UserCog, Mail, Sparkles, Code } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface BottomNavigationProps {
   activeTab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login';
-  adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets';
+  adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes';
   setActiveTab: (
     tab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
-    subTab?: 'orders' | 'catalog' | 'email' | 'wallets'
+    subTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes'
   ) => void;
   pendingOrdersCount: number;
   currentUser: UserProfile | null;
@@ -87,17 +87,17 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           <span className="text-[8px] xs:text-[9.5px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">CRUD</span>
         </button>
 
-        {/* Admin Tab 5: Alertas Correo */}
+        {/* Admin Tab 5: Códigos */}
         <button
-          onClick={() => setActiveTab('admin', 'email')}
+          onClick={() => setActiveTab('admin', 'codes')}
           className={`flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer px-1 ${
-            activeTab === 'admin' && adminSubTab === 'email'
+            activeTab === 'admin' && adminSubTab === 'codes'
               ? 'text-amber-400 bg-amber-400/10 border border-amber-400/30 shadow-[0_0_12px_rgba(251,191,36,0.3)]'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <Mail className={`w-4 h-4 ${activeTab === 'admin' && adminSubTab === 'email' ? 'text-amber-400 stroke-[2.5]' : ''}`} />
-          <span className="text-[8px] xs:text-[9.5px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">Alertas</span>
+          <Code className={`w-4 h-4 ${activeTab === 'admin' && adminSubTab === 'codes' ? 'text-amber-400 stroke-[2.5]' : ''}`} />
+          <span className="text-[8px] xs:text-[9.5px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">Códigos</span>
         </button>
       </nav>
     );
