@@ -143,7 +143,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                 type="text"
                 required
                 placeholder="Ej: 572 Diamantes"
-                value={productForm.name}
+                value={productForm.name || ''}
                 onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                 className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
               />
@@ -157,7 +157,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                 type="number"
                 step="0.01"
                 required
-                value={productForm.priceUSD}
+                value={productForm.priceUSD ?? 0}
                 onChange={(e) => setProductForm({ ...productForm, priceUSD: parseFloat(e.target.value) || 0 })}
                 className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border-2 border-amber-400/40 text-amber-300 font-extrabold text-xs sm:text-sm text-right focus:outline-none focus:border-amber-400"
               />
@@ -168,7 +168,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
               <input
                 type="number"
                 required
-                value={productForm.diamonds}
+                value={productForm.diamonds ?? 0}
                 onChange={(e) => setProductForm({ ...productForm, diamonds: parseInt(e.target.value) || 0 })}
                 className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
               />
@@ -178,7 +178,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
               <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Bono Diamantes Extra</label>
               <input
                 type="number"
-                value={productForm.bonusDiamonds}
+                value={productForm.bonusDiamonds ?? 0}
                 onChange={(e) => setProductForm({ ...productForm, bonusDiamonds: parseInt(e.target.value) || 0 })}
                 className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
               />
@@ -187,7 +187,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
             <div>
               <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Categoría</label>
               <select
-                value={productForm.category}
+                value={productForm.category || 'diamonds'}
                 onChange={(e) => setProductForm({ ...productForm, category: e.target.value as any })}
                 className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
               >
@@ -203,7 +203,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
               <input
                 type="text"
                 placeholder="Ej: MÁS VENDIDO ⚡"
-                value={productForm.badgeText}
+                value={productForm.badgeText || ''}
                 onChange={(e) => setProductForm({ ...productForm, badgeText: e.target.value })}
                 className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
               />
@@ -215,7 +215,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
             <input
               type="text"
               placeholder="Descripción rápida del producto..."
-              value={productForm.description}
+              value={productForm.description || ''}
               onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
               className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white text-xs sm:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-colors"
             />

@@ -521,6 +521,61 @@ export default function App() {
     fetchOrders(currentUser!.role, currentUser!.uid);
   };
 
+  const handleAddProduct = async (productData: Omit<Product, 'id'>) => {
+    const { error } = await supabase.from('products').insert({
+      name: productData.name,
+      diamonds: productData.diamonds,
+      bonus_diamonds: productData.bonusDiamonds || 0,
+      price_usd: productData.priceUSD,
+      category: productData.category,
+      description: productData.description || '',
+      is_popular: !!productData.isPopular,
+      is_gold_promo: !!productData.isGoldPromo,
+      badge_text: productData.badgeText || null,
+      active: true
+    });
+
+    if (error) {
+      showToast(`❌ Error al crear producto: ${error.message}`);
+    } else {
+      showToast(`✅ Producto "${productData.name}" creado exitosamente`);
+      fetchInitialData();
+    }
+  };
+
+  const handleUpdateProduct = async (updatedProduct: Product) => {
+    const { error } = await supabase.from('products').update({
+      name: updatedProduct.name,
+      diamonds: updatedProduct.diamonds,
+      bonus_diamonds: updatedProduct.bonusDiamonds || 0,
+      price_usd: updatedProduct.priceUSD,
+      category: updatedProduct.category,
+      description: updatedProduct.description || '',
+      is_popular: !!updatedProduct.isPopular,
+      is_gold_promo: !!updatedProduct.isGoldPromo,
+      badge_text: updatedProduct.badgeText || null,
+    }).eq('id', updatedProduct.id);
+
+    if (error) {
+      showToast(`❌ Error al actualizar producto: ${error.message}`);
+    } else {
+      showToast(`✅ Producto "${updatedProduct.name}" actualizado exitosamente`);
+      setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+      fetchInitialData();
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    const { error } = await supabase.from('products').delete().eq('id', productId);
+    if (error) {
+      showToast(`❌ Error al eliminar producto: ${error.message}`);
+    } else {
+      showToast(`🗑️ Producto eliminado`);
+      setProducts(prev => prev.filter(p => p.id !== productId));
+      fetchInitialData();
+    }
+  };
+
   const handleSubmitTopUpOrder = async (amount: number, bankName: string, receiptFile: File) => {
     if (!currentUser) return;
     
@@ -732,7 +787,7 @@ export default function App() {
             <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />
             {/* Smooth gradient fade between hero and catalog */}
             <div className="h-16 sm:h-24 bg-gradient-to-b from-[#050505] via-[#050505]/60 to-transparent -mb-16 sm:-mb-24 relative z-[1] pointer-events-none" />
-            <ProductCatalog products={products} onSelectProduct={handleSelectProductForPurchase} selectedCategory={selectedCatalogCategory} setSelectedCategory={setSelectedCatalogCategory} currentUser={currentUser} onOpenWalletModal={() => handleSelectTab('wallet')} onUpdateProduct={() => {}} onDeleteProduct={() => {}} onAddProduct={() => {}} />
+            <ProductCatalog products={products} onSelectProduct={handleSelectProductForPurchase} selectedCategory={selectedCatalogCategory} setSelectedCategory={setSelectedCatalogCategory} currentUser={currentUser} onOpenWalletModal={() => handleSelectTab('wallet')} onUpdateProduct={handleUpdateProduct} onDeleteProduct={handleDeleteProduct} onAddProduct={handleAddProduct} />
           </div>
         )}
         {activeTab === 'login' && (
@@ -748,7 +803,7 @@ export default function App() {
           <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
         )}
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
-          <AdminPanel orders={orders} products={products} registeredUsers={registeredUsers} activeSubTab={adminSubTab as any} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={() => {}} onUpdateProduct={() => {}} onDeleteProduct={() => {}} pendingTopUps={pendingTopUps} onUpdateTopUpStatus={handleUpdateTopUpStatus} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
+          <AdminPanel orders={orders} products={products} registeredUsers={registeredUsers} activeSubTab={adminSubTab as any} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={handleAddProduct} onUpdateProduct={handleUpdateProduct} onDeleteProduct={handleDeleteProduct} pendingTopUps={pendingTopUps} onUpdateTopUpStatus={handleUpdateTopUpStatus} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
             const user = registeredUsers.find(u => u.email === email);
             if (user) {
               let adjustment = amount;

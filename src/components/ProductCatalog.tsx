@@ -287,13 +287,13 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const handleOpenEdit = (p: Product) => {
     setEditingProduct(p);
     setFormState({
-      name: p.name,
-      diamonds: p.diamonds,
+      name: p.name || '',
+      diamonds: p.diamonds || 0,
       bonusDiamonds: p.bonusDiamonds || 0,
-      priceUSD: p.priceUSD,
-      category: p.category,
+      priceUSD: p.priceUSD || 0,
+      category: p.category || 'diamonds',
       badgeText: p.badgeText || '',
-      description: p.description,
+      description: p.description || '',
       isGoldPromo: !!p.isGoldPromo,
     });
   };
@@ -709,7 +709,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   <input
                     type="text"
                     placeholder="Ej: MÁS VENDIDO ⚡"
-                    value={formState.badgeText}
+                    value={formState.badgeText || ''}
                     onChange={(e) => setFormState({ ...formState, badgeText: e.target.value })}
                     className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
                   />
@@ -721,7 +721,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 <input
                   type="text"
                   placeholder="Descripción rápida..."
-                  value={formState.description}
+                  value={formState.description || ''}
                   onChange={(e) => setFormState({ ...formState, description: e.target.value })}
                   className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs font-semibold focus:outline-none"
                 />
