@@ -84,13 +84,13 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Catalog Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-zinc-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-700/50">
-        <div className="space-y-1 w-full sm:w-auto">
-          <h2 className="text-base sm:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-emerald-400" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 bg-zinc-800 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-zinc-700/50">
+        <div className="space-y-0.5 w-full sm:w-auto">
+          <h2 className="text-sm sm:text-xl font-black text-white uppercase tracking-tight flex items-center gap-2">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
             Catálogo de Productos
           </h2>
-          <p className="text-[10px] sm:text-xs text-zinc-400 font-semibold">Añade, modifica o elimina denominaciones de diamantes, pases o membresías.</p>
+          <p className="text-[9px] sm:text-xs text-zinc-400 font-semibold">Añade, modifica o elimina denominaciones de diamantes, pases o membresías.</p>
         </div>
 
         <button
@@ -109,19 +109,19 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
               badgeText: '',
             });
           }}
-          className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer uppercase tracking-wide"
+          className="w-full sm:w-auto px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer uppercase tracking-wide"
         >
-          <Plus className="w-4 h-4 stroke-[3]" />
+          <Plus className="w-3.5 h-3.5 stroke-[3]" />
           <span>Nuevo Producto</span>
         </button>
       </div>
 
       {/* Product CRUD Form Modal/Section */}
       {isAddingProduct && (
-        <form id="admin-product-form" onSubmit={handleSaveProduct} className="bg-zinc-800 text-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-zinc-700/50 shadow-2xl space-y-4 sm:space-y-5">
-          <div className="flex items-center justify-between border-b border-zinc-700/50 pb-2 sm:pb-3">
-            <h3 className="text-sm sm:text-base font-black text-amber-300 flex items-center gap-2">
-              <Edit className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0" />
+        <form id="admin-product-form" onSubmit={handleSaveProduct} className="bg-zinc-800 text-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-zinc-700/50 shadow-2xl space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between border-b border-zinc-700/50 pb-2">
+            <h3 className="text-xs sm:text-base font-black text-amber-300 flex items-center gap-2">
+              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
               <span className="truncate">{editingProductId ? `Editar: ${productForm.name || 'Producto'}` : 'Crear Nuevo Producto'}</span>
             </h3>
             <button
@@ -130,27 +130,27 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                 setIsAddingProduct(false);
                 setEditingProductId(null);
               }}
-              className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs font-bold rounded-lg cursor-pointer shrink-0 transition-colors"
+              className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-xs font-bold rounded-md cursor-pointer shrink-0 transition-colors"
             >
               ✕
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 text-xs sm:text-sm">
             <div>
-              <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Nombre del Producto</label>
+              <label className="block text-zinc-400 mb-0.5 sm:mb-1 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Nombre del Producto</label>
               <input
                 type="text"
                 required
                 placeholder="Ej: 572 Diamantes"
                 value={productForm.name || ''}
                 onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full p-2 sm:p-2.5 rounded-lg bg-zinc-900 border border-zinc-600 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
 
-            <div className="bg-amber-500/10 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-amber-500/30">
-              <label className="block text-amber-300 mb-1 sm:mb-1.5 font-black uppercase tracking-wider text-[9px] sm:text-[10px]">
+            <div className="bg-amber-500/10 p-2 sm:p-2.5 rounded-lg border border-amber-500/30">
+              <label className="block text-amber-300 mb-0.5 sm:mb-1 font-black uppercase tracking-wider text-[9px] sm:text-[10px]">
                 💲 Precio USD ($)
               </label>
               <input
@@ -159,37 +159,37 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                 required
                 value={productForm.priceUSD ?? 0}
                 onChange={(e) => setProductForm({ ...productForm, priceUSD: parseFloat(e.target.value) || 0 })}
-                className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border-2 border-amber-400/40 text-amber-300 font-extrabold text-xs sm:text-sm text-right focus:outline-none focus:border-amber-400"
+                className="w-full p-2 sm:p-2.5 rounded-lg bg-zinc-900 border-2 border-amber-400/40 text-amber-300 font-extrabold text-xs sm:text-sm text-right focus:outline-none focus:border-amber-400"
               />
             </div>
 
             <div>
-              <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Cantidad Diamantes</label>
+              <label className="block text-zinc-400 mb-0.5 sm:mb-1 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Cantidad Diamantes</label>
               <input
                 type="number"
                 required
                 value={productForm.diamonds ?? 0}
                 onChange={(e) => setProductForm({ ...productForm, diamonds: parseInt(e.target.value) || 0 })}
-                className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full p-2 sm:p-2.5 rounded-lg bg-zinc-900 border border-zinc-600 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Bono Diamantes Extra</label>
+              <label className="block text-zinc-400 mb-0.5 sm:mb-1 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Bono Diamantes Extra</label>
               <input
                 type="number"
                 value={productForm.bonusDiamonds ?? 0}
                 onChange={(e) => setProductForm({ ...productForm, bonusDiamonds: parseInt(e.target.value) || 0 })}
-                className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full p-2 sm:p-2.5 rounded-lg bg-zinc-900 border border-zinc-600 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Categoría</label>
+              <label className="block text-zinc-400 mb-0.5 sm:mb-1 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Categoría</label>
               <select
                 value={productForm.category || 'diamonds'}
                 onChange={(e) => setProductForm({ ...productForm, category: e.target.value as any })}
-                className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full p-2 sm:p-2.5 rounded-lg bg-zinc-900 border border-zinc-600 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition-colors"
               >
                 <option value="diamonds">Diamantes Directos</option>
                 <option value="memberships">Membresías VIP (Dorado 🟡)</option>
@@ -199,66 +199,66 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
             </div>
 
             <div>
-              <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Texto de Badge</label>
+              <label className="block text-zinc-400 mb-0.5 sm:mb-1 font-bold uppercase text-[9px] sm:text-[10px] tracking-wide">Texto de Badge</label>
               <input
                 type="text"
                 placeholder="Ej: MÁS VENDIDO ⚡"
                 value={productForm.badgeText || ''}
                 onChange={(e) => setProductForm({ ...productForm, badgeText: e.target.value })}
-                className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white font-bold focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full p-2 sm:p-2.5 rounded-lg bg-zinc-900 border border-zinc-600 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-zinc-400 mb-1 sm:mb-1.5 font-bold text-[9px] sm:text-[10px] uppercase tracking-wide">Descripción</label>
+            <label className="block text-zinc-400 mb-0.5 sm:mb-1 font-bold text-[9px] sm:text-[10px] uppercase tracking-wide">Descripción</label>
             <input
               type="text"
               placeholder="Descripción rápida del producto..."
               value={productForm.description || ''}
               onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-              className="w-full p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-zinc-900 border border-zinc-600 text-white text-xs sm:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full p-2 sm:p-2.5 rounded-lg bg-zinc-900 border border-zinc-600 text-white text-xs sm:text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 text-xs sm:text-sm text-zinc-300 pt-1 sm:pt-2">
-            <label className="flex items-center gap-2 cursor-pointer bg-zinc-900/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl border border-zinc-700/50 hover:border-amber-400/30 transition-colors w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-3 text-xs text-zinc-300 pt-1">
+            <label className="flex items-center gap-2 cursor-pointer bg-zinc-900/50 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-zinc-700/50 hover:border-amber-400/30 transition-colors w-full sm:w-auto">
               <input
                 type="checkbox"
                 checked={productForm.isGoldPromo}
                 onChange={(e) => setProductForm({ ...productForm, isGoldPromo: e.target.checked })}
-                className="w-4 h-4 rounded text-amber-500"
+                className="w-3.5 h-3.5 rounded text-amber-500"
               />
-              <span className="font-bold">Estilo Dorado (VIP)</span>
+              <span className="font-bold text-[11px] sm:text-xs">Estilo Dorado (VIP)</span>
             </label>
 
-            <label className="flex items-center gap-2 cursor-pointer bg-zinc-900/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl border border-zinc-700/50 hover:border-emerald-400/30 transition-colors w-full sm:w-auto">
+            <label className="flex items-center gap-2 cursor-pointer bg-zinc-900/50 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg border border-zinc-700/50 hover:border-emerald-400/30 transition-colors w-full sm:w-auto">
               <input
                 type="checkbox"
                 checked={productForm.isPopular}
                 onChange={(e) => setProductForm({ ...productForm, isPopular: e.target.checked })}
-                className="w-4 h-4 rounded text-emerald-500"
+                className="w-3.5 h-3.5 rounded text-emerald-500"
               />
-              <span className="font-bold">Destacar como "Más Vendido"</span>
+              <span className="font-bold text-[11px] sm:text-xs">Destacar como "Más Vendido"</span>
             </label>
           </div>
 
-          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-zinc-700/50">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2.5 sm:pt-3 border-t border-zinc-700/50">
             <button
               type="button"
               onClick={() => {
                 setIsAddingProduct(false);
                 setEditingProductId(null);
               }}
-              className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg sm:rounded-xl bg-zinc-700 hover:bg-zinc-600 text-zinc-300 font-bold text-xs sm:text-sm cursor-pointer transition-colors text-center"
+              className="w-full sm:w-auto px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg bg-zinc-700 hover:bg-zinc-600 text-zinc-300 font-bold text-xs cursor-pointer transition-colors text-center"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg uppercase transition-all"
+              className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-md uppercase transition-all"
             >
-              <Save className="w-4 h-4 fill-current" />
+              <Save className="w-3.5 h-3.5 fill-current" />
               <span>{editingProductId ? 'Guardar Cambios' : 'Crear Producto'}</span>
             </button>
           </div>
@@ -266,11 +266,11 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       )}
 
       {/* Mobile Catalog Cards (Visible on mobile/tablet) */}
-      <div className="grid grid-cols-1 gap-3 md:hidden">
+      <div className="grid grid-cols-1 gap-2.5 md:hidden">
         {products.map((p) => {
           const isEditingInline = editingInlinePriceId === p.id;
           return (
-            <div key={p.id} className="bg-zinc-800 rounded-xl border border-zinc-700/50 overflow-hidden shadow-lg">
+            <div key={p.id} className="bg-zinc-800 rounded-xl border border-zinc-700/50 overflow-hidden shadow-md">
               {/* Card Header */}
               <div className="bg-emerald-600 px-2.5 py-1.5 flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
@@ -295,38 +295,38 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
               </div>
 
               {/* Card Body */}
-              <div className="p-3 space-y-2.5">
+              <div className="p-2.5 space-y-2">
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-zinc-900/60 p-2 sm:p-3 rounded-lg border border-zinc-700/40 text-center">
-                    <span className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase block mb-0.5">Diamantes</span>
-                    <p className="font-black text-emerald-400 text-sm sm:text-base">
+                  <div className="bg-zinc-900/60 p-1.5 sm:p-2.5 rounded-lg border border-zinc-700/40 text-center">
+                    <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase block mb-0.5">Diamantes</span>
+                    <p className="font-black text-emerald-400 text-xs sm:text-sm">
                       {p.diamonds.toLocaleString()}
                     </p>
                     {p.bonusDiamonds > 0 && (
-                      <span className="text-[8px] sm:text-[9px] text-emerald-300/70 font-bold">+{p.bonusDiamonds} bonus</span>
+                      <span className="text-[8px] text-emerald-300/70 font-bold">+{p.bonusDiamonds} bonus</span>
                     )}
                   </div>
 
-                  <div className="bg-zinc-900/60 p-2 sm:p-3 rounded-lg border border-zinc-700/40 text-center">
-                    <span className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase block mb-0.5">Precio USD</span>
+                  <div className="bg-zinc-900/60 p-1.5 sm:p-2.5 rounded-lg border border-zinc-700/40 text-center">
+                    <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase block mb-0.5">Precio USD</span>
                     {isEditingInline ? (
                       <input
                         type="number"
                         step="0.01"
                         value={inlinePriceValue}
                         onChange={(e) => setInlinePriceValue(e.target.value)}
-                        className="w-full px-1.5 py-1 rounded-md bg-zinc-800 border-2 border-amber-400 text-amber-300 font-black text-xs sm:text-sm text-center focus:outline-none"
+                        className="w-full px-1 py-0.5 rounded bg-zinc-800 border border-amber-400 text-amber-300 font-black text-xs text-center focus:outline-none"
                         autoFocus
                       />
                     ) : (
-                      <p className="font-black text-white text-sm sm:text-base">${p.priceUSD.toFixed(2)}</p>
+                      <p className="font-black text-white text-xs sm:text-sm">${p.priceUSD.toFixed(2)}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-3 gap-1.5 pt-1">
+                <div className="grid grid-cols-3 gap-1.5 pt-0.5">
                   {isEditingInline ? (
                     <>
                       <button
@@ -337,13 +337,13 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           }
                           setEditingInlinePriceId(null);
                         }}
-                        className="col-span-2 py-1.5 sm:py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] sm:text-xs font-black rounded-lg cursor-pointer uppercase transition-colors text-center"
+                        className="col-span-2 py-1 bg-emerald-500 hover:bg-emerald-400 text-black text-[9px] sm:text-[10px] font-black rounded-md cursor-pointer uppercase transition-colors text-center"
                       >
                         ✓ Guardar
                       </button>
                       <button
                         onClick={() => setEditingInlinePriceId(null)}
-                        className="py-1.5 sm:py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-[10px] sm:text-xs font-bold rounded-lg cursor-pointer transition-colors text-center"
+                        className="py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-[9px] sm:text-[10px] font-bold rounded-md cursor-pointer transition-colors text-center"
                       >
                         ✕
                       </button>
@@ -355,23 +355,23 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           setEditingInlinePriceId(p.id);
                           setInlinePriceValue(p.priceUSD.toString());
                         }}
-                        className="py-1.5 bg-zinc-700 hover:bg-zinc-600 text-amber-400 font-black text-[9px] sm:text-[10px] rounded-lg uppercase transition-colors cursor-pointer text-center"
+                        className="py-1 bg-zinc-700 hover:bg-zinc-600 text-amber-400 font-black text-[9px] sm:text-[10px] rounded-md uppercase transition-colors cursor-pointer text-center"
                       >
                         💲 Precio
                       </button>
 
                       <button
                         onClick={() => startEditProduct(p)}
-                        className="py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] sm:text-[10px] rounded-lg uppercase transition-colors cursor-pointer text-center"
+                        className="py-1 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] sm:text-[10px] rounded-md uppercase transition-colors cursor-pointer text-center"
                       >
                         ✏️ Editar
                       </button>
 
                       <button
                         onClick={() => onDeleteProduct(p.id)}
-                        className="py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-black text-[9px] sm:text-[10px] rounded-lg border border-rose-500/30 transition-colors cursor-pointer text-center flex justify-center items-center"
+                        className="py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-black text-[9px] sm:text-[10px] rounded-md border border-rose-500/30 transition-colors cursor-pointer text-center flex justify-center items-center"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     </>
                   )}

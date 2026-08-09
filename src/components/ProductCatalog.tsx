@@ -642,21 +642,21 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleSaveModal} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <form onSubmit={handleSaveModal} className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs">
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Nombre del Producto</label>
+                  <label className="block text-zinc-300 mb-0.5 font-bold text-[10px] sm:text-xs">Nombre del Producto</label>
                   <input
                     type="text"
                     required
                     value={formState.name}
                     onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none focus:border-amber-400"
+                    className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
-                <div className="bg-amber-500/10 p-2 rounded-xl border border-amber-500/30">
-                  <label className="block text-amber-300 mb-1 font-black uppercase tracking-wider text-[11px] flex items-center gap-1">
+                <div className="bg-amber-500/10 p-2 rounded-lg border border-amber-500/30">
+                  <label className="block text-amber-300 mb-0.5 font-black uppercase tracking-wider text-[10px] flex items-center gap-1">
                     💲 Precio USD ($)
                   </label>
                   <input
@@ -665,37 +665,37 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     required
                     value={formState.priceUSD}
                     onChange={(e) => setFormState({ ...formState, priceUSD: parseFloat(e.target.value) || 0 })}
-                    className="w-full p-2 rounded-xl bg-black border-2 border-amber-400 text-amber-300 font-extrabold text-sm text-right focus:outline-none"
+                    className="w-full p-1.5 rounded-lg bg-black border-2 border-amber-400 text-amber-300 font-extrabold text-xs sm:text-sm text-right focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Cantidad Diamantes</label>
+                  <label className="block text-zinc-300 mb-0.5 font-bold text-[10px] sm:text-xs">Cantidad Diamantes</label>
                   <input
                     type="number"
                     required
                     value={formState.diamonds}
                     onChange={(e) => setFormState({ ...formState, diamonds: parseInt(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
+                    className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Bono Diamantes Extra</label>
+                  <label className="block text-zinc-300 mb-0.5 font-bold text-[10px] sm:text-xs">Bono Diamantes Extra</label>
                   <input
                     type="number"
                     value={formState.bonusDiamonds}
                     onChange={(e) => setFormState({ ...formState, bonusDiamonds: parseInt(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
+                    className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Categoría</label>
+                  <label className="block text-zinc-300 mb-0.5 font-bold text-[10px] sm:text-xs">Categoría</label>
                   <select
                     value={formState.category}
                     onChange={(e) => setFormState({ ...formState, category: e.target.value as ProductCategory })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
+                    className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
                   >
                     <option value="diamonds">Diamantes Directos</option>
                     <option value="memberships">Membresías VIP (Dorado 🟡)</option>
@@ -705,25 +705,25 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-zinc-300 mb-1 font-bold">Texto Badge Overlay</label>
+                  <label className="block text-zinc-300 mb-0.5 font-bold text-[10px] sm:text-xs">Texto Badge Overlay</label>
                   <input
                     type="text"
                     placeholder="Ej: MÁS VENDIDO ⚡"
                     value={formState.badgeText || ''}
                     onChange={(e) => setFormState({ ...formState, badgeText: e.target.value })}
-                    className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
+                    className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-700 text-white font-bold focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-zinc-300 mb-1 font-bold text-xs">Descripción</label>
+                <label className="block text-zinc-300 mb-0.5 font-bold text-[10px] sm:text-xs">Descripción</label>
                 <input
                   type="text"
                   placeholder="Descripción rápida..."
                   value={formState.description || ''}
                   onChange={(e) => setFormState({ ...formState, description: e.target.value })}
-                  className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-700 text-white text-xs font-semibold focus:outline-none"
+                  className="w-full p-2 rounded-lg bg-zinc-950 border border-zinc-700 text-white text-xs font-semibold focus:outline-none"
                 />
               </div>
 
