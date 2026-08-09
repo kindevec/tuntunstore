@@ -373,54 +373,58 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   return (
-    <section id="admin-panel-section" className="py-8 px-4 sm:px-6 lg:px-8 max-w-full mx-auto space-y-8">
+    <section id="admin-panel-section" className="py-4 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-full mx-auto space-y-4 sm:space-y-8">
       
       {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         
-        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-emerald-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
-          <div>
-            <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">Ventas Totales USD</p>
-            <p className="text-xl sm:text-3xl font-black text-white mt-1">${totalSalesUSD.toFixed(2)}</p>
-            <p className="text-[9px] sm:text-[10px] text-emerald-400 font-extrabold uppercase mt-1 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> Acreditación
+        {/* Ventas Totales */}
+        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Ventas Totales</p>
+            <p className="text-sm sm:text-2xl font-black text-white mt-0.5 truncate">${totalSalesUSD.toFixed(2)}</p>
+            <p className="text-[8px] sm:text-[10px] text-emerald-400 font-extrabold uppercase mt-0.5 flex items-center gap-1 truncate">
+              <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" /> <span className="truncate">Acreditación</span>
             </p>
           </div>
-          <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
-            <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+            <DollarSign className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
         </div>
 
-        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-amber-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
-          <div>
-            <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pedidos Pendientes</p>
-            <p className="text-xl sm:text-3xl font-black text-amber-400 mt-1">{pendingOrdersCount}</p>
-            <p className="text-[9px] sm:text-[10px] text-amber-400/80 font-extrabold uppercase mt-1">Revisar comprobante</p>
+        {/* Pedidos Pendientes */}
+        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Pendientes</p>
+            <p className="text-sm sm:text-2xl font-black text-amber-400 mt-0.5 truncate">{pendingOrdersCount}</p>
+            <p className="text-[8px] sm:text-[10px] text-amber-400/80 font-extrabold uppercase mt-0.5 truncate">Comprobante</p>
           </div>
-          <div className="p-2.5 sm:p-3 rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/30 shrink-0">
-            <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
-          </div>
-        </div>
-
-        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-sky-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
-          <div>
-            <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">En Proceso</p>
-            <p className="text-xl sm:text-3xl font-black text-sky-400 mt-1">{inProgressOrdersCount}</p>
-            <p className="text-[9px] sm:text-[10px] text-sky-400/80 font-extrabold uppercase mt-1">Cargando a ID</p>
-          </div>
-          <div className="p-2.5 sm:p-3 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/30 shrink-0">
-            <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/30 shrink-0">
+            <Clock className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
         </div>
 
-        <div className="bg-zinc-800 p-3.5 sm:p-5 rounded-2xl border border-emerald-500/20 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-white gap-2">
-          <div>
-            <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">Diamantes Entregados</p>
-            <p className="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{totalDiamondsDelivered.toLocaleString()} 💎</p>
-            <p className="text-[9px] sm:text-[10px] text-emerald-400/80 font-extrabold uppercase mt-1">Free Fire Ecuador</p>
+        {/* En Proceso */}
+        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">En Proceso</p>
+            <p className="text-sm sm:text-2xl font-black text-sky-400 mt-0.5 truncate">{inProgressOrdersCount}</p>
+            <p className="text-[8px] sm:text-[10px] text-sky-400/80 font-extrabold uppercase mt-0.5 truncate">Cargando a ID</p>
           </div>
-          <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
-            <DiamondIcon size="md" variant="emerald" />
+          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/30 shrink-0">
+            <RefreshCw className="w-4 h-4 sm:w-6 sm:h-6" />
+          </div>
+        </div>
+
+        {/* Diamantes Entregados */}
+        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+          <div className="min-w-0">
+            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Diamantes</p>
+            <p className="text-sm sm:text-2xl font-black text-emerald-400 mt-0.5 truncate">{totalDiamondsDelivered.toLocaleString()} 💎</p>
+            <p className="text-[8px] sm:text-[10px] text-emerald-400/80 font-extrabold uppercase mt-0.5 truncate">Free Fire Ecuador</p>
+          </div>
+          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+            <DiamondIcon size="sm" variant="emerald" />
           </div>
         </div>
 
