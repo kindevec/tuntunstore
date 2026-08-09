@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Product, BankAccount, Order, UserProfile, OrderStatus, EmailAlertConfig, ProductCategory } from './types';
+import { Product, BankAccount, Order, UserProfile, OrderStatus, ProductCategory, HeroSlide } from './types';
 import { supabase } from './supabaseClient';
 
 import { Header } from './components/Header';
@@ -14,6 +14,7 @@ import { LoginPage } from './components/LoginPage';
 import { ProfileView } from './components/ProfileView';
 import { WalletView } from './components/WalletView';
 import { Footer } from './components/Footer';
+import { HomeView } from './components/HomeView';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
@@ -27,19 +28,15 @@ export default function App() {
   });
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [walletHistory, setWalletHistory] = useState<any[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
-  const [emailConfig, setEmailConfig] = useState<EmailAlertConfig>({
-    adminEmail: 'kindevx@gmail.com',
-    notifyNewOrder: true,
-    notifyWalletTopUp: true
-  });
 
   const [loginRedirectReason, setLoginRedirectReason] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login'>('catalog');
-  const [adminSubTab, setAdminSubTab] = useState<'orders' | 'catalog' | 'email' | 'wallets'>('orders');
+  const [activeTab, setActiveTab] = useState<'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login'>('home');
+  const [adminSubTab, setAdminSubTab] = useState<'orders' | 'catalog' | 'wallets' | 'codes' | 'banners'>('orders');
   const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<ProductCategory | 'all'>('all');
   const [selectedProductForOrder, setSelectedProductForOrder] = useState<Product | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -189,6 +186,11 @@ export default function App() {
   }, [activeTab]);
 
   const fetchInitialData = async () => {
+    const { data: slidesData } = await supabase.from('hero_slides').select('*').eq('active', true).order('order_index', { ascending: true });
+    if (slidesData) {
+      setHeroSlides(slidesData);
+    }
+
     const { data: prodData } = await supabase.from('products').select('*').eq('active', true).order('price_usd', { ascending: true });
     if (prodData) {
       setProducts(prodData.map(p => ({
@@ -364,7 +366,7 @@ export default function App() {
       }
 
       const parts = hash.split('/');
-      let tab = (parts[0] || 'catalog') as any;
+      let tab = (parts[0] || 'home') as any;
       let subTab = parts[1] as any;
 
       if (currentUser?.role === 'admin') {
@@ -410,7 +412,7 @@ export default function App() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     updateCurrentActiveUser(null);
-    window.location.hash = '#catalog';
+    window.location.hash = '#home';
     showToast('Sesión cerrada correctamente');
   };
 
@@ -428,7 +430,6 @@ export default function App() {
     if (error) showToast(`❌ Error al guardar perfil: ${error.message}`);
     else showToast('✨ Perfil guardado exitosamente');
   };
-
   const handleSelectTab = (tab: string, subTab?: string) => window.location.hash = subTab ? `#${tab}/${subTab}` : `#${tab}`;
 
   const handleSelectProductForPurchase = (product: Product) => {
@@ -438,7 +439,7 @@ export default function App() {
 
   const handleCreateOrder = async (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>) => {
     if (!currentUser) return;
-    
+
     const { data, error } = await supabase.rpc('purchase_with_wallet_v2', {
       p_player_id: newOrderData.playerId,
       p_player_tag: newOrderData.playerTag || '',
@@ -454,10 +455,11 @@ export default function App() {
     }
     
     const result = data as any;
+    
     if (result?.has_code) {
-      showToast(`🎉 ¡Compra completada! Tu código de recarga está disponible en "Mis Pedidos".`);
+      showToast(`✅ ¡Compra completada! Tu código de recarga está disponible en "Mis Pedidos".`);
     } else {
-      showToast(`⚡ ¡Pedido registrado! Recibirás tu código pronto.`);
+      showToast(`⏳ ¡Pedido registrado! Recibirás tu código pronto.`);
     }
     
     await fetchUserProfile(currentUser.uid);
@@ -465,6 +467,43 @@ export default function App() {
     setSelectedProductForOrder(null);
     window.location.hash = '#orders';
   };
+
+  useEffect(() => {
+    // Inject a debug function to the window to clear DB easily
+    (window as any).clearDb = async () => {
+      try {
+        console.log('Borrando todos los codigos...');
+        const { error: codesError } = await supabase.from('redemption_codes').delete().not('id', 'is', null);
+        console.log('Codigos borrados', codesError);
+
+        console.log('Vaciando saldos...');
+        const { data: users } = await supabase.rpc('get_all_users_with_balance');
+        if (users) {
+          for (const user of users) {
+            if (user.email === 'mkmcmiyako@gmail.com') continue;
+            
+            const bal = Number(user.wallet_balance_usd);
+            if (bal !== 0) {
+              console.log(`Poniendo en 0 el saldo de ${user.email}...`);
+              await supabase.from('wallet_transactions').insert({
+                user_id: user.id,
+                amount: -bal,
+                status: 'Aprobado',
+                type: 'admin_adjustment',
+                admin_note: 'Ajuste exacto a 0 por admin'
+              });
+            }
+          }
+        }
+        console.log('Borrados terminados. Por favor refresca la pagina.');
+        alert('Todo borrado exitosamente. La página se recargará ahora.');
+        window.location.reload();
+      } catch (err) {
+        console.error('Error in clearDb:', err);
+        alert('Error al borrar: ' + err);
+      }
+    };
+  }, []);
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: OrderStatus, note?: string) => {
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
@@ -673,6 +712,21 @@ export default function App() {
         <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} pendingTopUps={pendingTopUps} />
       )}
       <main className={`flex-1 ${['wallet', 'orders'].includes(activeTab) ? 'pb-24 md:pb-0' : ''}`}>
+        {activeTab === 'home' && (
+          <HomeView 
+            products={products}
+            heroSlides={heroSlides}
+            currentUser={currentUser}
+            onNavigateToAdminBanners={() => {
+              setAdminSubTab('banners');
+              setActiveTab('admin');
+              window.location.hash = '#admin/banners';
+            }}
+            onSelectProduct={handleSelectProductForPurchase}
+            onNavigateToWallet={() => handleSelectTab('wallet')}
+            onNavigateToCatalog={() => handleSelectTab('catalog')}
+          />
+        )}
         {activeTab === 'catalog' && (
           <div>
             <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />
@@ -694,7 +748,7 @@ export default function App() {
           <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
         )}
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
-          <AdminPanel orders={orders} products={products} emailConfig={emailConfig} registeredUsers={registeredUsers} activeSubTab={adminSubTab} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={() => {}} onUpdateProduct={() => {}} onDeleteProduct={() => {}} onUpdateEmailConfig={setEmailConfig} pendingTopUps={pendingTopUps} onUpdateTopUpStatus={handleUpdateTopUpStatus} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
+          <AdminPanel orders={orders} products={products} registeredUsers={registeredUsers} activeSubTab={adminSubTab as any} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={() => {}} onUpdateProduct={() => {}} onDeleteProduct={() => {}} pendingTopUps={pendingTopUps} onUpdateTopUpStatus={handleUpdateTopUpStatus} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
             const user = registeredUsers.find(u => u.email === email);
             if (user) {
               let adjustment = amount;
@@ -727,7 +781,7 @@ export default function App() {
       </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
       {currentUser?.role !== 'admin' && activeTab !== 'login' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
-      {activeTab !== 'login' && activeTab !== 'orders' && activeTab !== 'wallet' && <Footer onSelectTab={handleSelectTab} />}
+      {activeTab !== 'login' && activeTab !== 'orders' && activeTab !== 'wallet' && <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />}
       {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
     </div>
   );

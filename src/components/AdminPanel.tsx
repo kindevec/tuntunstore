@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Order, OrderStatus, Product, EmailAlertConfig, UserProfile } from '../types';
+import { Order, OrderStatus, Product, UserProfile } from '../types';
 import { DiamondIcon } from './DiamondIcon';
 import { AdminOrdersTab } from './admin/AdminOrdersTab';
 import { AdminCatalogTab } from './admin/AdminCatalogTab';
-import { AdminEmailTab } from './admin/AdminEmailTab';
 import { AdminWalletsTab } from './admin/AdminWalletsTab';
 import { AdminCodesTab } from './admin/AdminCodesTab';
+import { AdminBannersTab } from './admin/AdminBannersTab';
 import { 
   ShieldCheck, 
   Search, 
@@ -33,7 +33,8 @@ import {
   Code,
   Upload,
   Package,
-  History
+  History,
+  Image as ImageIcon
 } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 
@@ -42,13 +43,12 @@ interface AdminPanelProps {
   products: Product[];
   emailConfig: EmailAlertConfig;
   registeredUsers?: UserProfile[];
-  activeSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes';
-  onSubTabChange?: (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes') => void;
+  activeSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners';
+  onSubTabChange?: (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners') => void;
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus, note?: string) => void;
   onAddProduct: (product: Omit<Product, 'id'>) => void;
   onUpdateProduct: (product: Product) => void;
   onDeleteProduct: (productId: string) => void;
-  onUpdateEmailConfig: (config: EmailAlertConfig) => void;
   onUpdateUserWalletBalance?: (email: string, amount: number, isSetExact?: boolean) => void;
   pendingTopUps?: any[];
   onUpdateTopUpStatus?: (transactionId: string, newStatus: 'Aprobado' | 'Rechazado') => void;
@@ -65,15 +65,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onAddProduct,
   onUpdateProduct,
   onDeleteProduct,
-  onUpdateEmailConfig,
   onUpdateUserWalletBalance,
   pendingTopUps = [],
   onUpdateTopUpStatus,
 }) => {
-  const [internalTab, setInternalTab] = useState<'orders' | 'catalog' | 'email' | 'wallets' | 'codes'>('orders');
+  const [internalTab, setInternalTab] = useState<'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners'>('orders');
   const activeTab = activeSubTab || internalTab;
 
-  const handleTabChange = (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes') => {
+  const handleTabChange = (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners') => {
     setInternalTab(tab);
     if (onSubTabChange) {
       onSubTabChange(tab);
@@ -124,11 +123,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     isGoldPromo: false,
     badgeText: '',
   });
-
-  // Test Email Notification Modal State
-  const [showTestEmailModal, setShowTestEmailModal] = useState(false);
-  const [testEmailSentSuccess, setTestEmailSentSuccess] = useState(false);
-
   const [codesProductId, setCodesProductId] = useState<string>('');
   const [codesText, setCodesText] = useState('');
   const [codesStats, setCodesStats] = useState<Array<{product_id: string, product_name: string, total: number, available: number, used: number}>>([]);
@@ -194,15 +188,66 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     
     const { error } = await supabase.from('redemption_codes').insert(rows);
     
-    setIsUploadingCodes(false);
-    
     if (error) {
+      setIsUploadingCodes(false);
       return { success: false, error: error.message };
-    } else {
-      setCodesText('');
-      fetchCodesStats();
-      return { success: true, count: codes.length };
     }
+
+    // AUTO-ASSIGNMENT LOGIC
+    try {
+      // 1. Fetch pending orders for this product
+      const { data: pendingOrders, error: fetchError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('product_id', codesProductId)
+        .eq('status', 'Pendiente')
+        .order('created_at', { ascending: true }); // oldest first
+        
+      if (fetchError) throw fetchError;
+      
+      if (pendingOrders && pendingOrders.length > 0) {
+        // 2. Fetch available codes for this product
+        const { data: availableCodes, error: codesFetchError } = await supabase
+          .from('redemption_codes')
+          .select('id, code')
+          .eq('product_id', codesProductId)
+          .eq('is_used', false)
+          .order('created_at', { ascending: true });
+          
+        if (codesFetchError) throw codesFetchError;
+        
+        // 3. Loop through orders and assign codes
+        if (availableCodes && availableCodes.length > 0) {
+          for (let i = 0; i < pendingOrders.length && i < availableCodes.length; i++) {
+            const order = pendingOrders[i];
+            const codeToAssign = availableCodes[i];
+            
+            // Mark code as used
+            await supabase.from('redemption_codes').update({ is_used: true }).eq('id', codeToAssign.id);
+            
+            // Update order
+            await supabase.from('orders').update({
+              status: 'Completado',
+              redemption_code: codeToAssign.code
+            }).eq('id', order.id);
+            
+            // Insert status history
+            await supabase.from('order_status_history').insert({
+              order_id: order.id,
+              status: 'Completado',
+              note: 'Código asignado automáticamente (Ingreso de stock)'
+            });
+          }
+        }
+      }
+    } catch (assignError) {
+      console.error('Error durante la auto-asignación de códigos:', assignError);
+    }
+
+    setIsUploadingCodes(false);
+    setCodesText('');
+    fetchCodesStats();
+    return { success: true, count: codes.length };
   };
 
   // Stats Calculations
@@ -281,18 +326,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }, 50);
   };
 
-  const triggerTestEmailAlert = () => {
-    setTestEmailSentSuccess(true);
-    setTimeout(() => {
-      setTestEmailSentSuccess(false);
-    }, 4000);
-  };
-
   return (
     <section id="admin-panel-section" className="py-8 px-4 sm:px-6 lg:px-8 max-w-full mx-auto space-y-8">
       
-
-
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         
@@ -383,20 +419,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </button>
 
         <button
-          onClick={() => handleTabChange('email')}
-          className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
-            activeTab === 'email'
-              ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
-          }`}
-        >
-          <Mail className="w-4 h-4" />
-          <span>Alertas Correo</span>
-        </button>
-
-        <button
           onClick={() => { handleTabChange('codes'); fetchCodesStats(); }}
-          className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
+          className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] relative ${
             activeTab === 'codes'
               ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]'
               : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
@@ -404,6 +428,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         >
           <Code className="w-4 h-4" />
           <span>Códigos</span>
+          {codesStats.filter(c => c.available <= 10).length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse shadow-md border border-rose-400">
+              ⚠️ {codesStats.filter(c => c.available <= 10).length}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => handleTabChange('banners')}
+          className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
+            activeTab === 'banners'
+              ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
+          }`}
+        >
+          <ImageIcon className="w-4 h-4" />
+          <span>Banners</span>
         </button>
       </div>
 
@@ -433,16 +474,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         />
       )}
 
-      {/* TAB 3: SISTEMA DE ALERTAS POR CORREO */}
-      {activeTab === 'email' && (
-        <AdminEmailTab
-          emailConfig={emailConfig}
-          onUpdateEmailConfig={onUpdateEmailConfig}
-          triggerTestEmailAlert={triggerTestEmailAlert}
-          testEmailSentSuccess={testEmailSentSuccess}
-        />
-      )}
-
       {/* TAB 4: GESTIÓN DE BILLETERAS Y SALDOS USD */}
       {activeTab === 'wallets' && (
         <AdminWalletsTab
@@ -468,6 +499,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         />
       )}
 
+      {/* TAB 6: GESTIÓN DE BANNERS */}
+      {activeTab === 'banners' && (
+        <AdminBannersTab />
+      )}
+
+      {/* MODAL: VER COMPROBANTE DE PAGO COMPLETO */}
       {selectedUserHistory && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 p-4 sm:p-6 rounded-2xl max-w-2xl w-full border border-blue-500/30 space-y-4 shadow-2xl text-white max-h-[90vh] flex flex-col">

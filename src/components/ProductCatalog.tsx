@@ -16,26 +16,32 @@ interface ProductCatalogProps {
   onAddProduct?: (product: Omit<Product, 'id'>) => void;
 }
 
-const CyanProductCard: React.FC<{
+export const CyanProductCard: React.FC<{
   product: Product;
-  isAdmin: boolean;
-  quickPriceId: string | null;
-  quickPriceValue: string;
-  setQuickPriceId: (id: string | null) => void;
-  setQuickPriceValue: (val: string) => void;
-  handleSaveQuickPrice: (p: Product) => void;
-  handleOpenEdit: (p: Product) => void;
+  isAdmin?: boolean;
+  carouselMode?: boolean;
+  isFeaturedMode?: boolean;
+  forceActive?: boolean;
+  quickPriceId?: string | null;
+  quickPriceValue?: string;
+  setQuickPriceId?: (id: string | null) => void;
+  setQuickPriceValue?: (val: string) => void;
+  handleSaveQuickPrice?: (p: Product) => void;
+  handleOpenEdit?: (p: Product) => void;
   onDeleteProduct?: (id: string) => void;
   onSelectProduct: (p: Product) => void;
 }> = ({
   product,
-  isAdmin,
-  quickPriceId,
-  quickPriceValue,
-  setQuickPriceId,
-  setQuickPriceValue,
-  handleSaveQuickPrice,
-  handleOpenEdit,
+  isAdmin = false,
+  carouselMode = false,
+  isFeaturedMode = false,
+  forceActive,
+  quickPriceId = null,
+  quickPriceValue = '',
+  setQuickPriceId = () => {},
+  setQuickPriceValue = () => {},
+  handleSaveQuickPrice = () => {},
+  handleOpenEdit = () => {},
   onDeleteProduct,
   onSelectProduct,
 }) => {
@@ -53,10 +59,9 @@ const CyanProductCard: React.FC<{
         setIsVisible(entry.isIntersecting);
       },
       {
-        // An extremely thin active zone (2% of the screen height) right in the dead center.
-        // Because the zone is thinner than the physical gap between cards,
-        // it is impossible for two rows to intersect this line simultaneously.
-        rootMargin: '-49% 0px -49% 0px', 
+        // For vertical scroll (default) use -49% 0px -49% 0px
+        // For horizontal carousel, use 0px -49% 0px -49%
+        rootMargin: carouselMode ? '0px -49% 0px -49%' : '-49% 0px -49% 0px', 
         threshold: 0, 
       }
     );
@@ -75,8 +80,12 @@ const CyanProductCard: React.FC<{
     <div
       ref={cardRef}
       id={`product-card-${product.id}`}
-      data-active={isVisible}
-      className={`bg-gradient-to-b from-zinc-800 to-zinc-900 border transition-all duration-500 rounded-xl flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden hover:scale-[1.03] hover:z-10 data-[active=true]:scale-[1.03] data-[active=true]:z-10 ${
+      data-active={forceActive !== undefined ? forceActive : isVisible}
+      className={`bg-gradient-to-b from-zinc-800 to-zinc-900 border transition-all duration-500 rounded-xl flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden h-full ${
+        carouselMode
+          ? 'data-[active=false]:scale-90 data-[active=false]:opacity-50 data-[active=false]:z-0 data-[active=true]:scale-[1.05] data-[active=true]:z-20 data-[active=true]:opacity-100'
+          : 'hover:scale-[1.03] hover:z-10 data-[active=true]:scale-[1.03] data-[active=true]:z-10'
+      } ${
         isAdmin
           ? 'border-amber-500/40 hover:border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)] data-[active=true]:border-amber-400'
           : 'border-emerald-500/20 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] data-[active=true]:border-emerald-400 data-[active=true]:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
@@ -93,16 +102,6 @@ const CyanProductCard: React.FC<{
           ) : (
             <span></span>
           )}
-          {isAdmin && (
-            <button
-              onClick={() => handleOpenEdit(product)}
-              className="bg-amber-400 text-black px-2 py-0.5 rounded-md font-black text-[10px] flex items-center gap-1 cursor-pointer hover:bg-amber-300 shadow uppercase relative z-20"
-              title="Editar producto"
-            >
-              <Edit className="w-3 h-3" />
-              <span>Editar</span>
-            </button>
-          )}
         </div>
 
         {/* Product Title */}
@@ -111,20 +110,20 @@ const CyanProductCard: React.FC<{
         </h3>
 
         {/* Diamond Image — fills card width nicely */}
-        <div className="flex items-center justify-center py-1.5 sm:py-3">
-          <div className="relative group-hover:scale-110 group-data-[active=true]:scale-110 transition-transform duration-500">
+        <div className="flex-1 flex items-center justify-center py-1 sm:py-3 min-h-0">
+          <div className="relative flex items-center justify-center w-full h-full group-hover:scale-110 group-data-[active=true]:scale-110 transition-transform duration-500">
             <div className="absolute inset-0 bg-emerald-500/20 blur-[18px] sm:blur-[25px] rounded-full animate-pulse group-hover:bg-emerald-400/30 group-data-[active=true]:bg-emerald-400/30 transition-colors" />
             {product.imageType === 'diamond-medium' ? (
               <>
                 <img 
                   src="/cofresito.png" 
                   alt="Cofre de Diamantes" 
-                  className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+                  className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
                 <img 
                   src="/cofresito2.png" 
                   alt="Cofre de Diamantes 2" 
-                  className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+                  className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
                 />
               </>
             ) : product.imageType === 'diamond-large' ? (
@@ -132,12 +131,12 @@ const CyanProductCard: React.FC<{
                 <img 
                   src="/coofre.png" 
                   alt="Cofre Grande" 
-                  className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+                  className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
                 <img 
                   src="/coofre2.png" 
                   alt="Cofre Grande 2" 
-                  className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+                  className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
                 />
               </>
             ) : (
@@ -145,12 +144,12 @@ const CyanProductCard: React.FC<{
                 <img 
                   src="/diamante.png" 
                   alt="Diamante" 
-                  className="w-20 h-20 sm:w-36 sm:h-36 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0"
+                  className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
                 <img 
                   src="/diamante-2.png" 
                   alt="Diamante 2" 
-                  className="absolute top-0 left-0 w-20 h-20 sm:w-36 sm:h-36 object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100"
+                  className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
                 />
               </>
             )}
@@ -163,9 +162,11 @@ const CyanProductCard: React.FC<{
         </div>
 
         {/* Diamond count pill */}
-        <p className="text-center text-[11px] sm:text-xs text-white/80 font-bold uppercase tracking-wide">
-          {product.diamonds} 💎 {product.bonusDiamonds ? `+ ${product.bonusDiamonds} bono` : ''}
-        </p>
+        {!isFeaturedMode && (
+          <p className="text-center text-[11px] sm:text-xs text-white/80 font-bold uppercase tracking-wide">
+            {product.diamonds} 💎 {product.bonusDiamonds ? `+ ${product.bonusDiamonds} bono` : ''}
+          </p>
+        )}
       </div>
 
       {/* Footer: Price + Button integrated */}
@@ -219,19 +220,19 @@ const CyanProductCard: React.FC<{
         </div>
 
         {isAdmin ? (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mt-0.5">
             <button
               onClick={() => handleOpenEdit(product)}
-              className="py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow relative z-20"
+              className="py-1.5 sm:py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-black text-[9px] sm:text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 shadow relative z-20"
             >
-              <Edit className="w-3.5 h-3.5" />
+              <Edit className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span>Editar</span>
             </button>
             <button
               onClick={() => onDeleteProduct && onDeleteProduct(product.id)}
-              className="py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 relative z-20"
+              className="py-1.5 sm:py-2 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold border border-rose-500/30 text-[9px] sm:text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 relative z-20"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               <span>Eliminar</span>
             </button>
           </div>

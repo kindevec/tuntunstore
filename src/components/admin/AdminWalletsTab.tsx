@@ -1,5 +1,5 @@
-import React from 'react';
-import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History } from 'lucide-react';
+import React, { useState } from 'react';
+import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X } from 'lucide-react';
 import { UserProfile } from '../../types';
 
 export interface AdminWalletsTabProps {
@@ -17,6 +17,8 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   setSelectedReceiptUrl,
   handleViewUserHistory
 }) => {
+  const [selectedProfileUser, setSelectedProfileUser] = useState<UserProfile | null>(null);
+
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-amber-500/10 via-zinc-900 to-amber-500/5 p-4 sm:p-6 rounded-2xl border border-amber-500/30">
@@ -206,12 +208,20 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                   <span className="text-base sm:text-lg font-black text-amber-400">
                     ${(u.walletBalanceUSD || 0).toFixed(2)}
                   </span>
-                  <button
-                     onClick={() => handleViewUserHistory(u.uid, u.name)}
-                     className="mt-2 w-full py-1.5 px-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex items-center justify-center gap-1"
-                  >
-                    <History className="w-3 h-3 shrink-0" /> Historial
-                  </button>
+                  <div className="flex gap-1.5 mt-2 w-full">
+                    <button
+                       onClick={() => setSelectedProfileUser(u)}
+                       className="flex-1 py-1.5 px-2 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-[10px] font-black rounded-lg uppercase border border-violet-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <User className="w-3 h-3 shrink-0" /> Perfil
+                    </button>
+                    <button
+                       onClick={() => handleViewUserHistory(u.uid, u.name)}
+                       className="flex-1 py-1.5 px-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <History className="w-3 h-3 shrink-0" /> Historial
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -271,8 +281,14 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                         ${(u.walletBalanceUSD || 0).toFixed(2)} USD
                       </span>
                       <button
+                         onClick={() => setSelectedProfileUser(u)}
+                         className="px-3 py-1.5 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-[10px] font-black rounded-lg uppercase border border-violet-500/30 transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        <User className="w-3 h-3" /> Perfil
+                      </button>
+                      <button
                          onClick={() => handleViewUserHistory(u.uid, u.name)}
-                         className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex items-center gap-1"
+                         className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex items-center gap-1 cursor-pointer"
                       >
                         <History className="w-3 h-3" /> Ver Historial
                       </button>
@@ -284,6 +300,128 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Profile Modal */}
+      {selectedProfileUser && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setSelectedProfileUser(null)}>
+          <div 
+            className="bg-zinc-900 border border-zinc-700/50 rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="relative bg-gradient-to-r from-violet-600/30 via-zinc-900 to-amber-500/20 p-6 pb-10 border-b border-zinc-700/50">
+              <button
+                onClick={() => setSelectedProfileUser(null)}
+                className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/30 hover:bg-black/50 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-4">
+                <img
+                  src={selectedProfileUser.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
+                  alt={selectedProfileUser.name}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-violet-500/40 shadow-lg"
+                />
+                <div className="min-w-0">
+                  <h3 className="text-lg sm:text-xl font-black text-white truncate">{selectedProfileUser.name}</h3>
+                  <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                    selectedProfileUser.role === 'admin'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  }`}>
+                    {selectedProfileUser.role === 'admin' ? '👑 Administrador' : '🎮 Cliente'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-6 space-y-3">
+              {/* Email */}
+              <div className="flex items-center gap-3 bg-zinc-800/60 p-3 rounded-xl border border-zinc-700/40">
+                <div className="p-2 bg-blue-500/10 rounded-lg shrink-0">
+                  <Mail className="w-4 h-4 text-blue-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase">Email</p>
+                  <p className="text-sm text-white font-bold truncate">{selectedProfileUser.email}</p>
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div className="flex items-center gap-3 bg-zinc-800/60 p-3 rounded-xl border border-zinc-700/40">
+                <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0">
+                  <Phone className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase">Teléfono</p>
+                  <p className="text-sm text-white font-bold">{selectedProfileUser.phone || 'No registrado'}</p>
+                </div>
+              </div>
+
+              {/* Player ID & Gamer Tag */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-3 bg-zinc-800/60 p-3 rounded-xl border border-zinc-700/40">
+                  <div className="p-2 bg-amber-500/10 rounded-lg shrink-0">
+                    <Gamepad2 className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase">ID Free Fire</p>
+                    <p className="text-sm text-white font-bold font-mono truncate">{selectedProfileUser.playerIdDefault || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 bg-zinc-800/60 p-3 rounded-xl border border-zinc-700/40">
+                  <div className="p-2 bg-cyan-500/10 rounded-lg shrink-0">
+                    <Gamepad2 className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase">Gamer Tag</p>
+                    <p className="text-sm text-white font-bold truncate">{selectedProfileUser.gamerTag || 'Sin Tag'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preferred Bank */}
+              <div className="flex items-center gap-3 bg-zinc-800/60 p-3 rounded-xl border border-zinc-700/40">
+                <div className="p-2 bg-violet-500/10 rounded-lg shrink-0">
+                  <CreditCard className="w-4 h-4 text-violet-400" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase">Banco Preferido</p>
+                  <p className="text-sm text-white font-bold">{selectedProfileUser.preferredBank || 'No registrado'}</p>
+                </div>
+              </div>
+
+              {/* Wallet Balance */}
+              <div className="flex items-center justify-between bg-gradient-to-r from-amber-500/10 to-zinc-800/60 p-4 rounded-xl border border-amber-500/30">
+                <div>
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Saldo en Billetera</p>
+                  <p className="text-2xl font-black text-amber-400">${(selectedProfileUser.walletBalanceUSD || 0).toFixed(2)}</p>
+                </div>
+                <div className="p-3 bg-amber-400/10 rounded-xl">
+                  <Wallet className="w-6 h-6 text-amber-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 sm:p-6 pt-0 flex gap-2">
+              <button
+                onClick={() => { handleViewUserHistory(selectedProfileUser.uid, selectedProfileUser.name); setSelectedProfileUser(null); }}
+                className="flex-1 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-black rounded-xl uppercase border border-blue-500/30 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <History className="w-4 h-4" /> Ver Historial
+              </button>
+              <button
+                onClick={() => setSelectedProfileUser(null)}
+                className="flex-1 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-black rounded-xl uppercase border border-zinc-700 transition-colors cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

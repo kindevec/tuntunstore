@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo } from 'react';
-import { Upload, X, AlertTriangle, CheckCircle2, FileText, Trash2, Shield, Sparkles } from 'lucide-react';
+import { Upload, X, AlertTriangle, CheckCircle2, FileText, Trash2, Shield, Sparkles, AlertOctagon, Zap } from 'lucide-react';
 
 export interface Product {
   id: string;
@@ -61,12 +61,19 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [notification, setNotification] = useState<{type: 'success'|'error', message: string} | null>(null);
+  const [dismissedAlert, setDismissedAlert] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const selectedProduct = useMemo(
     () => products.find(p => p.id === codesProductId),
     [products, codesProductId]
+  );
+
+  // Products with 10 or fewer available codes
+  const lowStockProducts = useMemo(
+    () => codesStats.filter(s => s.available <= 10),
+    [codesStats]
   );
 
   // Process raw text into chips
@@ -173,11 +180,80 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
     }
   };
 
+  const handleSelectProductForUpload = (productId: string) => {
+    setCodesProductId(productId);
+    setShowConfirmation(false);
+    dropZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   return (
     <div className="space-y-6">
-      <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-wider flex items-center gap-2">
-        🔑 Gestión de Códigos de Recarga
-      </h2>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-wider flex items-center gap-2">
+          🔑 Gestión de Códigos de Recarga
+        </h2>
+        {lowStockProducts.length > 0 && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-black uppercase tracking-wider animate-pulse">
+            <AlertTriangle className="w-4 h-4 text-rose-400" />
+            {lowStockProducts.length} producto(s) en stock crítico (≤10)
+          </span>
+        )}
+      </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+      {/* LOW STOCK CRITICAL ALERT BANNER                     */}
+      {/* ═══════════════════════════════════════════════════ */}
+      {lowStockProducts.length > 0 && !dismissedAlert && (
+        <div className="relative bg-gradient-to-r from-rose-950/90 via-amber-950/80 to-rose-950/90 border-2 border-rose-500/70 rounded-2xl p-4 md:p-5 shadow-[0_0_30px_rgba(244,63,94,0.35)] space-y-4 animate-in fade-in slide-in-from-top-3">
+          <button
+            onClick={() => setDismissedAlert(true)}
+            className="absolute top-3 right-3 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-black/30 transition-colors"
+            title="Ocultar banner de alerta"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          
+          <div className="flex items-start gap-3 pr-6">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/25 border border-rose-500/50 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(244,63,94,0.4)]">
+              <AlertOctagon className="w-6 h-6 text-rose-400 animate-bounce" />
+            </div>
+            <div>
+              <h3 className="text-sm md:text-base font-black text-rose-200 uppercase tracking-wider flex items-center gap-2">
+                🚨 ALERTA CRÍTICA: HAGA UNA RECARGA DE PINES
+              </h3>
+              <p className="text-xs text-zinc-300 font-medium mt-1 leading-relaxed">
+                ¡Atención Admin! Hay <span className="font-black text-rose-400 underline">{lowStockProducts.length} producto(s)</span> con <span className="font-black text-amber-300 font-mono">10 o menos</span> pines disponibles. Es necesario hacer una recarga de códigos inmediatamente para garantizar las ventas automáticas.
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Reload Selection Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
+            {lowStockProducts.map((p) => (
+              <div 
+                key={p.product_id} 
+                className={`bg-black/60 border rounded-xl p-3 flex items-center justify-between gap-2.5 transition-all ${
+                  p.available === 0 ? 'border-rose-500/80 bg-rose-500/10' : 'border-amber-500/60 bg-amber-500/5'
+                }`}
+              >
+                <div className="truncate">
+                  <p className="text-xs font-black text-white truncate">{p.product_name}</p>
+                  <p className={`text-[11px] font-bold font-mono mt-0.5 ${p.available === 0 ? 'text-rose-400' : 'text-amber-400'}`}>
+                    {p.available === 0 ? '❌ AGOTADO (0 pines)' : `⚠️ Quedan solo ${p.available} pin(es)`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleSelectProductForUpload(p.product_id)}
+                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-black uppercase shrink-0 flex items-center gap-1 transition-all cursor-pointer shadow-md hover:scale-105"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  Recargar
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ═══════════════════════════════════════════════════ */}
       {/* UPLOAD SECTION - Modern Redesign                    */}
@@ -226,9 +302,15 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
             className="w-full bg-black/50 border border-white/10 rounded-xl px-3 md:px-4 py-2.5 md:py-3 text-xs md:text-sm text-zinc-100 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 font-semibold cursor-pointer transition-all"
           >
             <option value="">-- Selecciona un producto --</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>{p.name} — ${p.priceUSD} USD</option>
-            ))}
+            {products.map((p) => {
+              const stat = codesStats.find(s => s.product_id === p.id);
+              const isLow = stat && stat.available <= 10;
+              return (
+                <option key={p.id} value={p.id}>
+                  {p.name} — ${p.priceUSD} USD {stat ? `(${stat.available} dispon.) ${isLow ? '⚠️ RECARGA URGENTE' : ''}` : ''}
+                </option>
+              );
+            })}
           </select>
         </div>
 
@@ -435,31 +517,72 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
           <p className="text-xs md:text-sm text-zinc-500 text-center py-6 md:py-8">No hay códigos cargados aún.</p>
         ) : (
           <div className="space-y-3">
-            {codesStats.map((stat) => (
-              <div key={stat.product_id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 md:p-4 bg-black/30 rounded-xl border border-white/5">
-                <div className="w-full sm:w-auto border-b border-white/5 sm:border-0 pb-2 sm:pb-0">
-                  <p className="text-sm font-bold text-white">{stat.product_name}</p>
-                  <p className="text-[10px] text-zinc-500 font-mono">ID: {stat.product_id.slice(0, 8)}...</p>
+            {codesStats.map((stat) => {
+              const isLowStock = stat.available <= 10;
+              const isOutOfStock = stat.available === 0;
+
+              return (
+                <div
+                  key={stat.product_id}
+                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 md:p-4 rounded-xl border transition-all ${
+                    isOutOfStock
+                      ? 'bg-rose-950/20 border-rose-500/60 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
+                      : isLowStock
+                      ? 'bg-amber-950/20 border-amber-500/60 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                      : 'bg-black/30 border-white/5'
+                  }`}
+                >
+                  <div className="w-full sm:w-auto border-b border-white/5 sm:border-0 pb-2 sm:pb-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-bold text-white">{stat.product_name}</p>
+                      {isOutOfStock && (
+                        <span className="px-2 py-0.5 rounded-md bg-rose-500/20 border border-rose-500/50 text-rose-400 text-[9px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                          <AlertTriangle className="w-3 h-3 text-rose-400" /> ¡Agotado!
+                        </span>
+                      )}
+                      {!isOutOfStock && isLowStock && (
+                        <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[9px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                          <AlertTriangle className="w-3 h-3 text-amber-400" /> Recarga requerida (≤10)
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-zinc-500 font-mono mt-0.5">ID: {stat.product_id.slice(0, 8)}...</p>
+                  </div>
+
+                  <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className={`text-center flex-1 sm:flex-none rounded-lg p-2 sm:p-0 ${isLowStock ? (isOutOfStock ? 'bg-rose-500/10 sm:bg-transparent' : 'bg-amber-500/10 sm:bg-transparent') : 'bg-black/20 sm:bg-transparent'}`}>
+                      <p className={`text-base md:text-lg font-black ${isOutOfStock ? 'text-rose-500 animate-pulse font-mono' : isLowStock ? 'text-amber-400 animate-pulse font-mono' : 'text-emerald-400'}`}>
+                        {stat.available}
+                      </p>
+                      <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold">Disponibles</p>
+                    </div>
+                    <div className="text-center flex-1 sm:flex-none bg-black/20 sm:bg-transparent rounded-lg p-2 sm:p-0">
+                      <p className="text-base md:text-lg font-black text-zinc-500">{stat.used}</p>
+                      <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold">Usados</p>
+                    </div>
+                    <div className="text-center flex-1 sm:flex-none bg-black/20 sm:bg-transparent rounded-lg p-2 sm:p-0">
+                      <p className="text-base md:text-lg font-black text-white">{stat.total}</p>
+                      <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold">Total</p>
+                    </div>
+
+                    {isLowStock && (
+                      <button
+                        onClick={() => handleSelectProductForUpload(stat.product_id)}
+                        className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-black uppercase shrink-0 flex items-center gap-1 transition-all cursor-pointer shadow-md hover:scale-105"
+                        title="Seleccionar este producto para cargar códigos"
+                      >
+                        <Zap className="w-3.5 h-3.5 fill-current" />
+                        <span>⚡ Recargar</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                  <div className="text-center flex-1 sm:flex-none bg-black/20 sm:bg-transparent rounded-lg p-2 sm:p-0">
-                    <p className="text-base md:text-lg font-black text-emerald-400">{stat.available}</p>
-                    <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold">Disponibles</p>
-                  </div>
-                  <div className="text-center flex-1 sm:flex-none bg-black/20 sm:bg-transparent rounded-lg p-2 sm:p-0">
-                    <p className="text-base md:text-lg font-black text-zinc-500">{stat.used}</p>
-                    <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold">Usados</p>
-                  </div>
-                  <div className="text-center flex-1 sm:flex-none bg-black/20 sm:bg-transparent rounded-lg p-2 sm:p-0">
-                    <p className="text-base md:text-lg font-black text-white">{stat.total}</p>
-                    <p className="text-[8px] md:text-[9px] text-zinc-500 uppercase font-bold">Total</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
     </div>
   );
 };
+

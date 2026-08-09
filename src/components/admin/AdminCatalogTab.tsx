@@ -272,7 +272,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
           return (
             <div key={p.id} className="bg-zinc-800 rounded-xl border border-zinc-700/50 overflow-hidden shadow-lg">
               {/* Card Header */}
-              <div className="bg-emerald-600 px-3 py-2.5 flex items-center justify-between">
+              <div className="bg-emerald-600 px-2.5 py-1.5 flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
                   <DiamondIcon size="sm" variant={p.isGoldPromo || p.category === 'memberships' ? 'gold' : 'emerald'} />
                   <div className="min-w-0">
@@ -337,13 +337,13 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           }
                           setEditingInlinePriceId(null);
                         }}
-                        className="col-span-2 py-2 sm:py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] sm:text-xs font-black rounded-lg cursor-pointer uppercase transition-colors text-center"
+                        className="col-span-2 py-1.5 sm:py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] sm:text-xs font-black rounded-lg cursor-pointer uppercase transition-colors text-center"
                       >
                         ✓ Guardar
                       </button>
                       <button
                         onClick={() => setEditingInlinePriceId(null)}
-                        className="py-2 sm:py-2.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-[10px] sm:text-xs font-bold rounded-lg cursor-pointer transition-colors text-center"
+                        className="py-1.5 sm:py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-[10px] sm:text-xs font-bold rounded-lg cursor-pointer transition-colors text-center"
                       >
                         ✕
                       </button>
@@ -355,21 +355,21 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           setEditingInlinePriceId(p.id);
                           setInlinePriceValue(p.priceUSD.toString());
                         }}
-                        className="py-2 bg-zinc-700 hover:bg-zinc-600 text-amber-400 font-black text-[9px] sm:text-[10px] rounded-lg uppercase transition-colors cursor-pointer text-center"
+                        className="py-1.5 bg-zinc-700 hover:bg-zinc-600 text-amber-400 font-black text-[9px] sm:text-[10px] rounded-lg uppercase transition-colors cursor-pointer text-center"
                       >
                         💲 Precio
                       </button>
 
                       <button
                         onClick={() => startEditProduct(p)}
-                        className="py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] sm:text-[10px] rounded-lg uppercase transition-colors cursor-pointer text-center"
+                        className="py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] sm:text-[10px] rounded-lg uppercase transition-colors cursor-pointer text-center"
                       >
                         ✏️ Editar
                       </button>
 
                       <button
                         onClick={() => onDeleteProduct(p.id)}
-                        className="py-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-black text-[9px] sm:text-[10px] rounded-lg border border-rose-500/30 transition-colors cursor-pointer text-center flex justify-center items-center"
+                        className="py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-black text-[9px] sm:text-[10px] rounded-lg border border-rose-500/30 transition-colors cursor-pointer text-center flex justify-center items-center"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

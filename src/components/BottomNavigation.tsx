@@ -1,15 +1,16 @@
 import React from 'react';
-import { ShoppingBag, ClipboardList, Wallet, UserCog, Mail, Sparkles, Code } from 'lucide-react';
+import { ShoppingBag, ClipboardList, Wallet, UserCog, Mail, Sparkles, Code, Home } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface BottomNavigationProps {
-  activeTab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login';
+  activeTab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login';
   adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes';
   setActiveTab: (
-    tab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
+    tab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
     subTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes'
   ) => void;
   pendingOrdersCount: number;
+  lowStockCodesCount?: number;
   currentUser: UserProfile | null;
 }
 
@@ -18,6 +19,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   adminSubTab = 'orders',
   setActiveTab,
   pendingOrdersCount,
+  lowStockCodesCount = 0,
   currentUser,
 }) => {
   const isAdmin = currentUser?.role === 'admin';
@@ -90,13 +92,20 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         {/* Admin Tab 5: Códigos */}
         <button
           onClick={() => setActiveTab('admin', 'codes')}
-          className={`flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer px-1 ${
+          className={`relative flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer px-1 ${
             activeTab === 'admin' && adminSubTab === 'codes'
               ? 'text-amber-400 bg-amber-400/10 border border-amber-400/30 shadow-[0_0_12px_rgba(251,191,36,0.3)]'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <Code className={`w-4 h-4 ${activeTab === 'admin' && adminSubTab === 'codes' ? 'text-amber-400 stroke-[2.5]' : ''}`} />
+          <div className="relative flex items-center justify-center">
+            <Code className={`w-4 h-4 ${activeTab === 'admin' && adminSubTab === 'codes' ? 'text-amber-400 stroke-[2.5]' : ''}`} />
+            {lowStockCodesCount > 0 && (
+              <span className="absolute -top-1.5 -right-2 bg-rose-500 text-white text-[8px] font-black px-1 py-0.2 rounded-full border border-black animate-pulse leading-none">
+                {lowStockCodesCount}
+              </span>
+            )}
+          </div>
           <span className="text-[8px] xs:text-[9.5px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">Códigos</span>
         </button>
       </nav>
@@ -141,7 +150,20 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         <span className="text-[8.5px] xs:text-[10px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">Billetera</span>
       </button>
 
-      {/* Tab 3: Mis Pedidos */}
+      {/* Tab 3: Inicio (Centro) */}
+      <button
+        onClick={() => setActiveTab('home')}
+        className={`flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer ${
+          activeTab === 'home'
+            ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.3)]'
+            : 'text-zinc-400 hover:text-white'
+        }`}
+      >
+        <Home className={`w-4 h-4 xs:w-5 xs:h-5 ${activeTab === 'home' ? 'text-amber-400 stroke-[2.5]' : ''}`} />
+        <span className="text-[8.5px] xs:text-[10px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">Inicio</span>
+      </button>
+
+      {/* Tab 4: Mis Pedidos */}
       <button
         onClick={() => setActiveTab('orders')}
         className={`relative flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer ${

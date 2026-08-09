@@ -16,7 +16,10 @@ import {
   Clock,
   Mail,
   DollarSign,
-  Bell
+  Bell,
+  Home,
+  Code,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -24,10 +27,10 @@ interface HeaderProps {
   onLoginGoogle: (role: 'client' | 'admin') => void;
   onLogout: () => void;
   onOpenLoginModal: () => void;
-  activeTab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login';
+  activeTab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login';
   adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets';
   setActiveTab: (
-    tab: 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
+    tab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
     subTab?: 'orders' | 'catalog' | 'email' | 'wallets'
   ) => void;
   pendingOrdersCount: number;
@@ -71,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Top Banner Notice - Hidden on mobile as explicitly requested */}
       <div id="header-top-bar" className="hidden md:flex bg-[#030914] px-4 py-1.5 text-[11px] text-center border-b border-emerald-900/30 items-center justify-center gap-3 font-bold tracking-wider uppercase text-zinc-300">
         <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]"></span>
-        <span>Estamos activos por el Contacto: <strong className="text-white">+593 99 008 4680</strong> ⚠️ Verificá la información.</span>
+        <span>Estamos activos por el Contacto: <strong className="text-white">+593 96 872 9952</strong> ⚠️ Verificá la información.</span>
         <span className="inline-block text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded text-[10px] border border-emerald-500/30 font-black">
           🟢 ACREDITACIÓN INSTANTÁNEA ECUADOR
         </span>
@@ -90,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Logo Brand */}
           <div 
             id="brand-logo" 
-            onClick={() => setActiveTab('catalog')} 
+            onClick={() => setActiveTab('home')} 
             className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer group shrink-0"
           >
             <img 
@@ -105,8 +108,22 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Center Navigation - Catálogo y Mis Pedidos para Cliente / Catálogo y Admin para Administrador */}
+          {/* Center Navigation */}
           <nav id="main-navigation" className="hidden md:flex items-center gap-2 bg-zinc-950 p-1.5 rounded-xl border border-white/10">
+            {/* Inicio Tab */}
+            <button
+              id="nav-btn-home"
+              onClick={() => setActiveTab('home')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === 'home'
+                  ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]'
+                  : 'text-zinc-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Home className="w-4 h-4" />
+              Inicio
+            </button>
+
             {/* Permanent Catalog tab */}
             <button
               id="nav-btn-catalog"
@@ -302,52 +319,12 @@ export const Header: React.FC<HeaderProps> = ({
                           <button
                             onClick={() => {
                               setShowAuthMenu(false);
-                              setActiveTab('admin', 'orders');
-                            }}
-                            className="w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 font-bold border border-amber-500/30 transition-colors cursor-pointer"
-                          >
-                            <span className="flex items-center gap-2">
-                              <Clock className="w-3.5 h-3.5 text-amber-400" />
-                              Gestión de Pedidos
-                            </span>
-                            {pendingOrdersCount > 0 && (
-                              <span className="bg-amber-400 text-black font-black text-[10px] px-1.5 py-0.2 rounded-full">
-                                {pendingOrdersCount}
-                              </span>
-                            )}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setShowAuthMenu(false);
-                              setActiveTab('admin', 'wallets');
+                              setActiveTab('admin', 'banners');
                             }}
                             className="w-full text-left px-3 py-2 text-xs rounded-lg flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold transition-colors cursor-pointer"
                           >
-                            <DollarSign className="w-3.5 h-3.5 text-amber-400" />
-                            Billeteras USD & Usuarios
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setShowAuthMenu(false);
-                              setActiveTab('admin', 'catalog');
-                            }}
-                            className="w-full text-left px-3 py-2 text-xs rounded-lg flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold transition-colors cursor-pointer"
-                          >
-                            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                            CRUD de Catálogo
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setShowAuthMenu(false);
-                              setActiveTab('admin', 'email');
-                            }}
-                            className="w-full text-left px-3 py-2 text-xs rounded-lg flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold transition-colors cursor-pointer"
-                          >
-                            <Mail className="w-3.5 h-3.5 text-amber-400" />
-                            Alertas por Correo
+                            <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                            Banners Publicitarios
                           </button>
                         </>
                       ) : (
