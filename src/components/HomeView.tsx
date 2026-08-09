@@ -85,21 +85,24 @@ export const HomeView: React.FC<HomeViewProps> = ({
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  // Mostramos los productos destacados (isPopular), reemplazando expresamente 341 DIAMANTES por 2398 DIAMANTES
-  let popularProducts = products.filter(p => p.active && p.isPopular && p.id !== 'dia-341');
+  // Exclusivamente los 3 productos solicitados para "OFERTAS DESTACADAS": 110, 572 y 2398 DIAMANTES
+  const targetKeys = [
+    { id: 'dia-110', num: 110 },
+    { id: 'dia-572', num: 572 },
+    { id: 'dia-2398', num: 2398 }
+  ];
 
-  // Buscar 2398 DIAMANTES
-  const p2398 = products.find(p => p.id === 'dia-2398' || p.name.toUpperCase().includes('2398'));
-  if (p2398 && !popularProducts.some(p => p.id === p2398.id)) {
-    popularProducts.unshift(p2398);
-  }
+  let featuredProducts: Product[] = [];
+  targetKeys.forEach(tk => {
+    const found = products.find(p => p.id === tk.id || p.diamonds === tk.num || p.name.includes(String(tk.num)));
+    if (found) featuredProducts.push(found);
+  });
 
-  let featuredProducts = popularProducts.slice(0, 3);
-  
-  // Fallback si no hay 3 productos destacados, rellenamos omitiendo dia-341
+  // Fallback de respaldo en caso de que falte algún producto en el catálogo
   if (featuredProducts.length < 3) {
-    const otherProducts = products.filter(p => p.active && p.id !== 'dia-341' && !featuredProducts.some(fp => fp.id === p.id));
-    featuredProducts = [...featuredProducts, ...otherProducts].slice(0, 3);
+    const existingIds = new Set(featuredProducts.map(p => p.id));
+    const extra = products.filter(p => p.active && !existingIds.has(p.id));
+    featuredProducts = [...featuredProducts, ...extra].slice(0, 3);
   }
 
   // Mobile Product Carousel State

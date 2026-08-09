@@ -9,6 +9,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     priceUSD: 0.92,
     category: 'diamonds',
     description: '110 Diamantes Free Fire • Acreditación inmediata por ID.',
+    isPopular: true,
     badgeText: '$0.92 ⚡',
     imageType: 'diamond-small',
   },
@@ -41,6 +42,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     priceUSD: 7.99,
     category: 'diamonds',
     description: '1166 Diamantes Free Fire • Recarga rápida garantizada.',
+    isPopular: false,
     badgeText: '$7.99 🚀',
     imageType: 'diamond-medium',
   },
@@ -62,11 +64,10 @@ export const INITIAL_PRODUCTS: Product[] = [
     priceUSD: 39.50,
     category: 'diamonds',
     description: '6160 Diamantes Free Fire • Paquete Mayorista con Ahorro Máximo.',
-    isPopular: true,
+    isPopular: false,
     badgeText: 'OFERTA MÁXIMA 💎',
     imageType: 'diamond-large',
   },
-
 ];
 
 export const BANK_ACCOUNTS: BankAccount[] = [
