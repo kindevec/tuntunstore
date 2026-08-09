@@ -144,10 +144,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
             onClick={(e) => { e.stopPropagation(); onNavigateToAdminBanners(); }}
             onTouchStart={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
-            className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/10 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+            className="absolute top-3 right-3 sm:top-6 sm:right-6 z-20 bg-black/70 hover:bg-black/90 backdrop-blur-md border border-amber-500/40 text-amber-300 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xl"
           >
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-            Administrar Banners
+            <span>Administrar Banners</span>
           </button>
         )}
         <div 

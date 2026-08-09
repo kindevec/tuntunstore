@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header id="header-main" className="sticky top-0 z-40 bg-black/80 backdrop-blur-md text-white border-b border-emerald-900/40 shadow-2xl">
+    <header id="header-main" className="sticky top-0 z-50 bg-black/80 backdrop-blur-md text-white border-b border-emerald-900/40 shadow-2xl">
       {/* Top Banner Notice - Hidden on mobile as explicitly requested */}
       <div id="header-top-bar" className="hidden md:flex bg-[#030914] px-4 py-1.5 text-[11px] text-center border-b border-emerald-900/30 items-center justify-center gap-3 font-bold tracking-wider uppercase text-zinc-300">
         <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]"></span>
