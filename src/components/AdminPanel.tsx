@@ -166,88 +166,134 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     fetchCodesStats();
   }, [products]);
 
-  const handleUploadCodes = async (preSanitizedCodes?: string[]) => {
-    if (!codesProductId) return { success: false, error: 'No product selected' };
+  const handleUploadCodes = async (preSanitizedCodes?: string[]): Promise<{
+    success: boolean;
+    error?: string;
+    count?: number;
+    blockedDuplicates?: string[];
+  }> => {
+    if (!codesProductId) return { success: false, error: 'No se ha seleccionado ningún producto.' };
     setIsUploadingCodes(true);
     
-    // Use pre-sanitized codes from the new component, or fall back to parsing codesText
-    const codes = preSanitizedCodes && preSanitizedCodes.length > 0
-      ? preSanitizedCodes
-      : codesText.split('\n').map(c => c.trim()).filter(c => c.length > 0);
+    // Clean and normalize input codes
+    const rawCodes = preSanitizedCodes && preSanitizedCodes.length > 0
+      ? preSanitizedCodes.map(c => c.trim().toUpperCase()).filter(Boolean)
+      : codesText.split('\n').map(c => c.trim().toUpperCase()).filter(Boolean);
       
-    if (codes.length === 0) {
+    if (rawCodes.length === 0) {
       setIsUploadingCodes(false);
-      return { success: false, error: 'No codes provided' };
-    }
-    
-    const rows = codes.map(code => ({
-      product_id: codesProductId,
-      code: code,
-      is_used: false,
-    }));
-    
-    const { error } = await supabase.from('redemption_codes').insert(rows);
-    
-    if (error) {
-      setIsUploadingCodes(false);
-      return { success: false, error: error.message };
+      return { success: false, error: 'No se ingresaron códigos válidos.' };
     }
 
-    // AUTO-ASSIGNMENT LOGIC
+    // 1. Deduplicate within current input batch
+    const uniqueInputCodes = Array.from(new Set(rawCodes));
+
+    // 2. SECURITY CHECK AGAINST DATABASE: Check if any codes already exist in redemption_codes
+    let cleanCodes: string[] = uniqueInputCodes;
+    let blockedDuplicates: string[] = [];
+
     try {
-      // 1. Fetch pending orders for this product
-      const { data: pendingOrders, error: fetchError } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('product_id', codesProductId)
-        .eq('status', 'Pendiente')
-        .order('created_at', { ascending: true }); // oldest first
-        
-      if (fetchError) throw fetchError;
+      const { data: existingRecords, error: fetchErr } = await supabase
+        .from('redemption_codes')
+        .select('code')
+        .in('code', uniqueInputCodes);
+
+      if (fetchErr) {
+        console.warn("Advertencia al verificar unicidad de códigos en BD:", fetchErr);
+      }
+
+      if (existingRecords && existingRecords.length > 0) {
+        const existingSet = new Set(existingRecords.map((r: any) => r.code.toUpperCase()));
+        cleanCodes = uniqueInputCodes.filter(c => !existingSet.has(c));
+        blockedDuplicates = uniqueInputCodes.filter(c => existingSet.has(c));
+      }
+
+      if (cleanCodes.length === 0) {
+        setIsUploadingCodes(false);
+        return {
+          success: false,
+          error: `🛡️ Bloqueo de Seguridad: Todos los ${blockedDuplicates.length} códigos ingresados ya existen previamente en la base de datos.`,
+          blockedDuplicates
+        };
+      }
+
+      // 3. Insert ONLY clean, verified unique codes
+      const rows = cleanCodes.map(code => ({
+        product_id: codesProductId,
+        code: code,
+        is_used: false,
+      }));
       
-      if (pendingOrders && pendingOrders.length > 0) {
-        // 2. Fetch available codes for this product
-        const { data: availableCodes, error: codesFetchError } = await supabase
-          .from('redemption_codes')
-          .select('id, code')
+      const { error: insertError } = await supabase.from('redemption_codes').insert(rows);
+      
+      if (insertError) {
+        setIsUploadingCodes(false);
+        if (insertError.code === '23505' || insertError.message.includes('unique constraint') || insertError.message.includes('duplicate key')) {
+          return {
+            success: false,
+            error: '🛡️ Bloqueo de Seguridad: Uno o más códigos ya existen en la base de datos.'
+          };
+        }
+        return { success: false, error: insertError.message };
+      }
+
+      // 4. AUTO-ASSIGNMENT LOGIC
+      try {
+        const { data: pendingOrders, error: fetchError } = await supabase
+          .from('orders')
+          .select('*')
           .eq('product_id', codesProductId)
-          .eq('is_used', false)
+          .eq('status', 'Pendiente')
           .order('created_at', { ascending: true });
           
-        if (codesFetchError) throw codesFetchError;
+        if (fetchError) throw fetchError;
         
-        // 3. Loop through orders and assign codes
-        if (availableCodes && availableCodes.length > 0) {
-          for (let i = 0; i < pendingOrders.length && i < availableCodes.length; i++) {
-            const order = pendingOrders[i];
-            const codeToAssign = availableCodes[i];
+        if (pendingOrders && pendingOrders.length > 0) {
+          const { data: availableCodes, error: codesFetchError } = await supabase
+            .from('redemption_codes')
+            .select('id, code')
+            .eq('product_id', codesProductId)
+            .eq('is_used', false)
+            .order('created_at', { ascending: true });
             
-            // Mark code as used
-            await supabase.from('redemption_codes').update({ is_used: true }).eq('id', codeToAssign.id);
-            
-            // Update order
-            await supabase.from('orders').update({
-              status: 'Completado',
-              redemption_code: codeToAssign.code
-            }).eq('id', order.id);
-            
-            // Insert status history
-            await supabase.from('order_status_history').insert({
-              order_id: order.id,
-              status: 'Completado',
-              note: 'Código asignado automáticamente (Ingreso de stock)'
-            });
+          if (codesFetchError) throw codesFetchError;
+          
+          if (availableCodes && availableCodes.length > 0) {
+            for (let i = 0; i < pendingOrders.length && i < availableCodes.length; i++) {
+              const order = pendingOrders[i];
+              const codeToAssign = availableCodes[i];
+              
+              await supabase.from('redemption_codes').update({ is_used: true }).eq('id', codeToAssign.id);
+              
+              await supabase.from('orders').update({
+                status: 'Completado',
+                redemption_code: codeToAssign.code
+              }).eq('id', order.id);
+              
+              await supabase.from('order_status_history').insert({
+                order_id: order.id,
+                status: 'Completado',
+                note: 'Código asignado automáticamente (Ingreso de stock)'
+              });
+            }
           }
         }
+      } catch (assignError) {
+        console.error('Error durante la auto-asignación de códigos:', assignError);
       }
-    } catch (assignError) {
-      console.error('Error durante la auto-asignación de códigos:', assignError);
-    }
 
-    setIsUploadingCodes(false);
-    setCodesText('');
-    fetchCodesStats();
-    return { success: true, count: codes.length };
+      setIsUploadingCodes(false);
+      setCodesText('');
+      fetchCodesStats();
+      return { 
+        success: true, 
+        count: cleanCodes.length,
+        blockedDuplicates: blockedDuplicates.length > 0 ? blockedDuplicates : undefined
+      };
+    } catch (err: any) {
+      setIsUploadingCodes(false);
+      return { success: false, error: err.message || 'Error al validar códigos en la base de datos' };
+    }
   };
 
   // Stats Calculations

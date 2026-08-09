@@ -21,7 +21,7 @@ export interface AdminCodesTabProps {
   setCodesProductId: (id: string) => void;
   codesText: string;
   setCodesText: (text: string) => void;
-  handleUploadCodes: (codes?: string[]) => Promise<{ success: boolean; error?: string; count?: number } | void>;
+  handleUploadCodes: (codes?: string[]) => Promise<{ success: boolean; error?: string; count?: number; blockedDuplicates?: string[] } | void>;
   isUploadingCodes: boolean;
   codesStats: CodeStat[];
 }
@@ -172,11 +172,18 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
       setChips([]);
       setDuplicatesFound([]);
       setShowConfirmation(false);
-      setNotification({ type: 'success', message: `¡${result.count} códigos subidos exitosamente!` });
-      setTimeout(() => setNotification(null), 5000);
+      if (result.blockedDuplicates && result.blockedDuplicates.length > 0) {
+        setNotification({
+          type: 'success',
+          message: `¡${result.count} códigos nuevos subidos exitosamente! 🛡️ Se omitieron ${result.blockedDuplicates.length} código(s) por ya existir en la base de datos.`
+        });
+      } else {
+        setNotification({ type: 'success', message: `¡${result.count} códigos subidos exitosamente con verificación de unicidad!` });
+      }
+      setTimeout(() => setNotification(null), 8000);
     } else if (result && result.error) {
-      setNotification({ type: 'error', message: `Error al subir: ${result.error}` });
-      setTimeout(() => setNotification(null), 6000);
+      setNotification({ type: 'error', message: result.error });
+      setTimeout(() => setNotification(null), 8000);
     }
   };
 
@@ -259,14 +266,20 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
       {/* UPLOAD SECTION - Modern Redesign                    */}
       {/* ═══════════════════════════════════════════════════ */}
       <div className="bg-zinc-900/60 border border-white/10 rounded-2xl p-4 md:p-6 space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
-            <Upload className="w-4 h-4 text-amber-400" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
+              <Upload className="w-4 h-4 text-amber-400" />
+            </div>
+            <div>
+              <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Subir Códigos Nuevos</h3>
+              <p className="text-[10px] text-zinc-500">Pega los códigos o escríbelos manualmente</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xs md:text-sm font-black text-white uppercase tracking-wider">Subir Códigos Nuevos</h3>
-            <p className="text-[10px] text-zinc-500">Pega los códigos o escríbelos manualmente</p>
-          </div>
+          <span className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase flex items-center gap-1.5 self-start sm:self-auto">
+            <Shield className="w-3.5 h-3.5 text-emerald-400" />
+            Protección Anti-Duplicados Activa
+          </span>
         </div>
 
         {/* ── Notification Banner ── */}
