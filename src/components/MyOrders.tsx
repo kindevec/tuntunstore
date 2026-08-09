@@ -136,29 +136,47 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
               id={`order-card-${order.id}`}
               className="bg-zinc-800 border border-zinc-700 hover:border-emerald-500/40 rounded-2xl overflow-hidden shadow-xl transition-all relative group"
             >
-              {/* Order Card Header - Restored Green Header */}
+              {/* Order Card Header - Compact & Responsive */}
               <div 
                 onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-700 cursor-pointer transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 sm:p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 border-b border-emerald-700 cursor-pointer transition-colors"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="font-mono text-xs sm:text-sm font-black text-white bg-black/20 px-3 py-1.5 rounded-lg border border-white/20 shrink-0">
-                    #{order.id}
-                  </span>
-                  <div className="min-w-0">
-                    <span className="text-sm sm:text-base font-black uppercase text-white block truncate">{order.productName}</span>
-                    <span className="text-[10px] sm:text-xs font-bold text-emerald-100 block">{order.date}</span>
+                {/* Top / Left Block */}
+                <div className="flex items-center justify-between sm:justify-start gap-2.5 min-w-0 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-mono text-[10px] sm:text-xs font-black text-white bg-black/25 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md border border-white/20 shrink-0">
+                      #{order.id.length > 10 ? order.id.slice(0, 8) : order.id}
+                    </span>
+                    <div className="min-w-0">
+                      <span className="text-xs sm:text-base font-black uppercase text-white block truncate">{order.productName}</span>
+                      <span className="text-[9px] sm:text-xs font-medium text-emerald-100/90 block truncate">{order.date}</span>
+                    </div>
+                  </div>
+
+                  {/* Price + Chevron on Mobile Right */}
+                  <div className="flex items-center gap-1.5 sm:hidden shrink-0">
+                    <span className="text-xs font-black text-white">${order.priceUSD.toFixed(2)}</span>
+                    {expandedOrderId === order.id ? (
+                      <ChevronUp className="w-4 h-4 text-emerald-200" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-emerald-200" />
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t border-emerald-700/50 sm:border-0">
+                {/* Bottom / Right Block */}
+                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-1.5 sm:pt-0 border-t border-emerald-500/30 sm:border-0">
                   {getStatusBadge(order.status)}
-                  <span className="text-lg sm:text-xl font-black text-white shrink-0 mr-2">${order.priceUSD.toFixed(2)} USD</span>
-                  {expandedOrderId === order.id ? (
-                    <ChevronUp className="w-5 h-5 text-emerald-200 shrink-0" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-emerald-200 shrink-0" />
-                  )}
+                  
+                  {/* Desktop Price + Chevron */}
+                  <div className="hidden sm:flex items-center gap-2 shrink-0">
+                    <span className="text-lg sm:text-xl font-black text-white">${order.priceUSD.toFixed(2)} USD</span>
+                    {expandedOrderId === order.id ? (
+                      <ChevronUp className="w-5 h-5 text-emerald-200 shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-emerald-200 shrink-0" />
+                    )}
+                  </div>
                 </div>
               </div>
 
