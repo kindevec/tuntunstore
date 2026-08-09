@@ -797,7 +797,13 @@ export default function App() {
           <WalletView currentUser={currentUser} bankAccounts={bankAccounts} walletHistory={walletHistory} onSubmitTopUpOrder={handleSubmitTopUpOrder} onNavigateToCatalog={() => window.location.hash = '#catalog'} />
         )}
         {activeTab === 'orders' && (
-          <MyOrders orders={orders} currentUserEmail={currentUser?.email} onOpenWhatsAppSupport={() => {}} />
+          <MyOrders orders={orders} currentUserEmail={currentUser?.email} onOpenWhatsAppSupport={(order) => {
+            const phone = '593968729952';
+            const msg = order 
+              ? `Hola TunTunStore, necesito soporte con mi pedido #${order.id} (${order.productName}). ID Jugador: ${order.playerId}`
+              : `Hola TunTunStore, necesito soporte con una compra.`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+          }} />
         )}
         {activeTab === 'profile' && currentUser && (
           <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
