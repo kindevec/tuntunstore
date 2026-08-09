@@ -109,15 +109,15 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
           </p>
         </div>
 
-        {/* Status Filters */}
-        <div className="w-full md:w-auto flex items-center gap-1.5 bg-zinc-900/80 backdrop-blur-md p-1.5 rounded-2xl border border-zinc-800 shadow-xl overflow-x-auto text-[11px] sm:text-xs font-black uppercase tracking-wider scrollbar-none">
+        {/* Status Filters - Distributed Horizontally on Mobile */}
+        <div className="w-full md:w-auto grid grid-cols-4 sm:flex items-center gap-1 sm:gap-1.5 bg-zinc-900/90 backdrop-blur-md p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-zinc-800 shadow-xl text-[10px] sm:text-xs font-black uppercase tracking-wider">
           {(['all', 'Pendiente', 'En proceso', 'Completado'] as const).map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-4 sm:px-5 py-2.5 rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-1 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all cursor-pointer text-center truncate ${
                 statusFilter === st
-                  ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  ? 'bg-gradient-to-b from-emerald-400 to-emerald-600 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
                   : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
               }`}
             >
