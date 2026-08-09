@@ -85,12 +85,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
     return () => clearInterval(timer);
   }, [slides.length]);
 
-  // Mostramos los productos que el admin haya marcado como "Destacados" (isPopular)
-  let featuredProducts = products.filter(p => p.active && p.isPopular).slice(0, 3);
+  // Mostramos los productos destacados (isPopular), reemplazando expresamente 341 DIAMANTES por 2398 DIAMANTES
+  let popularProducts = products.filter(p => p.active && p.isPopular && p.id !== 'dia-341');
+
+  // Buscar 2398 DIAMANTES
+  const p2398 = products.find(p => p.id === 'dia-2398' || p.name.toUpperCase().includes('2398'));
+  if (p2398 && !popularProducts.some(p => p.id === p2398.id)) {
+    popularProducts.unshift(p2398);
+  }
+
+  let featuredProducts = popularProducts.slice(0, 3);
   
-  // Fallback por si el admin no ha destacado 3 productos, rellenamos con los primeros disponibles
+  // Fallback si no hay 3 productos destacados, rellenamos omitiendo dia-341
   if (featuredProducts.length < 3) {
-    const otherProducts = products.filter(p => p.active && !p.isPopular);
+    const otherProducts = products.filter(p => p.active && p.id !== 'dia-341' && !featuredProducts.some(fp => fp.id === p.id));
     featuredProducts = [...featuredProducts, ...otherProducts].slice(0, 3);
   }
 

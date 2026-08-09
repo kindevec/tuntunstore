@@ -19,6 +19,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     priceUSD: 2.55,
     category: 'diamonds',
     description: '341 Diamantes Free Fire • Acreditación directa por ID.',
+    isPopular: false,
     badgeText: '$2.55 💎',
     imageType: 'diamond-small',
   },
@@ -50,6 +51,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     priceUSD: 15.50,
     category: 'diamonds',
     description: '2398 Diamantes Free Fire • Gran volumen al mejor precio.',
+    isPopular: true,
+    badgeText: 'OFERTA DESTACADA 🔥',
     imageType: 'diamond-large',
   },
   {
