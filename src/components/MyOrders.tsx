@@ -196,15 +196,17 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                       <p className="text-zinc-400">2. Copia este código:</p>
                       
                       {order.redemptionCode ? (
-                        <div className="flex items-center justify-between bg-black p-3 rounded-lg border border-zinc-800">
-                          <span className="font-mono text-emerald-400 font-black tracking-widest text-lg sm:text-xl">{order.redemptionCode}</span>
+                        <div className="flex items-center justify-between gap-3 bg-black p-3 rounded-lg border border-zinc-800 min-w-0">
+                          <span className="font-mono text-emerald-400 font-black tracking-widest text-sm sm:text-lg break-all min-w-0 select-all">
+                            {order.redemptionCode}
+                          </span>
                           <button 
                             onClick={() => {
                               navigator.clipboard.writeText(order.redemptionCode || '');
                               setCopiedCodeId(order.id);
                               setTimeout(() => setCopiedCodeId(null), 2000);
                             }}
-                            className={`p-2.5 rounded-lg transition-all ${
+                            className={`p-2.5 rounded-lg transition-all shrink-0 ${
                               copiedCodeId === order.id 
                                 ? 'bg-emerald-500 text-black' 
                                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white'
