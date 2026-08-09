@@ -781,7 +781,7 @@ export default function App() {
       </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
       {currentUser?.role !== 'admin' && activeTab !== 'login' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
-      {activeTab !== 'login' && activeTab !== 'orders' && activeTab !== 'wallet' && <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />}
+      {activeTab !== 'login' && <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />}
       {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
     </div>
   );
