@@ -127,18 +127,23 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, activeTab }) => {
 
   // 2. Footer sencillo, compacto e independiente para las demás páginas (SIN espacios vacíos ni gradient overlays)
   return (
-    <footer id="footer-main" className="bg-[#050505] text-zinc-400 border-t border-white/5 py-4 pb-20 md:pb-4 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-bold uppercase">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => onSelectTab('home')}>
-            <img src="/logo-transparent.png" alt="TunTun Store Logo" className="w-6 h-6 object-contain" />
-            <span className="text-sm font-black tracking-tighter text-white">
-              TUNTUN<span className="text-emerald-500 italic">STORE</span>
-            </span>
-          </div>
+    <footer id="footer-main" className="bg-[#050505] text-zinc-400 border-t border-white/5 py-4 pb-20 sm:pb-4 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[11px] font-bold uppercase text-center sm:text-left">
+        {/* 1. Logo & Brand */}
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => onSelectTab('home')}>
+          <img src="/logo-transparent.png" alt="TunTun Store Logo" className="w-6 h-6 object-contain" />
+          <span className="text-sm font-black tracking-tighter text-white">
+            TUNTUN<span className="text-emerald-500 italic">STORE</span>
+          </span>
+        </div>
+
+        {/* 2. Redes Sociales */}
+        <div className="flex items-center justify-center">
           <SocialIcons compact />
         </div>
-        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-1.5 text-zinc-500">
+
+        {/* 3. Mensaje de Copyright */}
+        <div className="text-zinc-500 text-center sm:text-right">
           <span>© 2026 TunTun Store • <a href="https://kindevx.web.app/" target="_blank" rel="noreferrer" className="text-emerald-400 font-extrabold hover:underline">KinDev S.A.S</a></span>
         </div>
       </div>
