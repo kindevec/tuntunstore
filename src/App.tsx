@@ -766,7 +766,7 @@ export default function App() {
       {activeTab !== 'login' && (
         <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} pendingTopUps={pendingTopUps} />
       )}
-      <main className={`flex-1 ${['wallet', 'orders'].includes(activeTab) ? 'pb-24 md:pb-0' : ''}`}>
+      <main className="flex-1">
         {activeTab === 'home' && (
           <HomeView 
             products={products}
