@@ -3,6 +3,7 @@ import { Product, ProductCategory, UserProfile } from '../types';
 import { DiamondIcon } from './DiamondIcon';
 import { DiamondChestGraphic } from './DiamondChestGraphic';
 import { Sparkles, Trophy, Flame, ShoppingCart, Check, Zap, HelpCircle, Wallet, Plus, Edit, Trash2, ShieldCheck, X, Save, DollarSign } from 'lucide-react';
+import { AdminConfirmModal } from './admin/AdminConfirmModal';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -38,10 +39,10 @@ export const CyanProductCard: React.FC<{
   forceActive,
   quickPriceId = null,
   quickPriceValue = '',
-  setQuickPriceId = () => {},
-  setQuickPriceValue = () => {},
-  handleSaveQuickPrice = () => {},
-  handleOpenEdit = () => {},
+  setQuickPriceId = (_id: string | null) => {},
+  setQuickPriceValue = (_val: string) => {},
+  handleSaveQuickPrice = (_p: Product) => {},
+  handleOpenEdit = (_p: Product) => {},
   onDeleteProduct,
   onSelectProduct,
 }) => {
@@ -272,6 +273,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [quickPriceId, setQuickPriceId] = useState<string | null>(null);
   const [quickPriceValue, setQuickPriceValue] = useState<string>('');
+  const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<Product | null>(null);
 
   const [formState, setFormState] = useState({
     name: '',
@@ -744,10 +746,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      if (confirm(`¿Estás seguro de eliminar "${editingProduct.name}"?`)) {
-                        onDeleteProduct(editingProduct.id);
-                        setEditingProduct(null);
-                      }
+                      setDeleteConfirmProduct(editingProduct);
                     }}
                     className="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold text-xs flex items-center gap-1 border border-rose-500/30 cursor-pointer"
                   >
@@ -782,6 +781,23 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           </div>
         </div>
       )}
+
+      <AdminConfirmModal
+        isOpen={!!deleteConfirmProduct}
+        title="¿Eliminar Producto?"
+        message={`¿Estás seguro de que deseas eliminar "${deleteConfirmProduct?.name}" del catálogo? Esta acción no se puede deshacer.`}
+        confirmText="Sí, Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        onConfirm={() => {
+          if (deleteConfirmProduct && onDeleteProduct) {
+            onDeleteProduct(deleteConfirmProduct.id);
+            setEditingProduct(null);
+            setDeleteConfirmProduct(null);
+          }
+        }}
+        onCancel={() => setDeleteConfirmProduct(null)}
+      />
     </section>
   );
 };

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X } from 'lucide-react';
+import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap } from 'lucide-react';
 import { UserProfile } from '../../types';
+import { AdminConfirmModal } from './AdminConfirmModal';
 
 export interface AdminWalletsTabProps {
   registeredUsers: UserProfile[];
   pendingTopUps: any[];
   onUpdateTopUpStatus?: (id: string, status: string) => void;
+  onUpdateTopUpAmount?: (id: string, newAmount: number) => void;
   setSelectedReceiptUrl: (url: string) => void;
   handleViewUserHistory: (uid: string, name: string) => void;
 }
@@ -14,10 +16,21 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   registeredUsers,
   pendingTopUps,
   onUpdateTopUpStatus,
+  onUpdateTopUpAmount,
   setSelectedReceiptUrl,
   handleViewUserHistory
 }) => {
   const [selectedProfileUser, setSelectedProfileUser] = useState<UserProfile | null>(null);
+  const [showAutoApproveConfirm, setShowAutoApproveConfirm] = useState(false);
+  const [editingTopUp, setEditingTopUp] = useState<{ id: string; amount: number; userEmail?: string } | null>(null);
+  const [newTopUpAmountInput, setNewTopUpAmountInput] = useState('');
+
+  const verifiedTopUps = pendingTopUps.filter(t => t.auto_verified);
+
+  const handleConfirmAutoApprove = () => {
+    setShowAutoApproveConfirm(false);
+    verifiedTopUps.forEach(t => onUpdateTopUpStatus && onUpdateTopUpStatus(t.id, 'Aprobado'));
+  };
 
   return (
     <div className="space-y-6">
@@ -58,16 +71,11 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
           </div>
           {pendingTopUps.some(t => t.auto_verified) && (
             <button
-              onClick={() => {
-                const verifiedTopUps = pendingTopUps.filter(t => t.auto_verified);
-                if (window.confirm(`¿Estás seguro de aprobar automáticamente las ${verifiedTopUps.length} recargas verificadas por el sistema OCR?`)) {
-                  verifiedTopUps.forEach(t => onUpdateTopUpStatus && onUpdateTopUpStatus(t.id, 'Aprobado'));
-                }
-              }}
+              onClick={() => setShowAutoApproveConfirm(true)}
               className="w-full sm:w-auto px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black rounded-xl uppercase flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all cursor-pointer"
               title="Aprueba de golpe todos los comprobantes que pasaron el filtro de seguridad OCR"
             >
-              <ShieldCheck className="w-4 h-4" /> Aprobar Todos los Verificados
+              <ShieldCheck className="w-4 h-4" /> Aprobar Todos los Verificados ({verifiedTopUps.length})
             </button>
           )}
         </div>
@@ -114,12 +122,29 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                               <ShieldCheck className="w-3 h-3 shrink-0" /> Verificado por Sistema (OCR)
                             </span>
                           ) : topUp.verification_warnings && topUp.verification_warnings.length > 0 ? (
-                            <div className="space-y-1 w-full">
-                              {topUp.verification_warnings.map((warn: string, idx: number) => (
-                                <span key={idx} className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded break-words max-w-full">
-                                  {warn}
-                                </span>
-                              ))}
+                            <div className="space-y-1.5 w-full">
+                              {topUp.verification_warnings.map((warn: string, idx: number) => {
+                                const isAmountWarn = warn.includes('Diferencia de Monto');
+                                const match = warn.match(/(?:muestra|detectó|cifras como) \$([0-9\.]+)/i);
+                                const detectedVal = match && match[1] ? parseFloat(match[1]) : null;
+
+                                return (
+                                  <div key={idx} className="flex flex-wrap items-center gap-2">
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded break-words max-w-full">
+                                      {warn}
+                                    </span>
+                                    {isAmountWarn && detectedVal && onUpdateTopUpAmount && (
+                                      <button
+                                        onClick={() => onUpdateTopUpAmount(topUp.id, detectedVal)}
+                                        className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-black text-[10px] font-black rounded-lg uppercase flex items-center gap-1 shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all cursor-pointer"
+                                        title={`Aplicar corrección automática de $${topUp.amount.toFixed(2)} USD a $${detectedVal.toFixed(2)} USD`}
+                                      >
+                                        <Zap className="w-3.5 h-3.5 fill-black shrink-0" /> Corrección Automática (${detectedVal.toFixed(2)})
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-500 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded">
@@ -142,6 +167,16 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                           <Eye className="w-4 h-4" /> Ver Baucher
                         </button>
                       )}
+                      <button
+                        onClick={() => {
+                          setEditingTopUp({ id: topUp.id, amount: topUp.amount, userEmail: user?.email });
+                          setNewTopUpAmountInput(topUp.amount.toString());
+                        }}
+                        className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-black rounded-xl uppercase flex items-center justify-center gap-1.5 border border-amber-500/30 transition-colors cursor-pointer"
+                        title="Editar el valor de esta recarga"
+                      >
+                        <Edit3 className="w-4 h-4" /> Editar
+                      </button>
                       <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button
                           onClick={() => onUpdateTopUpStatus && onUpdateTopUpStatus(topUp.id, 'Aprobado')}
@@ -417,6 +452,102 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                 className="flex-1 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-black rounded-xl uppercase border border-zinc-700 transition-colors cursor-pointer"
               >
                 Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <AdminConfirmModal
+        isOpen={showAutoApproveConfirm}
+        title="¿Aprobar Recargas Verificadas?"
+        message={`¿Estás seguro de aprobar automáticamente las ${verifiedTopUps.length} recargas verificadas por el sistema de seguridad OCR? El saldo será acreditado al instante.`}
+        confirmText="Sí, Aprobar Todas"
+        cancelText="Cancelar"
+        variant="success"
+        onConfirm={handleConfirmAutoApprove}
+        onCancel={() => setShowAutoApproveConfirm(false)}
+      />
+
+      {/* MODAL: EDITAR MONTO DE RECARGA */}
+      {editingTopUp && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-amber-500/40 p-6 rounded-2xl max-w-md w-full space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="font-black text-white uppercase text-base flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-amber-400" /> Editar Monto de Recarga
+              </h3>
+              <button
+                onClick={() => setEditingTopUp(null)}
+                className="p-1 text-zinc-400 hover:text-white rounded-lg hover:bg-white/10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-300">
+              Modifica el monto a acreditar para el cliente <strong className="text-amber-400">{editingTopUp.userEmail || 'Cliente'}</strong> si la cifra del comprobante es diferente a la solicitada.
+            </p>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Nuevo Monto ($ USD)</label>
+              <div className="relative mb-3">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-black text-amber-400 text-lg">$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={newTopUpAmountInput}
+                  onChange={(e) => setNewTopUpAmountInput(e.target.value)}
+                  className="w-full bg-black/60 border border-white/10 focus:border-amber-500 rounded-xl pl-8 pr-4 py-3 text-white font-black text-lg focus:outline-none"
+                  placeholder="0.00"
+                  autoFocus
+                />
+              </div>
+
+              {(() => {
+                const topUpObj = pendingTopUps.find(t => t.id === editingTopUp.id);
+                const warn = topUpObj?.verification_warnings?.find((w: string) => w.includes('Diferencia de Monto'));
+                const match = warn?.match(/(?:muestra|detectó|cifras como) \$([0-9\.]+)/i);
+                const ocrVal = match && match[1] ? parseFloat(match[1]) : null;
+
+                if (ocrVal) {
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setNewTopUpAmountInput(ocrVal.toFixed(2))}
+                      className="w-full py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Zap className="w-4 h-4 text-amber-400 fill-amber-400" /> Usar valor detectado por OCR (${ocrVal.toFixed(2)})
+                    </button>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setEditingTopUp(null)}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  const val = parseFloat(newTopUpAmountInput);
+                  if (isNaN(val) || val <= 0) {
+                    alert('Por favor ingresa un monto válido mayor a 0');
+                    return;
+                  }
+                  if (onUpdateTopUpAmount) {
+                    onUpdateTopUpAmount(editingTopUp.id, val);
+                  }
+                  setEditingTopUp(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase shadow-[0_0_15px_rgba(245,158,11,0.4)] cursor-pointer"
+              >
+                Guardar Nuevo Monto
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Order, OrderStatus, Product, UserProfile } from '../types';
+import { Order, OrderStatus, Product, UserProfile, EmailAlertConfig } from '../types';
 import { DiamondIcon } from './DiamondIcon';
 import { AdminOrdersTab } from './admin/AdminOrdersTab';
 import { AdminCatalogTab } from './admin/AdminCatalogTab';
@@ -52,6 +52,8 @@ interface AdminPanelProps {
   onUpdateUserWalletBalance?: (email: string, amount: number, isSetExact?: boolean) => void;
   pendingTopUps?: any[];
   onUpdateTopUpStatus?: (transactionId: string, newStatus: 'Aprobado' | 'Rechazado') => void;
+  onUpdateTopUpAmount?: (transactionId: string, newAmount: number) => void;
+  onRefreshBanners?: () => void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -68,6 +70,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdateUserWalletBalance,
   pendingTopUps = [],
   onUpdateTopUpStatus,
+  onUpdateTopUpAmount,
+  onRefreshBanners,
 }) => {
   const [internalTab, setInternalTab] = useState<'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners'>('orders');
   const activeTab = activeSubTab || internalTab;
@@ -135,8 +139,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       .order('created_at', { ascending: false });
     
     if (error) {
-      console.error("Error fetching codes stats:", error);
-      alert(`Error al cargar inventario de códigos: ${error.message}`);
+      console.error("Error fetching codes stats:", error.message);
       return;
     }
 
@@ -186,7 +189,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
 
     // 1. Deduplicate within current input batch
-    const uniqueInputCodes = Array.from(new Set(rawCodes));
+    const uniqueInputCodes: string[] = Array.from(new Set(rawCodes));
 
     // 2. SECURITY CHECK AGAINST DATABASE: Check if any codes already exist in redemption_codes
     let cleanCodes: string[] = uniqueInputCodes;
@@ -530,6 +533,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           registeredUsers={registeredUsers}
           pendingTopUps={pendingTopUps}
           onUpdateTopUpStatus={onUpdateTopUpStatus}
+          onUpdateTopUpAmount={onUpdateTopUpAmount}
           setSelectedReceiptUrl={setSelectedReceiptUrl}
           handleViewUserHistory={handleViewUserHistory}
         />
@@ -551,7 +555,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
       {/* TAB 6: GESTIÓN DE BANNERS */}
       {activeTab === 'banners' && (
-        <AdminBannersTab />
+        <AdminBannersTab onRefreshBanners={onRefreshBanners} />
       )}
 
       {/* MODAL: VER COMPROBANTE DE PAGO COMPLETO */}

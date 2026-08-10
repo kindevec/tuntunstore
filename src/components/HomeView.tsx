@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Product, HeroSlide } from '../types';
 import { ShoppingCart, Diamond, Wallet, ArrowRight, Play, CheckCircle2, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CyanProductCard } from './ProductCatalog';
@@ -25,10 +25,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
+
+  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const registerUserInteraction = () => {
+    setIsUserInteracting(true);
+    if (resumeTimeoutRef.current) {
+      clearTimeout(resumeTimeoutRef.current);
+    }
+    // Pausar auto-scroll y reanudar tras 1 minuto (60,000 ms) de inactividad
+    resumeTimeoutRef.current = setTimeout(() => {
+      setIsUserInteracting(false);
+    }, 60000);
+  };
 
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
+    registerUserInteraction();
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -39,6 +54,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
+    registerUserInteraction();
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -51,39 +67,60 @@ export const HomeView: React.FC<HomeViewProps> = ({
     }
   };
 
+  const goToSlide = (index: number) => {
+    registerUserInteraction();
+    setCurrentSlide(index);
+  };
+
+  const prevSlide = () => {
+    registerUserInteraction();
+    setCurrentSlide(prev => (prev === 0 ? slides.length - 1 : prev - 1));
+  };
+
+  const nextSlide = () => {
+    registerUserInteraction();
+    setCurrentSlide(prev => (prev === slides.length - 1 ? 0 : prev + 1));
+  };
+
   const defaultSlides = [
     {
       image: '/slide1.png',
-      title: 'RECUPERA TU PODER',
-      subtitle: 'Equípate para la batalla con los mejores packs de la temporada.',
-      buttonText: 'EXPLORAR PROMOCIONES',
-      onClick: onNavigateToCatalog
     },
     {
       image: '/slide2.png',
-      title: 'PROMOCIONES EN DIAMANTES',
-      subtitle: 'Multiplica tus recursos y domina la arena hoy mismo.',
-      buttonText: 'COMPRAR AHORA',
-      onClick: onNavigateToCatalog
     }
   ];
 
   const slides = heroSlides.length > 0 
     ? heroSlides.map(hs => ({
         image: hs.image_url,
-        title: hs.title,
-        subtitle: hs.subtitle,
-        buttonText: hs.button_text,
-        onClick: onNavigateToCatalog
       }))
     : defaultSlides;
 
+  // Auto-scroll (5s), se desactiva por 1 minuto al interactuar
   useEffect(() => {
+    if (isUserInteracting || slides.length <= 1) return;
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
+
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, isUserInteracting]);
+
+  useEffect(() => {
+    if (currentSlide >= slides.length) {
+      setCurrentSlide(0);
+    }
+  }, [slides.length, currentSlide]);
+
+  useEffect(() => {
+    return () => {
+      if (resumeTimeoutRef.current) {
+        clearTimeout(resumeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Exclusivamente los 3 productos solicitados para "OFERTAS DESTACADAS": 110, 572 y 2398 DIAMANTES
   const targetKeys = [
@@ -132,90 +169,88 @@ export const HomeView: React.FC<HomeViewProps> = ({
   return (
     <div className="bg-[#050505] text-white min-h-screen pb-20 md:pb-0 font-sans w-full animate-in fade-in duration-500">
       
-      {/* Hero Section Slider */}
-      <section 
-        className="relative w-full h-[60vh] min-h-[450px] md:min-h-[550px] overflow-hidden group border-b border-emerald-900/30 touch-pan-y"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
-        {currentUser?.role === 'admin' && onNavigateToAdminBanners && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onNavigateToAdminBanners(); }}
-            onTouchStart={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => e.stopPropagation()}
-            className="absolute top-3 right-3 sm:top-6 sm:right-6 z-20 bg-black/70 hover:bg-black/90 backdrop-blur-md border border-amber-500/40 text-amber-300 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xl"
-          >
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-            <span>Administrar Banners</span>
-          </button>
-        )}
-        <div 
-          className="relative h-full flex transition-transform duration-700 ease-in-out" 
-          style={{ width: `${slides.length * 100}%`, transform: `translateX(-${(currentSlide * 100) / slides.length}%)` }}
-        >
-          {slides.map((slide, index) => (
-            <div key={index} className="relative h-full flex items-center justify-center" style={{ width: `${100 / slides.length}%` }}>
-              <img 
-                src={slide.image} 
-                alt={`Slide ${index + 1}`} 
-                className="absolute inset-0 w-full h-full object-cover z-0 object-center"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-black/60 to-transparent z-10"></div>
-              
-              <div className="relative z-20 text-center px-4 max-w-4xl mt-12 md:mt-20">
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-amber-400 uppercase italic drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] mb-4 tracking-tighter">
-                  {slide.title}
-                </h1>
-                <p className="text-sm md:text-lg text-zinc-300 mb-8 max-w-2xl mx-auto font-medium drop-shadow-md">
-                  {slide.subtitle}
-                </p>
-                <button 
-                  onClick={slide.onClick}
-                  className="bg-amber-400 text-black font-black text-xs md:text-sm uppercase px-8 py-3.5 rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.6)] hover:bg-amber-300 transition-all duration-300 cursor-pointer"
-                >
-                  {slide.buttonText}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Dots */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-          {slides.map((_, index) => (
+      {/* Banner / Agenda Semanal Section */}
+      <section className="pt-6 pb-8 md:pt-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="relative flex items-center justify-center mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-4xl font-black uppercase italic tracking-tighter text-white text-center">
+            AGENDA <span className="text-amber-400">SEMANAL</span>
+          </h2>
+          {currentUser?.role === 'admin' && onNavigateToAdminBanners && (
             <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                index === currentSlide 
-                  ? 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)] scale-125' 
-                  : 'bg-white/40 hover:bg-white/60'
-              }`}
-            />
-          ))}
+              onClick={() => onNavigateToAdminBanners()}
+              className="absolute right-0 bg-black/70 hover:bg-black/90 backdrop-blur-md border border-amber-500/40 text-amber-300 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xl"
+            >
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <span className="hidden sm:inline">Administrar Banners</span>
+              <span className="sm:hidden">Banners</span>
+            </button>
+          )}
         </div>
 
-        {/* Desktop Navigation Arrows */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setCurrentSlide(prev => (prev === 0 ? slides.length - 1 : prev - 1));
-          }}
-          className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/40 hover:bg-amber-500 text-white backdrop-blur-sm border border-white/10 items-center justify-center cursor-pointer transition-all shadow-lg hover:scale-110 group/btn"
+        {/* Carousel Slider */}
+        <div 
+          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 shadow-2xl group touch-pan-y bg-zinc-950"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
-          <ChevronLeft className="w-6 h-6 group-hover/btn:-translate-x-0.5 transition-transform" />
-        </button>
+          <div 
+            className="relative flex transition-transform duration-700 ease-in-out" 
+            style={{ width: `${slides.length * 100}%`, transform: `translateX(-${(currentSlide * 100) / slides.length}%)` }}
+          >
+            {slides.map((slide, index) => (
+              <div key={slide.image || index} className="relative w-full flex items-center justify-center shrink-0" style={{ width: `${100 / slides.length}%` }}>
+                <img 
+                  src={slide.image} 
+                  alt={`Agenda Semanal ${index + 1}`} 
+                  className="w-full h-auto max-h-[550px] sm:max-h-[650px] object-contain sm:object-cover mx-auto"
+                />
+              </div>
+            ))}
+          </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setCurrentSlide(prev => (prev === slides.length - 1 ? 0 : prev + 1));
-          }}
-          className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/40 hover:bg-amber-500 text-white backdrop-blur-sm border border-white/10 items-center justify-center cursor-pointer transition-all shadow-lg hover:scale-110 group/btn"
-        >
-          <ChevronRight className="w-6 h-6 group-hover/btn:translate-x-0.5 transition-transform" />
-        </button>
+          {/* Dots */}
+          {slides.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    index === currentSlide 
+                      ? 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)] scale-125' 
+                      : 'bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Desktop Navigation Arrows */}
+          {slides.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevSlide();
+                }}
+                className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-amber-500 text-white backdrop-blur-sm border border-white/10 items-center justify-center cursor-pointer transition-all shadow-lg hover:scale-110 group/btn"
+              >
+                <ChevronLeft className="w-6 h-6 group-hover/btn:-translate-x-0.5 transition-transform" />
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextSlide();
+                }}
+                className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-amber-500 text-white backdrop-blur-sm border border-white/10 items-center justify-center cursor-pointer transition-all shadow-lg hover:scale-110 group/btn"
+              >
+                <ChevronRight className="w-6 h-6 group-hover/btn:translate-x-0.5 transition-transform" />
+              </button>
+            </>
+          )}
+        </div>
       </section>
 
       {/* How to Buy Section - Compact Version */}

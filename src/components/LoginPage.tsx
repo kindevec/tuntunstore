@@ -33,6 +33,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [name, setName] = useState('');
   const [playerId, setPlayerId] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       setErrorMessage(error.message);
     } else {
       if (!data.session) {
-        alert("¡Cuenta creada exitosamente! Si Supabase requiere confirmación, por favor revisa tu bandeja de entrada.");
+        setSuccessMessage("¡Cuenta creada exitosamente! Si Supabase requiere confirmación, por favor revisa tu bandeja de entrada.");
       }
     }
   };
@@ -177,6 +178,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             )}
 
+            {/* Success Message */}
+            {successMessage && (
+              <div className="mb-3 p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-medium flex items-center gap-2 w-full">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{successMessage}</span>
+              </div>
+            )}
+
             {/* LOGIN FORM */}
             {authMode === 'login' ? (
               <form onSubmit={handleLoginSubmit} className="space-y-2.5 sm:space-y-4 w-full relative z-10">
@@ -228,7 +237,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   </label>
                   <button
                     type="button"
-                    onClick={() => alert('Para recuperar tu clave comunícate directamente con soporte por WhatsApp.')}
+                    onClick={() => window.open('https://wa.me/593968729952?text=Hola%20TunTunStore,%20necesito%20ayuda%20para%20recuperar%20mi%20contrase%C3%B1a', '_blank', 'noopener,noreferrer')}
                     className="text-emerald-400 lg:text-emerald-500/70 hover:text-emerald-300 lg:hover:text-emerald-400 hover:underline cursor-pointer font-medium"
                   >
                     ¿Olvidaste tu contraseña?

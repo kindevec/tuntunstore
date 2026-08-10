@@ -64,8 +64,33 @@ export default function App() {
       }
     });
 
+    // Realtime channel for public data (hero_slides & products) - active for ALL users
+    const publicChannel = supabase.channel('tuntun_public_realtime')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'hero_slides' 
+      }, () => {
+        fetchInitialData();
+      })
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'products' 
+      }, () => {
+        fetchInitialData();
+      })
+      .subscribe();
+
+    const handleLocalBannersUpdated = () => {
+      fetchInitialData();
+    };
+    window.addEventListener('tuntun_banners_updated', handleLocalBannersUpdated);
+
     return () => {
       subscription.unsubscribe();
+      supabase.removeChannel(publicChannel);
+      window.removeEventListener('tuntun_banners_updated', handleLocalBannersUpdated);
     };
   }, []);
 
@@ -185,10 +210,16 @@ export default function App() {
     };
   }, [activeTab]);
 
+  useEffect(() => {
+    if (activeTab === 'home') {
+      fetchInitialData();
+    }
+  }, [activeTab]);
+
   const fetchInitialData = async () => {
     const { data: slidesData } = await supabase.from('hero_slides').select('*').eq('active', true).order('order_index', { ascending: true });
     if (slidesData) {
-      setHeroSlides(slidesData);
+      setHeroSlides([...slidesData]);
     }
 
     const { data: prodData } = await supabase.from('products').select('*').eq('active', true).order('price_usd', { ascending: true });
@@ -703,6 +734,47 @@ export default function App() {
         if (!isReceipt) {
            verificationWarnings.push('⚠️ Imagen Sospechosa: El texto no contiene palabras típicas de un comprobante bancario (pago, transferencia, etc.).');
         }
+
+        // 5. Amount Extraction OCR Check (Monto transferido vs Monto solicitado)
+        let detectedAmount: number | null = null;
+        const textUpper = text.toUpperCase();
+        
+        const currencyMatches = [...textUpper.matchAll(/(?:MONTO|VALOR|TOTAL|IMPORTE|RECIBIDO|USD|\$)\s*[:=]?\s*\$?\s*(\d+[\.\,]\d{2})\b/g)];
+        const dollarMatches = [...textUpper.matchAll(/\$\s*(\d+[\.\,]\d{2})\b/g)];
+        const allMatches = [...currencyMatches, ...dollarMatches];
+        
+        const extractedAmounts: number[] = [];
+        for (const m of allMatches) {
+          if (m[1]) {
+            const num = parseFloat(m[1].replace(',', '.'));
+            if (!isNaN(num) && num > 0 && num < 5000) {
+              extractedAmounts.push(num);
+            }
+          }
+        }
+        
+        if (extractedAmounts.length > 0) {
+          const exactMatch = extractedAmounts.find(v => Math.abs(v - amount) < 0.01);
+          if (exactMatch) {
+            detectedAmount = exactMatch;
+          } else {
+            detectedAmount = extractedAmounts[0];
+            verificationWarnings.push(
+              `⚠️ Diferencia de Monto: El usuario solicitó $${amount.toFixed(2)} USD pero el comprobante muestra $${detectedAmount.toFixed(2)} USD.`
+            );
+          }
+        } else {
+          const anyDecimals = [...textUpper.matchAll(/\b(\d+[\.\,]\d{2})\b/g)]
+            .map(m => parseFloat(m[1].replace(',', '.')))
+            .filter(n => n > 0 && n < 5000);
+          
+          const exactMatch = anyDecimals.find(v => Math.abs(v - amount) < 0.01);
+          if (!exactMatch && anyDecimals.length > 0) {
+            verificationWarnings.push(
+              `⚠️ Posible Diferencia de Monto: El usuario solicitó $${amount.toFixed(2)} USD pero el comprobante contiene cifras como $${anyDecimals[0].toFixed(2)} USD.`
+            );
+          }
+        }
         
       } catch (error) {
         console.error('OCR Error:', error);
@@ -747,6 +819,24 @@ export default function App() {
       return;
     }
     showToast(`Recarga actualizada a "${newStatus}"`);
+  };
+
+  const handleUpdateTopUpAmount = async (transactionId: string, newAmount: number) => {
+    const { error } = await supabase.from('wallet_transactions').update({ amount: newAmount }).eq('id', transactionId);
+    if (error) {
+      showToast(`❌ Error al actualizar monto: ${error.message}`);
+      return;
+    }
+    showToast(`✅ Monto de recarga actualizado a $${newAmount.toFixed(2)} USD`);
+    if (currentUser?.role === 'admin') {
+      supabase.from('wallet_transactions')
+        .select('*')
+        .eq('type', 'top_up')
+        .eq('status', 'Pendiente')
+        .then(({ data }) => {
+          if (data) setPendingTopUps(data);
+        });
+    }
   };
 
   const activePendingOrdersCount = orders.filter((o) => o.status === 'Pendiente' || o.status === 'En proceso').length;
@@ -809,34 +899,49 @@ export default function App() {
           <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
         )}
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
-          <AdminPanel orders={orders} products={products} registeredUsers={registeredUsers} activeSubTab={adminSubTab as any} onSubTabChange={(st) => window.location.hash = `#admin/${st}`} onUpdateOrderStatus={handleUpdateOrderStatus} onAddProduct={handleAddProduct} onUpdateProduct={handleUpdateProduct} onDeleteProduct={handleDeleteProduct} pendingTopUps={pendingTopUps} onUpdateTopUpStatus={handleUpdateTopUpStatus} onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
-            const user = registeredUsers.find(u => u.email === email);
-            if (user) {
-              let adjustment = amount;
-              if (isSetExact) {
-                const { data: balanceData } = await supabase.rpc('get_wallet_balance', { p_user_id: user.uid });
-                const currentBalance = Number(balanceData || 0);
-                adjustment = amount - currentBalance;
-              }
-              
-              if (adjustment !== 0) {
-                const { error } = await supabase.from('wallet_transactions').insert({
-                  user_id: user.uid,
-                  amount: adjustment,
-                  type: 'admin_adjustment',
-                  status: 'Aprobado',
-                  admin_note: isSetExact ? `Ajuste manual exacto a $${amount}` : `Ajuste manual de $${amount > 0 ? '+' : ''}${amount}`
-                });
+          <AdminPanel 
+            orders={orders} 
+            products={products} 
+            registeredUsers={registeredUsers} 
+            activeSubTab={adminSubTab as any} 
+            onSubTabChange={(st) => window.location.hash = `#admin/${st}`} 
+            onUpdateOrderStatus={handleUpdateOrderStatus} 
+            onAddProduct={handleAddProduct} 
+            onUpdateProduct={handleUpdateProduct} 
+            onDeleteProduct={handleDeleteProduct} 
+            pendingTopUps={pendingTopUps} 
+            onUpdateTopUpStatus={handleUpdateTopUpStatus} 
+            onUpdateTopUpAmount={handleUpdateTopUpAmount}
+            onRefreshBanners={fetchInitialData}
+            onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
+              const user = registeredUsers.find(u => u.email === email);
+              if (user) {
+                let adjustment = amount;
+                if (isSetExact) {
+                  const { data: balanceData } = await supabase.rpc('get_wallet_balance', { p_user_id: user.uid });
+                  const currentBalance = Number(balanceData || 0);
+                  adjustment = amount - currentBalance;
+                }
                 
-                if (error) {
-                  showToast(`❌ Error al ajustar saldo: ${error.message}`);
-                } else {
-                  fetchAllUsersForAdmin();
-                  showToast(`💰 Ajuste de saldo aplicado a ${email}`);
+                if (adjustment !== 0) {
+                  const { error } = await supabase.from('wallet_transactions').insert({
+                    user_id: user.uid,
+                    amount: adjustment,
+                    type: 'admin_adjustment',
+                    status: 'Aprobado',
+                    admin_note: isSetExact ? `Ajuste manual exacto a $${amount}` : `Ajuste manual de $${amount > 0 ? '+' : ''}${amount}`
+                  });
+                  
+                  if (error) {
+                    showToast(`❌ Error al ajustar saldo: ${error.message}`);
+                  } else {
+                    fetchAllUsersForAdmin();
+                    showToast(`💰 Ajuste de saldo aplicado a ${email}`);
+                  }
                 }
               }
-            }
-          }} />
+            }} 
+          />
         )}
       </main>
       </div>

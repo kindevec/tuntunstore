@@ -86,12 +86,20 @@ export interface WalletTransaction {
   verification_warnings?: string[];
 }
 
+export interface EmailAlertConfig {
+  enabled: boolean;
+  adminEmail: string;
+  notifyOnNewOrder: boolean;
+  notifyOnStatusChange: boolean;
+  smtpStatus: 'simulated' | 'connected' | 'error';
+}
+
 export interface HeroSlide {
   id: string;
   image_url: string;
-  title: string;
-  subtitle: string;
-  button_text: string;
+  title?: string;
+  subtitle?: string;
+  button_text?: string;
   order_index: number;
   active: boolean;
 }
