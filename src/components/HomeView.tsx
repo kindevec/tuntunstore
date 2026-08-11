@@ -331,25 +331,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </h2>
           
           <div className="flex justify-center">
-              {/* Enhanced Video Container */}
-              <div className="relative p-1 rounded-3xl bg-gradient-to-tr from-emerald-500/30 via-transparent to-amber-500/30 shadow-[0_0_40px_rgba(16,185,129,0.15)] max-w-sm w-full">
-                  <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden border border-emerald-500/40 shadow-inner group cursor-pointer bg-black">
-                      {/* Background placeholder for video */}
-                      <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
-                           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80')" }}></div>
-                      
-                      <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors"></div>
-                      
-                      <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-20 h-20 bg-emerald-500/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.6)] group-hover:scale-110 group-hover:bg-emerald-400 transition-all duration-300">
-                              <Play className="w-8 h-8 text-black ml-1 fill-black" />
-                          </div>
-                      </div>
-                      
-                      <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/90 to-transparent">
-                          <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-1.5 drop-shadow-md">Tutorial Rápido</p>
-                          <p className="font-black text-lg text-white leading-tight drop-shadow-md">Cómo canjear tus diamantes en 60s</p>
-                      </div>
+              {/* TikTok Video — iframe directo, solo el video */}
+              <div className="relative p-[3px] rounded-3xl bg-gradient-to-tr from-emerald-500/40 via-transparent to-amber-500/40 shadow-[0_0_50px_rgba(16,185,129,0.15)] max-w-[340px] w-full">
+                  <div className="relative w-full rounded-[22px] overflow-hidden bg-black" style={{ aspectRatio: '9/16' }}>
+                    <iframe
+                      src="https://www.tiktok.com/player/v1/7672753276164607250?music_info=1&description=1"
+                      style={{ width: '100%', height: '100%', border: 'none' }}
+                      allow="fullscreen"
+                      title="TunTun Store — Video Oficial"
+                    />
                   </div>
               </div>
           </div>
@@ -443,6 +433,49 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <h2 className="text-xl md:text-3xl font-black text-center mb-6 uppercase italic text-white tracking-tighter">
           NUESTRAS <span className="text-emerald-400">COMUNIDADES</span>
         </h2>
+        
+        {/* WhatsApp Community Prominent Banner */}
+        <a 
+          href="https://whatsapp.com/channel/0029VbCH5rr0bIdfTxGoPH2u" 
+          target="_blank" 
+          rel="noreferrer"
+          className="group block relative w-full rounded-3xl overflow-hidden mb-6 sm:mb-8 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] hover:shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:border-emerald-400/50 transition-all duration-500"
+        >
+          {/* Background effects */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/80 via-[#050505] to-zinc-900/90 z-0"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 group-hover:bg-emerald-500/20 transition-all duration-700"></div>
+          
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between p-6 sm:p-8 lg:p-10 gap-6">
+            
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
+              {/* Floating WhatsApp Icon */}
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0">
+                <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl group-hover:bg-emerald-400/40 transition-colors animate-pulse"></div>
+                <div className="relative w-full h-full bg-black rounded-2xl flex items-center justify-center shadow-xl rotate-3 group-hover:-rotate-3 transition-transform duration-500 border border-white/20 overflow-hidden">
+                  <img 
+                    src="/logo-comunidad.jfif" 
+                    alt="Logo Comunidad" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <div className="inline-block bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-emerald-500/20 mb-2">Canal Oficial</div>
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-2 tracking-tight">Comunidad TunTun Store</h3>
+                <p className="text-zinc-400 text-xs sm:text-sm max-w-md leading-relaxed font-medium">Únete a nuestro canal de WhatsApp para ser el primero en enterarte de <span className="text-white font-bold">ofertas exclusivas, torneos y sorteos de diamantes</span>.</p>
+              </div>
+            </div>
+            
+            <div className="w-full sm:w-auto shrink-0">
+              <div className="bg-[#25D366] text-black font-black uppercase text-sm px-6 py-3.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 group-hover:bg-[#1fbe58] transition-colors shadow-[0_0_20px_rgba(37,211,102,0.4)] hover:shadow-[0_0_30px_rgba(37,211,102,0.6)]">
+                Unirme Ahora
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+
+          </div>
+        </a>
         
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {/* Facebook */}

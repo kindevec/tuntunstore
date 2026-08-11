@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
 import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap } from 'lucide-react';
 import { UserProfile } from '../../types';
 import { AdminConfirmModal } from './AdminConfirmModal';
@@ -24,6 +25,44 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   const [showAutoApproveConfirm, setShowAutoApproveConfirm] = useState(false);
   const [editingTopUp, setEditingTopUp] = useState<{ id: string; amount: number; userEmail?: string } | null>(null);
   const [newTopUpAmountInput, setNewTopUpAmountInput] = useState('');
+
+  const [localUsers, setLocalUsers] = useState<UserProfile[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const USERS_PER_PAGE = 20;
+
+  useEffect(() => {
+    fetchPaginatedUsers(page);
+  }, [page]);
+
+  const fetchPaginatedUsers = async (pageNum: number) => {
+    setLoadingUsers(true);
+    const from = (pageNum - 1) * USERS_PER_PAGE;
+    const to = from + USERS_PER_PAGE - 1;
+
+    const { data, count, error } = await supabase
+      .rpc('get_all_users_with_balance', {}, { count: 'exact' })
+      .order('wallet_balance_usd', { ascending: false })
+      .range(from, to);
+
+    if (!error && data) {
+      setLocalUsers(data.map((p: any) => ({
+        uid: p.id,
+        name: p.name || 'Usuario',
+        email: p.email,
+        avatar: p.avatar_url,
+        role: p.role as any,
+        walletBalanceUSD: Number(p.wallet_balance_usd || 0),
+        playerIdDefault: p.player_id_default,
+        gamerTag: p.gamer_tag,
+        phone: p.phone,
+        preferredBank: p.preferred_bank,
+      })));
+      if (count !== null) setTotalUsers(count);
+    }
+    setLoadingUsers(false);
+  };
 
   const verifiedTopUps = pendingTopUps.filter(t => t.auto_verified);
 
@@ -201,16 +240,22 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
       </div>
 
       <div className="bg-zinc-800 rounded-2xl border border-zinc-700/50 overflow-hidden">
-        <div className="p-4 border-b border-zinc-700/50 flex items-center justify-between">
+        <div className="p-4 border-b border-zinc-700/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h3 className="font-black text-sm text-white uppercase flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-amber-400" /> Usuarios Registrados
+            <ShieldCheck className="w-4 h-4 text-amber-400" /> Directorio de Clientes
           </h3>
-          <span className="text-[10px] sm:text-xs text-zinc-400 font-bold bg-zinc-900 px-2 py-1 rounded">{registeredUsers.length} Usuarios</span>
+          <span className="text-xs sm:text-sm font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-3 py-1.5 rounded-xl shadow-[0_0_15px_rgba(251,191,36,0.2)]">
+            Total: {totalUsers} Usuarios
+          </span>
         </div>
 
         {/* Mobile Wallet Cards */}
         <div className="grid grid-cols-1 gap-4 p-4 md:hidden">
-          {registeredUsers.map((u) => (
+          {loadingUsers ? (
+            <div className="flex justify-center py-8">
+              <span className="text-zinc-500 font-bold text-xs uppercase animate-pulse">Cargando usuarios...</span>
+            </div>
+          ) : localUsers.map((u) => (
             <div key={u.uid} className="bg-zinc-900/80 rounded-2xl border border-zinc-700/50 p-4 space-y-4 shadow-lg">
               <div className="flex items-center justify-between border-b border-zinc-700/50 pb-3 gap-2">
                 <div className="flex items-center gap-3 min-w-0">
@@ -276,7 +321,13 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-700/50">
-              {registeredUsers.map((u) => (
+              {loadingUsers ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-zinc-500 font-bold text-xs uppercase animate-pulse">
+                    Cargando usuarios...
+                  </td>
+                </tr>
+              ) : localUsers.map((u) => (
                 <tr key={u.uid} className="hover:bg-zinc-700/30 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
@@ -333,6 +384,27 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="p-4 border-t border-zinc-700/50 flex items-center justify-between bg-zinc-900/50">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1 || loadingUsers}
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+          >
+            Anterior
+          </button>
+          <span className="text-xs text-zinc-400 font-bold">
+            Página {page} de {Math.max(1, Math.ceil(totalUsers / USERS_PER_PAGE))}
+          </span>
+          <button
+            onClick={() => setPage(p => p + 1)}
+            disabled={page >= Math.ceil(totalUsers / USERS_PER_PAGE) || loadingUsers}
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+          >
+            Siguiente
+          </button>
         </div>
       </div>
 

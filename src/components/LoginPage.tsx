@@ -35,6 +35,36 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Translate Supabase auth errors to friendly Spanish messages
+  const translateAuthError = (errorMsg: string): string => {
+    const msg = errorMsg.toLowerCase();
+    if (msg.includes('email rate limit exceeded')) {
+      return '⏳ El servicio de correo está temporalmente saturado. Por favor intenta registrarte con Google o espera unos minutos e intenta de nuevo.';
+    }
+    if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+      return '❌ Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.';
+    }
+    if (msg.includes('email not confirmed')) {
+      return '📧 Tu correo aún no ha sido confirmado. Revisa tu bandeja de entrada o intenta iniciar sesión con Google.';
+    }
+    if (msg.includes('user already registered') || msg.includes('already been registered')) {
+      return '👤 Este correo ya está registrado. Intenta iniciar sesión o usa otro correo.';
+    }
+    if (msg.includes('password') && (msg.includes('short') || msg.includes('weak') || msg.includes('at least'))) {
+      return '🔒 La contraseña es muy débil. Debe tener al menos 6 caracteres.';
+    }
+    if (msg.includes('rate limit') || msg.includes('too many requests')) {
+      return '⏳ Demasiados intentos. Por favor espera unos minutos antes de intentar de nuevo.';
+    }
+    if (msg.includes('network') || msg.includes('fetch')) {
+      return '🌐 Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
+    }
+    if (msg.includes('user not found')) {
+      return '👤 No existe una cuenta con este correo. ¿Quieres crear una cuenta nueva?';
+    }
+    return errorMsg;
+  };
+
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -50,7 +80,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     });
 
     if (error) {
-      setErrorMessage(`Error de acceso: ${error.message}`);
+      setErrorMessage(translateAuthError(error.message));
     } else if (data.user) {
       // The onAuthStateChange listener in App.tsx will pick this up automatically
     }
@@ -82,10 +112,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     });
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(translateAuthError(error.message));
     } else {
       if (!data.session) {
-        setSuccessMessage("¡Cuenta creada exitosamente! Si Supabase requiere confirmación, por favor revisa tu bandeja de entrada.");
+        setSuccessMessage("🎮 ¡Cuenta creada exitosamente! Revisa tu bandeja de entrada para confirmar tu correo, o inicia sesión con Google para acceder de inmediato.");
       }
     }
   };
@@ -146,9 +176,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
           {/* Form Title */}
           <div className="mb-2 sm:mb-4 w-full text-center lg:text-left relative z-10 shrink-0">
-            <h1 className="text-lg sm:text-3xl font-black tracking-tight text-white mb-0 sm:mb-1.5">
-              {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta Gamer'}
-            </h1>
+            <div className="flex items-center justify-between w-full gap-3">
+              <h1 className="text-lg sm:text-3xl font-black tracking-tight text-white mb-0 sm:mb-1.5">
+                {authMode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta Gamer'}
+              </h1>
+              <button
+                onClick={onBackToCatalog}
+                className="flex items-center gap-1.5 text-[11px] lg:text-xs font-bold text-emerald-300 cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 lg:px-3.5 py-1.5 rounded-full border border-emerald-500/30 hover:border-emerald-400/60 shrink-0 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">Regresar</span>
+              </button>
+            </div>
             <p className="hidden sm:block text-xs sm:text-sm text-zinc-400">
               {authMode === 'login'
                 ? 'Ingresa a tu cuenta para recargar tus juegos y comprar PINs al instante'

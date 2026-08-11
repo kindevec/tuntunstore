@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Copy, Check } from 'lucide-react';
 import { Order, OrderStatus } from '../../types';
 
@@ -23,6 +23,16 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
   copiedPlayerId,
   onUpdateOrderStatus
 }) => {
+  const [page, setPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / ITEMS_PER_PAGE));
+  const paginatedOrders = filteredOrders.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
   return (
     <div className="space-y-4 sm:space-y-6 w-full">
       {/* Controls Bar */}
@@ -60,8 +70,8 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
 
       {/* Mobile Card List (Visible on mobile/tablet) */}
       <div className="grid grid-cols-1 gap-3.5 lg:hidden">
-        {filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => (
+        {paginatedOrders.length > 0 ? (
+          paginatedOrders.map((order) => (
             <div key={order.id} className="bg-zinc-800 rounded-2xl border border-zinc-700/50 p-4 space-y-3 shadow-lg flex flex-col">
               {/* Top bar: Order ID, Status, Date */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-700/50 pb-2.5">
@@ -190,8 +200,8 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-700/50">
-              {filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => (
+              {paginatedOrders.length > 0 ? (
+                paginatedOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-zinc-700/30 transition-colors">
                     {/* Order ID & Date */}
                     <td className="p-4">
@@ -299,6 +309,29 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {filteredOrders.length > 0 && (
+        <div className="p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-800 border border-zinc-700/50 shadow-lg">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="w-full sm:w-auto px-5 py-2.5 bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+          >
+            Anterior
+          </button>
+          <span className="text-xs text-zinc-400 font-bold bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-700">
+            Página {page} de {totalPages} <span className="text-zinc-600">|</span> <span className="text-emerald-400">{filteredOrders.length} Resultados</span>
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="w-full sm:w-auto px-5 py-2.5 bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
     </div>
   );
 };
