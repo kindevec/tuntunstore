@@ -67,7 +67,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, activeTab }) => {
             {/* Brand Column */}
             <div className="flex flex-col items-center md:items-start text-center md:text-left">
               <div className="flex items-center gap-2 mb-4 cursor-pointer" onClick={() => onSelectTab('home')}>
-                <img src="/logo-transparent.png" alt="TunTun Store Logo" className="w-12 h-12 object-contain" />
+                <img src="/logo-transparent.webp" alt="TunTun Store Logo" className="w-12 h-12 object-contain" />
                 <span className="text-xl font-black tracking-tighter text-white">
                   TUNTUN<span className="text-emerald-500 italic">STORE</span>
                 </span>
@@ -131,7 +131,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, activeTab }) => {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[11px] font-bold uppercase text-center sm:text-left">
         {/* 1. Logo & Brand */}
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => onSelectTab('home')}>
-          <img src="/logo-transparent.png" alt="TunTun Store Logo" className="w-6 h-6 object-contain" />
+          <img src="/logo-transparent.webp" alt="TunTun Store Logo" className="w-6 h-6 object-contain" />
           <span className="text-sm font-black tracking-tighter text-white">
             TUNTUN<span className="text-emerald-500 italic">STORE</span>
           </span>

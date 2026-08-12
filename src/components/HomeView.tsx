@@ -84,10 +84,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   const defaultSlides = [
     {
-      image: '/slide1.png',
+      image: '/slide1.webp',
     },
     {
-      image: '/slide2.png',
+      image: '/slide2.webp',
     }
   ];
 
@@ -203,7 +203,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <img 
                   src={slide.image} 
                   alt={`Agenda Semanal ${index + 1}`} 
-                  className="w-full h-auto max-h-[550px] object-contain mx-auto"
+                  className="w-full h-auto max-h-[550px] sm:max-h-[650px] object-contain sm:object-cover mx-auto"
+                  loading="lazy"
                 />
               </div>
             ))}
@@ -415,6 +416,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <div className="relative w-full rounded-[22px] overflow-hidden bg-black" style={{ aspectRatio: '9/16' }}>
                     <iframe
                       src="https://www.tiktok.com/player/v1/7672753276164607250?music_info=1&description=1"
+                      loading="lazy"
                       style={{ width: '100%', height: '100%', border: 'none' }}
                       allow="fullscreen"
                       title="TunTun Store — Video Oficial"
@@ -532,9 +534,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl group-hover:bg-emerald-400/40 transition-colors animate-pulse"></div>
                 <div className="relative w-full h-full bg-black rounded-2xl flex items-center justify-center shadow-xl rotate-3 group-hover:-rotate-3 transition-transform duration-500 border border-white/20 overflow-hidden">
                   <img 
-                    src="/logo-comunidad.jfif" 
+                    src="/logo-comunidad.webp" 
                     alt="Logo Comunidad" 
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               </div>
@@ -560,7 +563,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           {/* Facebook */}
           <a href="https://www.facebook.com/profile.php?id=61592564474036" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
             {/* Fondo de imagen difuminada */}
-            <div className="absolute inset-0 bg-[url('/logo.jpeg')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="absolute inset-0 bg-black/60 group-hover:bg-[#1877F2]/80 transition-colors duration-300"></div>
             
             {/* Contenido revelado en Hover */}
@@ -577,7 +580,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           {/* Instagram */}
           <a href="https://www.instagram.com/sahur055?igsh=MWs3cXI1cDM0Z2x2YQ==" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
-            <div className="absolute inset-0 bg-[url('/logo.jpeg')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="absolute inset-0 bg-black/60 group-hover:bg-gradient-to-tr group-hover:from-[#f09433] group-hover:via-[#dc2743] group-hover:to-[#bc1888] group-hover:opacity-90 transition-all duration-300"></div>
             
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
@@ -593,7 +596,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           {/* WhatsApp */}
           <a href="https://wa.me/593968729952" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
-            <div className="absolute inset-0 bg-[url('/logo.jpeg')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="absolute inset-0 bg-black/60 group-hover:bg-[#25D366]/90 transition-colors duration-300"></div>
             
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
@@ -609,7 +612,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           {/* TikTok */}
           <a href="https://tiktok.com/@tuntunstore1" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
-            <div className="absolute inset-0 bg-[url('/logo.jpeg')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
             <div className="absolute inset-0 bg-black/60 group-hover:bg-black/80 transition-colors duration-300"></div>
             
             <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
