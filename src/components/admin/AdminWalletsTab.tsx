@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap } from 'lucide-react';
+import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap, Search } from 'lucide-react';
 import { UserProfile } from '../../types';
 import { AdminConfirmModal } from './AdminConfirmModal';
 
@@ -32,17 +32,39 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   const [loadingUsers, setLoadingUsers] = useState(false);
   const USERS_PER_PAGE = 20;
 
-  useEffect(() => {
-    fetchPaginatedUsers(page);
-  }, [page]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  
+  const [editingBalanceUser, setEditingBalanceUser] = useState<UserProfile | null>(null);
+  const [editBalanceAmount, setEditBalanceAmount] = useState('');
+  const [editBalanceNote, setEditBalanceNote] = useState('');
 
-  const fetchPaginatedUsers = async (pageNum: number) => {
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchPaginatedUsers(page, debouncedSearchQuery);
+  }, [page, debouncedSearchQuery]);
+
+  const fetchPaginatedUsers = async (pageNum: number, search: string) => {
     setLoadingUsers(true);
     const from = (pageNum - 1) * USERS_PER_PAGE;
     const to = from + USERS_PER_PAGE - 1;
 
-    const { data, count, error } = await supabase
-      .rpc('get_all_users_with_balance', {}, { count: 'exact' })
+    let query = supabase
+      .rpc('get_all_users_with_balance', {}, { count: 'exact' });
+
+    if (search.trim()) {
+      const term = `%${search.trim()}%`;
+      query = query.or(`name.ilike.${term},email.ilike.${term},player_id_default.ilike.${term}`);
+    }
+
+    const { data, count, error } = await query
       .order('wallet_balance_usd', { ascending: false })
       .range(from, to);
 
@@ -69,6 +91,37 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   const handleConfirmAutoApprove = () => {
     setShowAutoApproveConfirm(false);
     verifiedTopUps.forEach(t => onUpdateTopUpStatus && onUpdateTopUpStatus(t.id, 'Aprobado'));
+  };
+
+  const handleAdminBalanceAdjustment = async () => {
+    if (!editingBalanceUser) return;
+    
+    const amount = parseFloat(editBalanceAmount);
+    if (isNaN(amount) || amount === 0) {
+      alert('Ingresa un monto válido distinto de 0.');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('wallet_transactions').insert({
+        user_id: editingBalanceUser.uid,
+        amount: amount,
+        type: 'admin_adjustment',
+        status: 'Aprobado',
+        admin_note: editBalanceNote.trim() || 'Ajuste manual desde panel admin'
+      });
+
+      if (error) throw error;
+      
+      fetchPaginatedUsers(page, debouncedSearchQuery);
+      setEditingBalanceUser(null);
+      setEditBalanceAmount('');
+      setEditBalanceNote('');
+      alert('Saldo actualizado correctamente.');
+    } catch (err: any) {
+      console.error(err);
+      alert('Error al actualizar el saldo: ' + err.message);
+    }
   };
 
   return (
@@ -240,13 +293,25 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
       </div>
 
       <div className="bg-zinc-800 rounded-2xl border border-zinc-700/50 overflow-hidden">
-        <div className="p-4 border-b border-zinc-700/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="p-4 border-b border-zinc-700/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <h3 className="font-black text-sm text-white uppercase flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-amber-400" /> Directorio de Clientes
           </h3>
-          <span className="text-xs sm:text-sm font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-3 py-1.5 rounded-xl shadow-[0_0_15px_rgba(251,191,36,0.2)]">
-            Total: {totalUsers} Usuarios
-          </span>
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            <div className="relative w-full sm:w-72">
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, correo, ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white text-xs font-bold focus:outline-none focus:border-amber-500 transition-colors"
+              />
+            </div>
+            <span className="text-xs sm:text-sm font-black text-amber-400 bg-amber-400/10 border border-amber-400/30 px-3 py-2 rounded-xl shadow-[0_0_15px_rgba(251,191,36,0.2)] whitespace-nowrap w-full sm:w-auto text-center">
+              Total: {totalUsers} Usuarios
+            </span>
+          </div>
         </div>
 
         {/* Mobile Wallet Cards */}
@@ -289,6 +354,13 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                     ${(u.walletBalanceUSD || 0).toFixed(2)}
                   </span>
                   <div className="flex gap-1.5 mt-2 w-full">
+                    <button
+                       onClick={() => setEditingBalanceUser(u)}
+                       className="flex-1 py-1.5 px-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[10px] font-black rounded-lg uppercase border border-amber-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                       title="Editar saldo de billetera"
+                    >
+                      <Wallet className="w-3 h-3 shrink-0" /> Editar Saldo
+                    </button>
                     <button
                        onClick={() => setSelectedProfileUser(u)}
                        className="flex-1 py-1.5 px-2 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-[10px] font-black rounded-lg uppercase border border-violet-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
@@ -366,6 +438,13 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                       <span className="text-sm font-black text-amber-400 bg-amber-400/10 px-3 py-1.5 rounded-xl border border-amber-400/30 inline-block">
                         ${(u.walletBalanceUSD || 0).toFixed(2)} USD
                       </span>
+                      <button
+                         onClick={() => setEditingBalanceUser(u)}
+                         className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[10px] font-black rounded-lg uppercase border border-amber-500/30 transition-colors flex items-center gap-1 cursor-pointer"
+                         title="Editar saldo de billetera"
+                      >
+                        <Wallet className="w-3 h-3" /> Editar Saldo
+                      </button>
                       <button
                          onClick={() => setSelectedProfileUser(u)}
                          className="px-3 py-1.5 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-[10px] font-black rounded-lg uppercase border border-violet-500/30 transition-colors flex items-center gap-1 cursor-pointer"
@@ -620,6 +699,81 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                 className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase shadow-[0_0_15px_rgba(245,158,11,0.4)] cursor-pointer"
               >
                 Guardar Nuevo Monto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDITAR SALDO MANUALMENTE */}
+      {editingBalanceUser && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-[#0a0a0a] border border-amber-500/40 p-6 rounded-2xl max-w-md w-full space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="font-black text-white uppercase text-base flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-amber-400" /> Ajuste Manual de Saldo
+              </h3>
+              <button
+                onClick={() => setEditingBalanceUser(null)}
+                className="p-1 text-zinc-400 hover:text-white rounded-lg hover:bg-white/10 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-amber-500/5 border border-amber-500/20 p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-zinc-400 uppercase font-black">Cliente</p>
+                <p className="text-white text-sm font-bold truncate">{editingBalanceUser.name}</p>
+                <p className="text-[10px] text-zinc-500 font-mono">{editingBalanceUser.email}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] text-zinc-400 uppercase font-black">Saldo Actual</p>
+                <p className="text-amber-400 font-black text-lg">${(editingBalanceUser.walletBalanceUSD || 0).toFixed(2)}</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Monto a Ajustar ($ USD)</label>
+              <div className="relative mb-1">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-black text-amber-400 text-lg">$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editBalanceAmount}
+                  onChange={(e) => setEditBalanceAmount(e.target.value)}
+                  className="w-full bg-black/60 border border-white/10 focus:border-amber-500 rounded-xl pl-8 pr-4 py-3 text-white font-black text-lg focus:outline-none"
+                  placeholder="Ej: 5.00 o -2.50"
+                  autoFocus
+                />
+              </div>
+              <p className="text-[10px] text-zinc-500 mt-1">Usa números positivos para sumar saldo, o negativos (ej: -5) para restar.</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase mb-2">Nota Administrativa (Opcional)</label>
+              <input
+                type="text"
+                value={editBalanceNote}
+                onChange={(e) => setEditBalanceNote(e.target.value)}
+                className="w-full bg-black/60 border border-white/10 focus:border-amber-500 rounded-xl px-4 py-2 text-white font-bold text-xs focus:outline-none"
+                placeholder="Ej: Reembolso, premio, ajuste..."
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setEditingBalanceUser(null)}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleAdminBalanceAdjustment}
+                disabled={!editBalanceAmount || parseFloat(editBalanceAmount) === 0}
+                className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black font-black text-xs uppercase shadow-[0_0_15px_rgba(245,158,11,0.4)] cursor-pointer transition-colors"
+              >
+                Confirmar Ajuste
               </button>
             </div>
           </div>
