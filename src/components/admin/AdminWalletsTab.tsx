@@ -383,7 +383,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                   <div className="flex gap-1.5 mt-2 w-full">
                     <button
                        onClick={() => setEditingBalanceUser(u)}
-                       className="flex-1 py-1.5 px-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[10px] font-black rounded-lg uppercase border border-amber-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                       className="flex-1 py-1.5 px-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded-lg uppercase border border-emerald-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                        title="Editar saldo de billetera"
                     >
                       <Wallet className="w-3 h-3 shrink-0" /> Editar Saldo
@@ -467,7 +467,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                       </span>
                       <button
                          onClick={() => setEditingBalanceUser(u)}
-                         className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[10px] font-black rounded-lg uppercase border border-amber-500/30 transition-colors flex items-center gap-1 cursor-pointer"
+                         className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded-lg uppercase border border-emerald-500/30 transition-colors flex items-center gap-1 cursor-pointer"
                          title="Editar saldo de billetera"
                       >
                         <Wallet className="w-3 h-3" /> Editar Saldo
