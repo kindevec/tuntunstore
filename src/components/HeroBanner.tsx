@@ -85,7 +85,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           <div className="hidden lg:flex lg:col-span-5 justify-center relative">
             <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
             <img 
-              src="/logo-transparent.png" 
+              src="/logo-transparent.webp" 
               alt="TunTun Store" 
               className="w-full max-w-[380px] object-contain drop-shadow-[0_0_50px_rgba(16,185,129,0.4)] hover:scale-105 transition-transform duration-700" 
             />

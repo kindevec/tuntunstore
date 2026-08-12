@@ -117,12 +117,14 @@ export const CyanProductCard: React.FC<{
             {product.imageType === 'diamond-medium' ? (
               <>
                 <img 
-                  src="/cofresito.png" 
+                  src="/cofresito.webp" 
+                  loading="lazy"
                   alt="Cofre de Diamantes" 
                   className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
                 <img 
-                  src="/cofresito2.png" 
+                  src="/cofresito2.webp" 
+                  loading="lazy"
                   alt="Cofre de Diamantes 2" 
                   className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
                 />
@@ -130,12 +132,14 @@ export const CyanProductCard: React.FC<{
             ) : product.imageType === 'diamond-large' ? (
               <>
                 <img 
-                  src="/coofre.png" 
+                  src="/coofre.webp" 
+                  loading="lazy"
                   alt="Cofre Grande" 
                   className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
                 <img 
-                  src="/coofre2.png" 
+                  src="/coofre2.webp" 
+                  loading="lazy"
                   alt="Cofre Grande 2" 
                   className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
                 />
@@ -143,12 +147,14 @@ export const CyanProductCard: React.FC<{
             ) : (
               <>
                 <img 
-                  src="/diamante.png" 
+                  src="/diamante.webp" 
+                  loading="lazy"
                   alt="Diamante" 
                   className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
                 <img 
-                  src="/diamante-2.png" 
+                  src="/diamante-2.webp" 
+                  loading="lazy"
                   alt="Diamante 2" 
                   className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
                 />

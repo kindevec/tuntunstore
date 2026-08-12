@@ -146,7 +146,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <div className={`relative z-10 rounded-full p-1.5 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_30px_rgba(16,185,129,0.3)] ring-2 ring-black/50 transition-all duration-500 ${authMode === 'login' ? 'w-32 h-32 sm:w-40 sm:h-40' : 'w-24 h-24 sm:w-32 sm:h-32'}`}>
               <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
                 <img
-                  src="/logo.jpeg"
+                  src="/logo.webp"
                   alt="TunTun Store"
                   className="w-full h-full object-cover rounded-full border-2 border-black"
                 />
@@ -161,7 +161,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           {/* ----------------- DESKTOP LOGO (Original) ----------------- */}
           <div className="hidden lg:flex items-center gap-3.5 mb-6 self-start">
             <img 
-              src="/logo-transparent.png" 
+              src="/logo-transparent.webp" 
               alt="TunTun Store Logo" 
               className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] shrink-0"
             />
@@ -463,8 +463,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             <div className="absolute inset-0 bg-emerald-500/20 blur-[40px] rounded-full animate-pulse" />
             <div className="relative w-48 h-48 sm:w-60 sm:h-60 rounded-full p-1.5 bg-gradient-to-br from-emerald-400 via-black to-emerald-700 shadow-[0_0_50px_rgba(16,185,129,0.3)] group">
               <img
-                src="/logo.jpeg"
+                src="/logo.webp"
                 alt="TunTun Store Identity"
+                loading="lazy"
                 className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-500"
               />
               {/* Badge */}
