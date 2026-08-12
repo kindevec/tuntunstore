@@ -34,7 +34,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
   return (
     <div
       id="whatsapp-floating-widget"
-      className={`fixed ${hasBottomNav ? 'bottom-28' : 'bottom-24'} right-0 z-[100] transition-all duration-300 flex flex-col items-end`}
+      className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-6'} right-0 z-[100] transition-all duration-300 flex flex-col items-end`}
     >
       
       {/* Expanded Quick Chat Drawer */}
@@ -120,7 +120,7 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
       )}
 
       {/* Glassmorphism Bubble Container */}
-      <div className="bg-zinc-900/60 backdrop-blur-lg border border-r-0 border-white/10 shadow-2xl rounded-l-3xl p-2 sm:p-3 flex items-center justify-center">
+      <div className="bg-zinc-900/60 backdrop-blur-lg border border-r-0 border-white/10 shadow-2xl rounded-l-3xl p-1.5 sm:p-2.5 flex items-center justify-center">
         {/* Main Floating Trigger Button */}
         <button
           id="whatsapp-floating-btn"
@@ -128,10 +128,10 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
           className="relative group hover:scale-110 active:scale-95 transition-transform duration-300 cursor-pointer drop-shadow-[0_4px_10px_rgba(37,211,102,0.4)]"
           title="Atención por WhatsApp"
         >
-          <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-red-500 ring-2 ring-black animate-ping z-10"></span>
-          <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-red-500 ring-2 ring-black z-10"></span>
+          <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-black animate-ping z-10"></span>
+          <span className="absolute top-0 right-0 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-black z-10"></span>
           {/* Official WhatsApp Color: #25D366 */}
-          <WhatsAppIcon className="w-14 h-14 sm:w-16 sm:h-16 text-[#25D366]" />
+          <WhatsAppIcon className="w-10 h-10 sm:w-12 sm:h-12 text-[#25D366]" />
         </button>
       </div>
 

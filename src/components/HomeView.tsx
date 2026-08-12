@@ -170,15 +170,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
     <div className="bg-[#050505] text-white min-h-screen pb-20 md:pb-0 font-sans w-full animate-in fade-in duration-500">
       
       {/* Banner / Agenda Semanal Section */}
-      <section className="pt-6 pb-8 md:pt-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="relative flex items-center justify-center mb-4 sm:mb-6">
+      <section className="pt-6 pb-8 md:pt-8 md:pb-12 px-0 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="relative flex items-center justify-center mb-4 sm:mb-6 px-4 sm:px-0">
           <h2 className="text-2xl sm:text-4xl font-black uppercase italic tracking-tighter text-white text-center">
             AGENDA <span className="text-amber-400">SEMANAL</span>
           </h2>
           {currentUser?.role === 'admin' && onNavigateToAdminBanners && (
             <button
               onClick={() => onNavigateToAdminBanners()}
-              className="absolute right-0 bg-black/70 hover:bg-black/90 backdrop-blur-md border border-amber-500/40 text-amber-300 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xl"
+              className="absolute right-4 sm:right-0 bg-black/70 hover:bg-black/90 backdrop-blur-md border border-amber-500/40 text-amber-300 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xl"
             >
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
               <span className="hidden sm:inline">Administrar Banners</span>
@@ -187,9 +187,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
           )}
         </div>
 
-        {/* Carousel Slider */}
+        {/* Mobile Banner (Standard Slider) */}
         <div 
-          className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 shadow-2xl group touch-pan-y bg-zinc-950"
+          className="sm:hidden relative w-full rounded-none overflow-hidden border-y border-white/10 shadow-2xl group touch-pan-y bg-zinc-950"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -203,13 +203,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <img 
                   src={slide.image} 
                   alt={`Agenda Semanal ${index + 1}`} 
-                  className="w-full h-auto max-h-[550px] sm:max-h-[650px] object-contain sm:object-cover mx-auto"
+                  className="w-full h-auto max-h-[550px] object-contain mx-auto"
                 />
               </div>
             ))}
           </div>
 
-          {/* Dots */}
+          {/* Dots for Mobile */}
           {slides.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
               {slides.map((_, index) => (
@@ -225,6 +225,68 @@ export const HomeView: React.FC<HomeViewProps> = ({
               ))}
             </div>
           )}
+        </div>
+
+        {/* Desktop Banner (3D Carousel) */}
+        <div className="hidden sm:flex relative w-full h-[400px] md:h-[500px] lg:h-[580px] overflow-hidden items-center justify-center group my-2">
+          {(slides.length === 2 ? [...slides, ...slides] : slides).map((slide, idx, arr) => {
+             const len = arr.length;
+             let position = 'hidden';
+             let transform = 'scale(0.6) translateX(0)';
+             let zIndex = 0;
+             let opacity = 0;
+
+             if (len === 1) {
+                position = 'center';
+                transform = 'translateX(0) scale(1)';
+                zIndex = 20;
+                opacity = 1;
+             } else {
+                if (idx === currentSlide) {
+                   position = 'center';
+                   transform = 'translateX(0) scale(1)';
+                   zIndex = 20;
+                   opacity = 1;
+                } else if (idx === (currentSlide - 1 + len) % len) {
+                   position = 'left';
+                   transform = 'translateX(-65%) scale(0.85)';
+                   zIndex = 10;
+                   opacity = 0.5;
+                } else if (idx === (currentSlide + 1) % len) {
+                   position = 'right';
+                   transform = 'translateX(65%) scale(0.85)';
+                   zIndex = 10;
+                   opacity = 0.5;
+                } else {
+                   transform = 'translateX(0) scale(0.5)';
+                   opacity = 0;
+                }
+             }
+
+             return (
+               <div 
+                 key={`${slide.image || idx}-${idx}`}
+                 className="absolute h-[90%] transition-all duration-700 ease-out cursor-pointer group"
+                 style={{ transform, zIndex, opacity }}
+                 onClick={() => {
+                   if (position === 'left') prevSlide();
+                   else if (position === 'right') nextSlide();
+                   else goToSlide(idx % slides.length);
+                 }}
+               >
+                  <img 
+                    src={slide.image} 
+                    className={`h-full w-auto max-w-[80vw] lg:max-w-[900px] object-cover rounded-3xl border transition-all duration-700 relative z-10 ${
+                      position === 'center' 
+                        ? 'border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.3)]' 
+                        : 'border-emerald-500/20 shadow-[0_4px_20px_rgba(0,0,0,0.6)] group-hover:border-emerald-400 group-hover:shadow-[0_0_25px_rgba(6,182,212,0.25)]'
+                    }`} 
+                    alt={`Banner ${idx}`} 
+                  />
+                  <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 z-20 rounded-3xl ${position === 'center' ? 'opacity-0' : 'opacity-60 bg-black'}`}></div>
+               </div>
+             )
+          })}
 
           {/* Desktop Navigation Arrows */}
           {slides.length > 1 && (
@@ -234,9 +296,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   e.stopPropagation();
                   prevSlide();
                 }}
-                className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-amber-500 text-white backdrop-blur-sm border border-white/10 items-center justify-center cursor-pointer transition-all shadow-lg hover:scale-110 group/btn"
+                className="absolute left-6 lg:left-10 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/60 hover:bg-emerald-500 text-white backdrop-blur-sm border border-white/10 flex items-center justify-center cursor-pointer transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:scale-110 group/btn"
               >
-                <ChevronLeft className="w-6 h-6 group-hover/btn:-translate-x-0.5 transition-transform" />
+                <ChevronLeft className="w-7 h-7 group-hover/btn:-translate-x-0.5 transition-transform" />
               </button>
 
               <button
@@ -244,11 +306,28 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   e.stopPropagation();
                   nextSlide();
                 }}
-                className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-black/50 hover:bg-amber-500 text-white backdrop-blur-sm border border-white/10 items-center justify-center cursor-pointer transition-all shadow-lg hover:scale-110 group/btn"
+                className="absolute right-6 lg:right-10 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/60 hover:bg-emerald-500 text-white backdrop-blur-sm border border-white/10 flex items-center justify-center cursor-pointer transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:scale-110 group/btn"
               >
-                <ChevronRight className="w-6 h-6 group-hover/btn:translate-x-0.5 transition-transform" />
+                <ChevronRight className="w-7 h-7 group-hover/btn:translate-x-0.5 transition-transform" />
               </button>
             </>
+          )}
+
+          {/* Dots for Desktop */}
+          {slides.length > 1 && (
+            <div className="absolute bottom-0 lg:bottom-2 left-1/2 -translate-x-1/2 z-30 flex gap-3 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    index === currentSlide 
+                      ? 'bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)] scale-125' 
+                      : 'bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+            </div>
           )}
         </div>
       </section>

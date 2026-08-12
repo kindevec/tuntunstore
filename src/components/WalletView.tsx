@@ -154,11 +154,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-900/30 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold uppercase tracking-wider mb-1">
-            <span>Página Independiente</span>
-            <span>•</span>
-            <span>Billetera Virtual TunTun</span>
-          </div>
+
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
             <Wallet className="w-8 h-8 text-emerald-400" />
             Mi Billetera Virtual USD

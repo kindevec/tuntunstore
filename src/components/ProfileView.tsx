@@ -116,11 +116,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       
       {/* Page Title */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-emerald-400 font-bold uppercase tracking-wider mb-2">
-          <span>Página Independiente</span>
-          <span>•</span>
-          <span>Cuenta Verificada</span>
-        </div>
+
         <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight flex items-center gap-3">
           Mi Perfil
         </h1>
