@@ -47,6 +47,7 @@ export const CyanProductCard: React.FC<{
   onSelectProduct,
 }) => {
   const [isVisible, setIsVisible] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
   const cardRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -76,12 +77,16 @@ export const CyanProductCard: React.FC<{
 
   const isQuickEditing = quickPriceId === product.id;
   const activeClass = isVisible ? 'mobile-active' : '';
+  const isActive = forceActive !== undefined ? forceActive : isVisible;
+  const shouldLoadSecondary = isHovered || isActive;
 
   return (
     <div
       ref={cardRef}
       id={`product-card-${product.id}`}
       data-active={forceActive !== undefined ? forceActive : isVisible}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`bg-gradient-to-b from-zinc-800 to-zinc-900 border transition-all duration-500 rounded-xl flex flex-col justify-between group shadow-[0_4px_20px_rgba(0,0,0,0.6)] relative overflow-hidden h-full ${
         carouselMode
           ? 'data-[active=false]:scale-90 data-[active=false]:opacity-50 data-[active=false]:z-0 data-[active=true]:scale-[1.05] data-[active=true]:z-20 data-[active=true]:opacity-100'
@@ -122,12 +127,14 @@ export const CyanProductCard: React.FC<{
                   alt="Cofre de Diamantes" 
                   className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
-                <img 
-                  src="/cofresito2.webp" 
-                  loading="lazy"
-                  alt="Cofre de Diamantes 2" 
-                  className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
-                />
+                {shouldLoadSecondary && (
+                  <img 
+                    src="/cofresito2.webp" 
+                    loading="lazy"
+                    alt="Cofre de Diamantes 2" 
+                    className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
+                  />
+                )}
               </>
             ) : product.imageType === 'diamond-large' ? (
               <>
@@ -137,12 +144,14 @@ export const CyanProductCard: React.FC<{
                   alt="Cofre Grande" 
                   className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
-                <img 
-                  src="/coofre2.webp" 
-                  loading="lazy"
-                  alt="Cofre Grande 2" 
-                  className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
-                />
+                {shouldLoadSecondary && (
+                  <img 
+                    src="/coofre2.webp" 
+                    loading="lazy"
+                    alt="Cofre Grande 2" 
+                    className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
+                  />
+                )}
               </>
             ) : (
               <>
@@ -152,12 +161,14 @@ export const CyanProductCard: React.FC<{
                   alt="Diamante" 
                   className={`${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain relative z-10 drop-shadow-[0_0_15px_rgba(16,185,129,0.7)] transition-opacity duration-300 group-hover:opacity-0 group-data-[active=true]:opacity-0`}
                 />
-                <img 
-                  src="/diamante-2.webp" 
-                  loading="lazy"
-                  alt="Diamante 2" 
-                  className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
-                />
+                {shouldLoadSecondary && (
+                  <img 
+                    src="/diamante-2.webp" 
+                    loading="lazy"
+                    alt="Diamante 2" 
+                    className={`absolute inset-0 m-auto ${isFeaturedMode ? 'w-full h-full max-h-[160px] sm:max-h-[200px]' : 'w-20 h-20 sm:w-36 sm:h-36'} object-contain z-10 drop-shadow-[0_0_25px_rgba(16,185,129,1)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-data-[active=true]:opacity-100`}
+                  />
+                )}
               </>
             )}
             {product.bonusDiamonds > 0 && (
