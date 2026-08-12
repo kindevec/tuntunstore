@@ -379,37 +379,40 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-xl border border-zinc-700/50">
-                <div className="min-w-0 pr-2">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block truncate">ID FF:</span>
-                  <span className="font-mono font-bold text-zinc-300 text-xs sm:text-sm truncate block">{u.playerIdDefault || 'N/A'}</span>
-                </div>
-                <div className="text-right flex flex-col items-end shrink-0">
-                  <span className="text-[10px] text-zinc-400 font-bold uppercase block">Saldo Actual:</span>
-                  <span className="text-base sm:text-lg font-black text-amber-400">
-                    ${(u.walletBalanceUSD || 0).toFixed(2)}
-                  </span>
-                  <div className="flex gap-1.5 mt-2 w-full">
-                    <button
-                       onClick={() => setEditingBalanceUser(u)}
-                       className="flex-1 py-1.5 px-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded-lg uppercase border border-emerald-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                       title="Editar saldo de billetera"
-                    >
-                      <Wallet className="w-3 h-3 shrink-0" /> Editar Saldo
-                    </button>
-                    <button
-                       onClick={() => setSelectedProfileUser(u)}
-                       className="flex-1 py-1.5 px-2 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-[10px] font-black rounded-lg uppercase border border-violet-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <User className="w-3 h-3 shrink-0" /> Perfil
-                    </button>
-                    <button
-                       onClick={() => handleViewUserHistory(u.uid, u.name)}
-                       className="flex-1 py-1.5 px-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <History className="w-3 h-3 shrink-0" /> Historial
-                    </button>
+              <div className="bg-zinc-900/50 p-3 rounded-xl border border-zinc-700/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0 pr-2">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase block truncate">ID FF:</span>
+                    <span className="font-mono font-bold text-zinc-300 text-xs sm:text-sm truncate block">{u.playerIdDefault || 'N/A'}</span>
                   </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase block">Saldo Actual:</span>
+                    <span className="text-base sm:text-lg font-black text-amber-400">
+                      ${(u.walletBalanceUSD || 0).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-700/50">
+                  <button
+                     onClick={() => setEditingBalanceUser(u)}
+                     className="py-2 px-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[9px] sm:text-[10px] font-black rounded-lg uppercase border border-emerald-500/30 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer"
+                     title="Editar saldo de billetera"
+                  >
+                    <Wallet className="w-4 h-4 shrink-0" /> Editar
+                  </button>
+                  <button
+                     onClick={() => setSelectedProfileUser(u)}
+                     className="py-2 px-1 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 text-[9px] sm:text-[10px] font-black rounded-lg uppercase border border-violet-500/30 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <User className="w-4 h-4 shrink-0" /> Perfil
+                  </button>
+                  <button
+                     onClick={() => handleViewUserHistory(u.uid, u.name)}
+                     className="py-2 px-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[9px] sm:text-[10px] font-black rounded-lg uppercase border border-blue-500/30 transition-colors flex flex-col items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <History className="w-4 h-4 shrink-0" /> Historial
+                  </button>
                 </div>
               </div>
             </div>
