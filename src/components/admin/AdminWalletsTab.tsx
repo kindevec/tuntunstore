@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap, Search } from 'lucide-react';
+import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap, Search, AlertTriangle } from 'lucide-react';
 import { UserProfile } from '../../types';
 import { AdminConfirmModal } from './AdminConfirmModal';
 
@@ -38,6 +38,8 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   const [editingBalanceUser, setEditingBalanceUser] = useState<UserProfile | null>(null);
   const [editBalanceAmount, setEditBalanceAmount] = useState('');
   const [editBalanceNote, setEditBalanceNote] = useState('');
+
+  const [notification, setNotification] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -98,7 +100,8 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
     
     const amount = parseFloat(editBalanceAmount);
     if (isNaN(amount) || amount === 0) {
-      alert('Ingresa un monto válido distinto de 0.');
+      setNotification({ type: 'error', message: 'Ingresa un monto válido distinto de 0.' });
+      setTimeout(() => setNotification(null), 5000);
       return;
     }
 
@@ -117,15 +120,39 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
       setEditingBalanceUser(null);
       setEditBalanceAmount('');
       setEditBalanceNote('');
-      alert('Saldo actualizado correctamente.');
+      setNotification({ type: 'success', message: 'Saldo actualizado correctamente.' });
+      setTimeout(() => setNotification(null), 5000);
     } catch (err: any) {
       console.error(err);
-      alert('Error al actualizar el saldo: ' + err.message);
+      setNotification({ type: 'error', message: 'Error al actualizar el saldo: ' + err.message });
+      setTimeout(() => setNotification(null), 5000);
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* 🔔 Notification Banner 🔔 */}
+      {notification && (
+        <div className={`flex items-start gap-3 p-4 rounded-xl border animate-in slide-in-from-top-2 z-50 fixed top-4 right-4 max-w-sm shadow-2xl ${
+          notification.type === 'success' 
+            ? 'bg-emerald-500/90 backdrop-blur-md border-emerald-400 text-white' 
+            : 'bg-rose-500/90 backdrop-blur-md border-rose-400 text-white'
+        }`}>
+          {notification.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 shrink-0" />
+          ) : (
+            <AlertTriangle className="w-5 h-5 shrink-0" />
+          )}
+          <p className="text-sm font-bold mt-0.5">{notification.message}</p>
+          <button 
+            onClick={() => setNotification(null)}
+            className="ml-auto p-1 hover:bg-black/20 rounded-lg transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <div className="bg-gradient-to-r from-amber-500/10 via-zinc-900 to-amber-500/5 p-4 sm:p-6 rounded-2xl border border-amber-500/30">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -688,7 +715,8 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                 onClick={() => {
                   const val = parseFloat(newTopUpAmountInput);
                   if (isNaN(val) || val <= 0) {
-                    alert('Por favor ingresa un monto válido mayor a 0');
+                    setNotification({ type: 'error', message: 'Por favor ingresa un monto válido mayor a 0' });
+                    setTimeout(() => setNotification(null), 5000);
                     return;
                   }
                   if (onUpdateTopUpAmount) {
