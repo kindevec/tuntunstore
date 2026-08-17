@@ -464,7 +464,7 @@ export default function App() {
   const handleSelectTab = (tab: string, subTab?: string) => window.location.hash = subTab ? `#${tab}/${subTab}` : `#${tab}`;
 
   const handleSelectProductForPurchase = (product: Product) => {
-    if (!currentUser) return openLoginWithReason('Para realizar tu recarga de diamantes por ID, inicia sesión con Google primero.');
+    if (!currentUser) return openLoginWithReason('Para realizar tu compra de diamantes, inicia sesión con Google primero.');
     setSelectedProductForOrder(product);
   };
 

@@ -559,70 +559,96 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </a>
         
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-          {/* Facebook */}
-          <a href="https://www.facebook.com/profile.php?id=61592564474036" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
-            {/* Fondo de imagen difuminada */}
-            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute inset-0 bg-black/60 group-hover:bg-[#1877F2]/80 transition-colors duration-300"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {/* WhatsApp Soporte Card */}
+          <a 
+            href="https://wa.me/593968729952" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="group relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-gradient-to-br from-[#0c1a13] via-[#09110d] to-[#050505] border border-emerald-500/25 hover:border-emerald-400/60 shadow-[0_0_25px_rgba(16,185,129,0.08)] hover:shadow-[0_0_35px_rgba(37,211,102,0.25)] transition-all duration-500 overflow-hidden flex flex-col justify-between"
+          >
+            {/* Background Glows & Ambience */}
+            <div className="absolute top-0 right-0 w-44 h-44 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 group-hover:scale-125 transition-all duration-700"></div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-[#25D366]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[#25D366]/15 transition-all duration-700"></div>
             
-            {/* Contenido revelado en Hover */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md mb-3 border border-white/20 group-hover:bg-white group-hover:scale-110 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white group-hover:text-[#1877F2] transition-colors">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
+            <div className="relative z-10">
+              {/* Header: Icon + Status Pill */}
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-[#25D366] shadow-[0_0_20px_rgba(37,211,102,0.15)] group-hover:bg-[#25D366] group-hover:text-black group-hover:scale-105 group-hover:shadow-[0_0_25px_rgba(37,211,102,0.4)] transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 sm:w-7 sm:h-7 transition-colors">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.487-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                </div>
+                <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] sm:text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Soporte 24/7
+                </div>
               </div>
-              <h3 className="font-black text-lg text-white uppercase tracking-wider translate-y-2 group-hover:translate-y-0 transition-transform">Facebook</h3>
-              <p className="text-xs text-white/0 group-hover:text-white/90 font-medium mt-1 -translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-75">Únete a nuestra página</p>
+
+              {/* Title & Description */}
+              <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-wide group-hover:text-emerald-300 transition-colors mb-1.5">
+                WhatsApp Oficial
+              </h3>
+              <p className="text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed">
+                Atención directa para recargas inmediatas, dudas sobre pedidos y soporte personalizado.
+              </p>
+            </div>
+
+            {/* Action Bar / Button */}
+            <div className="relative z-10 mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+              <span className="text-xs sm:text-sm font-extrabold text-emerald-400/90 group-hover:text-white transition-colors">
+                +593 96 872 9952
+              </span>
+              <div className="inline-flex items-center gap-2 bg-[#25D366]/15 group-hover:bg-[#25D366] text-[#25D366] group-hover:text-black text-xs font-black uppercase tracking-wider px-4 py-2 rounded-xl border border-[#25D366]/30 transition-all duration-300 shadow-[0_0_15px_rgba(37,211,102,0.15)] group-hover:shadow-[0_0_20px_rgba(37,211,102,0.4)]">
+                <span>Chatear</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
           </a>
 
-          {/* Instagram */}
-          <a href="https://www.instagram.com/sahur055?igsh=MWs3cXI1cDM0Z2x2YQ==" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
-            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute inset-0 bg-black/60 group-hover:bg-gradient-to-tr group-hover:from-[#f09433] group-hover:via-[#dc2743] group-hover:to-[#bc1888] group-hover:opacity-90 transition-all duration-300"></div>
+          {/* TikTok Card */}
+          <a 
+            href="https://tiktok.com/@tuntunstore1" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="group relative rounded-2xl sm:rounded-3xl p-5 sm:p-6 bg-gradient-to-br from-[#150914] via-[#0d0912] to-[#050505] border border-rose-500/25 hover:border-cyan-400/60 shadow-[0_0_25px_rgba(255,0,80,0.08)] hover:shadow-[0_0_35px_rgba(0,242,254,0.25)] transition-all duration-500 overflow-hidden flex flex-col justify-between"
+          >
+            {/* Background Glows & Ambience */}
+            <div className="absolute top-0 right-0 w-44 h-44 bg-rose-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-rose-500/20 group-hover:scale-125 transition-all duration-700"></div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-[#00f2fe]/5 rounded-full blur-2xl pointer-events-none group-hover:bg-[#00f2fe]/15 transition-all duration-700"></div>
             
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md mb-3 border border-white/20 group-hover:bg-white group-hover:scale-110 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white group-hover:text-[#dc2743] transition-colors">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-                </svg>
+            <div className="relative z-10">
+              {/* Header: Icon + Status Pill */}
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,0,80,0.15)] group-hover:bg-gradient-to-tr group-hover:from-[#ff0050] group-hover:to-[#00f2fe] group-hover:text-black group-hover:scale-105 group-hover:shadow-[0_0_25px_rgba(0,242,254,0.4)] group-hover:border-transparent transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 sm:w-7 sm:h-7 transition-colors drop-shadow-[1px_1px_0_rgba(0,242,254,0.6)]">
+                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.28 6.28 0 005.4 15.65a6.28 6.28 0 006.28 6.28A6.28 6.28 0 0018 15.65V9.43a8.3 8.3 0 004 1V6.69z"/>
+                  </svg>
+                </div>
+                <div className="flex items-center gap-1.5 bg-gradient-to-r from-rose-500/10 to-cyan-500/10 border border-rose-500/20 text-rose-300 text-[10px] sm:text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full">
+                  <span className="w-2 h-2 rounded-full bg-[#ff0050] animate-pulse"></span>
+                  Videos & Sorteos
+                </div>
               </div>
-              <h3 className="font-black text-lg text-white uppercase tracking-wider translate-y-2 group-hover:translate-y-0 transition-transform">Instagram</h3>
-              <p className="text-xs text-white/0 group-hover:text-white/90 font-medium mt-1 -translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-75">Síguenos para sorteos</p>
-            </div>
-          </a>
 
-          {/* WhatsApp */}
-          <a href="https://wa.me/593968729952" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
-            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute inset-0 bg-black/60 group-hover:bg-[#25D366]/90 transition-colors duration-300"></div>
-            
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md mb-3 border border-white/20 group-hover:bg-white group-hover:scale-110 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white group-hover:text-[#25D366] transition-colors">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.487-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg>
-              </div>
-              <h3 className="font-black text-lg text-white uppercase tracking-wider translate-y-2 group-hover:translate-y-0 transition-transform">WhatsApp</h3>
-              <p className="text-xs text-white/0 group-hover:text-white/90 font-medium mt-1 -translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-75">Soporte y compras</p>
+              {/* Title & Description */}
+              <h3 className="text-lg sm:text-xl font-black text-white uppercase tracking-wide group-hover:text-cyan-300 transition-colors mb-1.5">
+                TikTok Oficial
+              </h3>
+              <p className="text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed">
+                Tutoriales de recargas, demostraciones de pases élite, sorteos de diamantes y contenido exclusivo.
+              </p>
             </div>
-          </a>
 
-          {/* TikTok */}
-          <a href="https://tiktok.com/@tuntunstore1" target="_blank" rel="noreferrer" className="group relative h-40 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-white/10 block">
-            <div className="absolute inset-0 bg-[url('/logo.webp')] bg-cover bg-center blur-[2px] scale-105 group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute inset-0 bg-black/60 group-hover:bg-black/80 transition-colors duration-300"></div>
-            
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md mb-3 border border-white/20 group-hover:bg-white group-hover:scale-110 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white group-hover:text-[#ff0050] transition-colors drop-shadow-[1px_1px_0_#00f2fe]">
-                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.28 6.28 0 005.4 15.65a6.28 6.28 0 006.28 6.28A6.28 6.28 0 0018 15.65V9.43a8.3 8.3 0 004 1V6.69z"/>
-                </svg>
+            {/* Action Bar / Button */}
+            <div className="relative z-10 mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+              <span className="text-xs sm:text-sm font-extrabold text-rose-400/90 group-hover:text-white transition-colors">
+                @tuntunstore1
+              </span>
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#ff0050]/20 to-[#00f2fe]/20 group-hover:from-[#ff0050] group-hover:to-[#00f2fe] text-rose-300 group-hover:text-black text-xs font-black uppercase tracking-wider px-4 py-2 rounded-xl border border-rose-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(255,0,80,0.15)] group-hover:shadow-[0_0_20px_rgba(0,242,254,0.4)]">
+                <span>Seguir</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
-              <h3 className="font-black text-lg text-white uppercase tracking-wider translate-y-2 group-hover:translate-y-0 transition-transform">TikTok</h3>
-              <p className="text-xs text-white/0 group-hover:text-white/90 font-medium mt-1 -translate-y-2 group-hover:translate-y-0 transition-all duration-300 delay-75">Contenido exclusivo</p>
             </div>
           </a>
         </div>
