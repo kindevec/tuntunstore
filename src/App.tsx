@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product, BankAccount, Order, UserProfile, OrderStatus, ProductCategory, HeroSlide } from './types';
 import { supabase } from './supabaseClient';
+import { convertImageToWebp } from './utils/imageOptimization';
 
 import { Header } from './components/Header';
 import { HeroBanner } from './components/HeroBanner';
@@ -783,9 +784,13 @@ export default function App() {
 
       autoVerified = verificationWarnings.length === 0;
 
-      const fileExt = receiptFile.name.split('.').pop();
+      // Optimizar comprobante a WebP para reducir hasta un 80% de almacenamiento
+      const optimizedReceipt = await convertImageToWebp(receiptFile, 0.8);
+      const fileExt = optimizedReceipt.name.split('.').pop() || 'webp';
       const filePath = `${currentUser.uid}/${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('receipts').upload(filePath, receiptFile);
+      const { error: uploadError } = await supabase.storage
+        .from('receipts')
+        .upload(filePath, optimizedReceipt, { contentType: 'image/webp' });
       if (uploadError) {
         showToast(`❌ Error al subir comprobante: ${uploadError.message}`);
         return;

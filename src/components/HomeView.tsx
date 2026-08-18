@@ -415,7 +415,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="relative p-[3px] rounded-3xl bg-gradient-to-tr from-emerald-500/40 via-transparent to-amber-500/40 shadow-[0_0_50px_rgba(16,185,129,0.15)] max-w-[340px] w-full">
                   <div className="relative w-full rounded-[22px] overflow-hidden bg-black" style={{ aspectRatio: '9/16' }}>
                     <iframe
-                      src="https://www.tiktok.com/player/v1/7672753276164607250?music_info=1&description=1"
+                      src="https://www.tiktok.com/player/v1/7675461351858244882?music_info=1&description=1"
                       loading="lazy"
                       style={{ width: '100%', height: '100%', border: 'none' }}
                       allow="fullscreen"
