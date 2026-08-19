@@ -7,7 +7,8 @@ import {
   ShieldCheck, 
   Zap, 
   Wallet,
-  CheckCircle2
+  CheckCircle2,
+  Ban
 } from 'lucide-react';
 
 interface OrderModalProps {
@@ -29,7 +30,8 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   if (!product) return null;
 
   const userBalance = currentUser?.walletBalanceUSD || 0;
-  const hasEnoughBalance = userBalance >= product.priceUSD;
+  const isBlocked = !!currentUser?.isBlocked;
+  const hasEnoughBalance = userBalance >= product.priceUSD && !isBlocked;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,6 +39,10 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isBlocked) {
+      setErrorMessage('Tu cuenta ha sido inhabilitada por administración para realizar compras.');
+      return;
+    }
     if (!hasEnoughBalance) {
       setErrorMessage('Saldo insuficiente en tu Billetera Virtual.');
       return;
@@ -101,6 +107,19 @@ export const OrderModal: React.FC<OrderModalProps> = ({
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1">
           
+          {/* Blocked Account Warning */}
+          {isBlocked && (
+            <div className="p-4 bg-rose-950/70 border border-rose-500/70 rounded-2xl text-rose-200 text-xs space-y-2">
+              <div className="flex items-center gap-2 font-black uppercase text-rose-400">
+                <Ban className="w-4 h-4" />
+                <span>Cuenta Inhabilitada para Compras</span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-relaxed">
+                Tu cuenta tiene restringida la adquisición de productos por decisión de la administración. Para solicitar asistencia o resolver inquietudes sobre tu cuenta, por favor contacta al soporte vía WhatsApp.
+              </p>
+            </div>
+          )}
+
           {/* Product Summary Box */}
           <div className="p-4 rounded-2xl bg-black border border-emerald-500/30 flex items-center justify-between">
             <div>
@@ -119,17 +138,21 @@ export const OrderModal: React.FC<OrderModalProps> = ({
           {/* Payment Method & Balance Card */}
           <div
             className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
-              hasEnoughBalance
+              isBlocked 
+                ? 'border-rose-500/30 bg-rose-950/20'
+                : hasEnoughBalance
                 ? 'border-emerald-500/50 bg-emerald-950/40 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
                 : 'border-amber-500/50 bg-amber-950/20'
             }`}
           >
             <div className="flex items-center justify-between">
-              <div className={`flex items-center gap-2 font-black text-xs uppercase ${hasEnoughBalance ? 'text-emerald-400' : 'text-amber-400'}`}>
+              <div className={`flex items-center gap-2 font-black text-xs uppercase ${
+                isBlocked ? 'text-rose-400' : hasEnoughBalance ? 'text-emerald-400' : 'text-amber-400'
+              }`}>
                 <Wallet className="w-4 h-4" />
                 <span>Método de Pago: Saldo TunTun USD</span>
               </div>
-              {hasEnoughBalance && (
+              {hasEnoughBalance && !isBlocked && (
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#10b981]"></span>
               )}
             </div>
@@ -140,7 +163,11 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                 <span className="text-base sm:text-lg font-black text-white">${userBalance.toFixed(2)} USD</span>
               </div>
 
-              {hasEnoughBalance ? (
+              {isBlocked ? (
+                <div className="pt-2 border-t border-rose-500/20 text-xs font-bold text-rose-300">
+                  <span>🚫 No puedes utilizar tu saldo mientras la cuenta esté inhabilitada.</span>
+                </div>
+              ) : hasEnoughBalance ? (
                 <div className="pt-2 border-t border-emerald-500/20 flex items-center justify-between text-xs font-bold">
                   <span className="text-zinc-300">Saldo tras la compra:</span>
                   <span className="text-emerald-400 font-black font-mono">
@@ -196,18 +223,27 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
           <button
             id="btn-submit-order-final"
-            disabled={!hasEnoughBalance || isSubmitting}
+            disabled={!hasEnoughBalance || isSubmitting || isBlocked}
             onClick={handleSubmit}
             className={`w-full sm:w-auto px-6 py-3.5 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all min-h-[44px] ${
-              hasEnoughBalance && !isSubmitting
+              hasEnoughBalance && !isSubmitting && !isBlocked
                 ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer'
                 : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
             }`}
           >
-            <Zap className="w-4 h-4 fill-current" />
-            <span>
-              {isSubmitting ? 'Procesando Compra...' : `Confirmar Pago ($${product.priceUSD.toFixed(2)} USD)`}
-            </span>
+            {isBlocked ? (
+              <>
+                <Ban className="w-4 h-4" />
+                <span>Cuenta Inhabilitada</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4 fill-current" />
+                <span>
+                  {isSubmitting ? 'Procesando Compra...' : `Confirmar Pago ($${product.priceUSD.toFixed(2)} USD)`}
+                </span>
+              </>
+            )}
           </button>
         </div>
 

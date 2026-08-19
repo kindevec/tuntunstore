@@ -67,6 +67,7 @@ export interface UserProfile {
   gamerTag?: string;
   phone?: string;
   preferredBank?: string;
+  isBlocked?: boolean;
 }
 
 export type WalletTransactionType = 'top_up' | 'purchase' | 'refund' | 'admin_adjustment';

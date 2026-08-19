@@ -13,7 +13,8 @@ import {
   Wallet,
   LogOut,
   ArrowRight,
-  Key
+  Key,
+  Ban
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -155,8 +156,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   ? 'bg-amber-400/10 text-amber-300 border border-amber-400/30' 
                   : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
               }`}>
-                {currentUser.role === 'admin' ? '⭐ Administrador' : 'Cliente Verificado'}
+                {currentUser.role === 'admin' ? '⭐ Administrador' : '🎮 Cliente'}
               </span>
+
+              {currentUser.isBlocked ? (
+                <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1.5 shadow-sm">
+                  <Ban className="w-3.5 h-3.5 text-rose-400" />
+                  Cuenta Inhabilitada
+                </span>
+              ) : (
+                <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  Estado Activo
+                </span>
+              )}
               
               <button
                 type="button"

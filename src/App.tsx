@@ -175,6 +175,19 @@ export default function App() {
         // Al actualizar, crear o borrar productos, refrescar el catálogo
         fetchInitialData();
       })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'profiles'
+      }, (payload) => {
+        const newProfile = payload.new as any;
+        if (currentUser && newProfile && newProfile.id === currentUser.uid) {
+          fetchUserProfile(currentUser.uid);
+        }
+        if (currentUser?.role === 'admin') {
+          fetchAllUsersForAdmin();
+        }
+      })
       .subscribe();
 
     return () => {
@@ -334,6 +347,7 @@ export default function App() {
         gamerTag: p.gamer_tag,
         phone: p.phone,
         preferredBank: p.preferred_bank,
+        isBlocked: !!p.is_blocked,
       })));
     }
   };
@@ -365,6 +379,7 @@ export default function App() {
         gamerTag: data.gamer_tag,
         phone: data.phone,
         preferredBank: data.preferred_bank,
+        isBlocked: !!data.is_blocked,
       };
       updateCurrentActiveUser(userProfile);
       
@@ -471,6 +486,11 @@ export default function App() {
 
   const handleCreateOrder = async (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>) => {
     if (!currentUser) return;
+
+    if (currentUser.isBlocked) {
+      showToast('🚫 Tu cuenta ha sido inhabilitada por la administración. No puedes realizar compras.');
+      return;
+    }
 
     const { data, error } = await supabase.rpc('purchase_with_wallet_v2', {
       p_player_id: newOrderData.playerId,
@@ -610,6 +630,11 @@ export default function App() {
 
   const handleSubmitTopUpOrder = async (amount: number, bankName: string, receiptFile: File) => {
     if (!currentUser) return;
+
+    if (currentUser.isBlocked) {
+      showToast('🚫 Tu cuenta ha sido inhabilitada por la administración. No puedes realizar recargas de saldo.');
+      return;
+    }
     
     let uploadedReceiptPath = null;
     let receiptHash = null;

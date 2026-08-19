@@ -10,7 +10,8 @@ import {
   Copy,
   Plus,
   Upload,
-  FileCheck
+  FileCheck,
+  Ban
 } from 'lucide-react';
 import { UserProfile, BankAccount, WalletTransaction } from '../types';
 
@@ -130,6 +131,10 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
   const handleBankTopUp = (e: React.FormEvent) => {
     e.preventDefault();
+    if (currentUser.isBlocked) {
+      setErrorMessage('🚫 Tu cuenta se encuentra inhabilitada para recargas de saldo. Contacta a soporte.');
+      return;
+    }
     if (finalAmount < 5) {
       setErrorMessage('El monto mínimo de recarga es de $5 USD.');
       return;
@@ -150,6 +155,33 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
   return (
     <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-300">
+      
+      {/* Alerta de Usuario Bloqueado */}
+      {currentUser.isBlocked && (
+        <div className="bg-rose-950/70 border-2 border-rose-500/80 rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_0_30px_rgba(244,63,94,0.25)] animate-in fade-in">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 bg-rose-500/20 rounded-xl text-rose-400 border border-rose-500/30 shrink-0 mt-0.5 sm:mt-0">
+              <Ban className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-black text-sm sm:text-base text-rose-300 uppercase tracking-wide">
+                Cuenta Inhabilitada para Recargas y Compras
+              </h3>
+              <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
+                Tu cuenta ha sido inhabilitada para procesar transferencias y compras por disposición de la administración. Puedes seguir navegando en el catálogo. Para resolver dudas sobre tus comprobantes o solicitar reactivación, por favor contáctanos por WhatsApp.
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://wa.me/593968729952?text=Hola%20TunTunStore,%20mi%20cuenta%20se%20encuentra%20inhabilitada%20y%20deseo%20asistencia%20con%20mi%20usuario."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2.5 bg-rose-500 hover:bg-rose-400 text-white font-black text-xs uppercase rounded-xl transition-colors shrink-0 shadow-md w-full sm:w-auto text-center cursor-pointer"
+          >
+            Contactar Soporte
+          </a>
+        </div>
+      )}
       
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-emerald-900/30 pb-6">
@@ -340,13 +372,25 @@ export const WalletView: React.FC<WalletViewProps> = ({
                 </div>
               )}
 
-              <button
-                type="submit"
-                className="w-full py-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-sm uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all cursor-pointer"
-              >
-                <span>Enviar Recarga de ${finalAmount.toFixed(2)} a Verificación</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
+              {currentUser.isBlocked ? (
+                <div className="p-4 bg-rose-950/40 border border-rose-500/30 rounded-2xl text-center space-y-1.5">
+                  <p className="text-xs font-black text-rose-300 uppercase flex items-center justify-center gap-2">
+                    <Ban className="w-4 h-4 text-rose-400" />
+                    <span>Función de recarga inhabilitada</span>
+                  </p>
+                  <p className="text-[11px] text-zinc-400">
+                    Tu cuenta tiene restringido el envío de recargas por disposición administrativa.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  className="w-full py-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-sm uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all cursor-pointer"
+                >
+                  <span>Enviar Recarga de ${finalAmount.toFixed(2)} a Verificación</span>
+                  <ArrowUpRight className="w-4 h-4" />
+                </button>
+              )}
             </form>
           </div>
 

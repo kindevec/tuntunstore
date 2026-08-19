@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap, Search, AlertTriangle } from 'lucide-react';
+import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap, Search, AlertTriangle, Ban } from 'lucide-react';
 import { UserProfile } from '../../types';
 import { AdminConfirmModal } from './AdminConfirmModal';
 
@@ -40,6 +40,12 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   const [editBalanceNote, setEditBalanceNote] = useState('');
 
   const [notification, setNotification] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
+
+  const [blockConfirmModal, setBlockConfirmModal] = useState<{
+    isOpen: boolean;
+    user: UserProfile | null;
+    targetBlockedState: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -82,6 +88,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
         gamerTag: p.gamer_tag,
         phone: p.phone,
         preferredBank: p.preferred_bank,
+        isBlocked: !!p.is_blocked,
       })));
       if (count !== null) setTotalUsers(count);
     }
@@ -93,6 +100,67 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   const handleConfirmAutoApprove = () => {
     setShowAutoApproveConfirm(false);
     verifiedTopUps.forEach(t => onUpdateTopUpStatus && onUpdateTopUpStatus(t.id, 'Aprobado'));
+  };
+
+  const handleRequestToggleBlock = (user: UserProfile, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (user.role === 'admin') {
+      setNotification({
+        type: 'error',
+        message: '🛡️ Seguridad: Las cuentas de Administrador no pueden ser bloqueadas.'
+      });
+      setTimeout(() => setNotification(null), 5000);
+      return;
+    }
+    const nextBlockedState = !user.isBlocked;
+    setBlockConfirmModal({
+      isOpen: true,
+      user,
+      targetBlockedState: nextBlockedState,
+    });
+  };
+
+  const handleConfirmToggleBlock = async () => {
+    if (!blockConfirmModal || !blockConfirmModal.user) return;
+    const { user, targetBlockedState } = blockConfirmModal;
+    setBlockConfirmModal(null);
+
+    try {
+      // 1. Intentar ejecutar el RPC seguro
+      const { error: rpcError } = await supabase.rpc('toggle_user_blocked_status', {
+        p_target_user_id: user.uid,
+        p_is_blocked: targetBlockedState
+      });
+
+      if (rpcError) {
+        // Fallback: actualización directa en profiles
+        const { error: directErr } = await supabase
+          .from('profiles')
+          .update({ is_blocked: targetBlockedState })
+          .eq('id', user.uid);
+        if (directErr) throw directErr;
+      }
+
+      setLocalUsers(prev => prev.map(u => u.uid === user.uid ? { ...u, isBlocked: targetBlockedState } : u));
+      if (selectedProfileUser && selectedProfileUser.uid === user.uid) {
+        setSelectedProfileUser(prev => prev ? { ...prev, isBlocked: targetBlockedState } : null);
+      }
+
+      setNotification({
+        type: 'success',
+        message: targetBlockedState 
+          ? `🚫 Usuario "${user.name}" bloqueado correctamente. Podrá navegar pero no realizar recargas ni compras.`
+          : `✅ Usuario "${user.name}" desbloqueado y reactivado con éxito.`
+      });
+      setTimeout(() => setNotification(null), 5000);
+    } catch (err: any) {
+      console.error('Error al actualizar estado de bloqueo:', err);
+      setNotification({
+        type: 'error',
+        message: 'Error al cambiar estado de bloqueo: ' + (err.message || 'Verifica permisos')
+      });
+      setTimeout(() => setNotification(null), 5000);
+    }
   };
 
   const handleAdminBalanceAdjustment = async () => {
@@ -379,6 +447,55 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                 </span>
               </div>
 
+              {/* Mobile Block Switch Row */}
+              <div className="flex items-center justify-between bg-black/40 p-2.5 rounded-xl border border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-zinc-400 font-bold uppercase">Estado:</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase flex items-center gap-1 ${
+                    u.isBlocked 
+                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' 
+                      : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                  }`}>
+                    {u.isBlocked ? (
+                      <>
+                        <Ban className="w-3 h-3 text-rose-400" />
+                        <span>Bloqueado</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                        <span>Activo</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] text-zinc-400 font-bold uppercase">
+                    {u.isBlocked ? 'Desbloquear:' : 'Bloquear:'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRequestToggleBlock(u)}
+                    className={`relative inline-flex items-center rounded-full transition-all duration-300 focus:outline-none cursor-pointer w-12 h-6 shrink-0 ${
+                      u.isBlocked
+                        ? 'bg-rose-600 shadow-[0_0_12px_rgba(244,63,94,0.4)] border border-rose-500'
+                        : 'bg-emerald-600 shadow-[0_0_12px_rgba(16,185,129,0.4)] border border-emerald-500'
+                    }`}
+                    title={u.isBlocked ? 'Usuario Bloqueado. Clic para Desbloquear' : 'Usuario Activo. Clic para Bloquear'}
+                  >
+                    <span
+                      className={`inline-block transform rounded-full bg-white transition-all duration-300 shadow-md flex items-center justify-center w-4 h-4 text-[9px] font-black ${
+                        u.isBlocked
+                          ? 'translate-x-1 text-rose-600'
+                          : 'translate-x-7 text-emerald-600'
+                      }`}
+                    >
+                      {u.isBlocked ? '✕' : '✓'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-zinc-900/50 p-3 rounded-xl border border-zinc-700/50 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="min-w-0 pr-2">
@@ -428,13 +545,14 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                 <th className="p-4">Email</th>
                 <th className="p-4">Rol</th>
                 <th className="p-4">ID Free Fire</th>
+                <th className="p-4">Estado / Bloqueo</th>
                 <th className="p-4">Saldo Actual USD</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-700/50">
               {loadingUsers ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-zinc-500 font-bold text-xs uppercase animate-pulse">
+                  <td colSpan={6} className="p-8 text-center text-zinc-500 font-bold text-xs uppercase animate-pulse">
                     Cargando usuarios...
                   </td>
                 </tr>
@@ -470,6 +588,50 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
 
                   <td className="p-4 font-mono font-bold text-zinc-300">
                     {u.playerIdDefault || '284910293'}
+                  </td>
+
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleRequestToggleBlock(u)}
+                        className={`relative inline-flex items-center rounded-full transition-all duration-300 focus:outline-none cursor-pointer w-12 h-6 shrink-0 ${
+                          u.isBlocked
+                            ? 'bg-rose-600 shadow-[0_0_12px_rgba(244,63,94,0.4)] border border-rose-500'
+                            : 'bg-emerald-600 shadow-[0_0_12px_rgba(16,185,129,0.4)] border border-emerald-500'
+                        }`}
+                        title={u.isBlocked ? 'Usuario Bloqueado. Clic para Desbloquear' : 'Usuario Activo. Clic para Bloquear'}
+                      >
+                        <span
+                          className={`inline-block transform rounded-full bg-white transition-all duration-300 shadow-md flex items-center justify-center w-4 h-4 text-[9px] font-black ${
+                            u.isBlocked
+                              ? 'translate-x-1 text-rose-600'
+                              : 'translate-x-7 text-emerald-600'
+                          }`}
+                        >
+                          {u.isBlocked ? '✕' : '✓'}
+                        </span>
+                      </button>
+                      <span
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase inline-flex items-center gap-1 ${
+                          u.isBlocked
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.15)]'
+                            : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]'
+                        }`}
+                      >
+                        {u.isBlocked ? (
+                          <>
+                            <Ban className="w-3 h-3 text-rose-400" />
+                            <span>Bloqueado</span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span>Activo</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
                   </td>
 
                   <td className="p-4">
@@ -627,6 +789,63 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                   <Wallet className="w-6 h-6 text-amber-400" />
                 </div>
               </div>
+
+              {/* Account Status & Admin Block Control */}
+              <div className={`p-4 rounded-xl border flex items-center justify-between transition-colors ${
+                selectedProfileUser.isBlocked 
+                  ? 'bg-rose-500/10 border-rose-500/30' 
+                  : 'bg-emerald-500/10 border-emerald-500/30'
+              }`}>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase">Control de Estado / Acceso</p>
+                  <p className={`text-xs sm:text-sm font-black uppercase flex items-center gap-1.5 ${
+                    selectedProfileUser.isBlocked ? 'text-rose-400' : 'text-emerald-400'
+                  }`}>
+                    {selectedProfileUser.isBlocked ? (
+                      <>
+                        <Ban className="w-4 h-4 text-rose-400 shrink-0" />
+                        <span>Cuenta Inhabilitada (Bloqueada)</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>Cuenta Activa (Desbloqueada)</span>
+                      </>
+                    )}
+                  </p>
+                  <p className="text-[10px] text-zinc-400 max-w-[220px] sm:max-w-xs leading-tight">
+                    {selectedProfileUser.isBlocked 
+                      ? 'Este usuario no puede realizar compras ni recargas de saldo.' 
+                      : 'El usuario tiene acceso normal a recargar saldo y comprar productos.'}
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-end gap-1.5 shrink-0 pl-2">
+                  <button
+                    type="button"
+                    onClick={() => handleRequestToggleBlock(selectedProfileUser)}
+                    className={`relative inline-flex items-center rounded-full transition-all duration-300 focus:outline-none cursor-pointer w-14 h-7 ${
+                      selectedProfileUser.isBlocked
+                        ? 'bg-rose-600 shadow-[0_0_15px_rgba(244,63,94,0.4)] border border-rose-500'
+                        : 'bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.4)] border border-emerald-500'
+                    }`}
+                    title={selectedProfileUser.isBlocked ? 'Clic para Desbloquear' : 'Clic para Bloquear'}
+                  >
+                    <span
+                      className={`inline-block transform rounded-full bg-white transition-all duration-300 shadow-md flex items-center justify-center w-5 h-5 text-[10px] font-black ${
+                        selectedProfileUser.isBlocked
+                          ? 'translate-x-1 text-rose-600'
+                          : 'translate-x-8 text-emerald-600'
+                      }`}
+                    >
+                      {selectedProfileUser.isBlocked ? '✕' : '✓'}
+                    </span>
+                  </button>
+                  <span className="text-[9px] font-black text-zinc-400 uppercase">
+                    {selectedProfileUser.isBlocked ? 'Desbloquear' : 'Bloquear'}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Modal Footer */}
@@ -658,6 +877,24 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
         onConfirm={handleConfirmAutoApprove}
         onCancel={() => setShowAutoApproveConfirm(false)}
       />
+
+      {/* MODAL: CONFIRMAR BLOQUEO / DESBLOQUEO */}
+      {blockConfirmModal && (
+        <AdminConfirmModal
+          isOpen={blockConfirmModal.isOpen}
+          title={blockConfirmModal.targetBlockedState ? "🚫 ¿Bloquear Usuario?" : "✅ ¿Desbloquear Usuario?"}
+          message={
+            blockConfirmModal.targetBlockedState
+              ? `¿Estás seguro de BLOQUEAR a "${blockConfirmModal.user?.name}" (${blockConfirmModal.user?.email})? El usuario podrá seguir navegando por la tienda pero NO podrá recargar saldo ni comprar productos.`
+              : `¿Estás seguro de DESBLOQUEAR a "${blockConfirmModal.user?.name}" (${blockConfirmModal.user?.email})? El usuario recuperará de inmediato todos los permisos para recargar saldo y comprar diamantes.`
+          }
+          confirmText={blockConfirmModal.targetBlockedState ? "Sí, Bloquear Usuario" : "Sí, Desbloquear Usuario"}
+          cancelText="Cancelar"
+          variant={blockConfirmModal.targetBlockedState ? "danger" : "success"}
+          onConfirm={handleConfirmToggleBlock}
+          onCancel={() => setBlockConfirmModal(null)}
+        />
+      )}
 
       {/* MODAL: EDITAR MONTO DE RECARGA */}
       {editingTopUp && (
