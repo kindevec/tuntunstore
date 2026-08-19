@@ -89,7 +89,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 4. SEGURIDAD: Blindar la función de compras (purchase_with_wallet_v2) contra usuarios bloqueados
+-- 4. SEGURIDAD & COMPRA: Función de compras blindada y con tipado seguro
 CREATE OR REPLACE FUNCTION public.purchase_with_wallet_v2(
     p_player_id TEXT,
     p_player_tag TEXT,
@@ -106,6 +106,7 @@ DECLARE
     v_available_code_id UUID;
     v_available_code TEXT;
     v_has_code BOOLEAN := false;
+    v_order_number TEXT;
 BEGIN
     v_user_id := auth.uid();
     IF v_user_id IS NULL THEN
@@ -121,7 +122,7 @@ BEGIN
         RAISE EXCEPTION 'Tu cuenta ha sido inhabilitada por administración. No puedes realizar compras.';
     END IF;
 
-    -- Bloquear y verificar saldo disponible en la billetera
+    -- Verificar saldo disponible en la billetera
     v_current_balance := public.get_wallet_balance(v_user_id);
 
     IF v_current_balance < p_price_usd THEN
@@ -131,7 +132,7 @@ BEGIN
     -- 1. Intentar bloquear un código disponible para este producto
     SELECT id, code INTO v_available_code_id, v_available_code
     FROM public.redemption_codes
-    WHERE product_id = p_product_id
+    WHERE product_id::TEXT = p_product_id::TEXT
       AND is_used = false
     ORDER BY created_at ASC
     LIMIT 1
@@ -145,12 +146,15 @@ BEGIN
     INSERT INTO public.wallet_transactions (user_id, amount, type, status)
     VALUES (v_user_id, -p_price_usd, 'purchase', 'Aprobado');
 
+    -- Generar número de orden único
+    v_order_number := 'ORD-' || TO_CHAR(NOW(), 'YYMMDD') || '-' || UPPER(SUBSTRING(gen_random_uuid()::TEXT, 1, 6));
+
     -- 3. Insertar Pedido
     INSERT INTO public.orders (
-        user_id, player_id, player_tag, product_id, product_name_snapshot, 
+        order_number, user_id, player_id, player_tag, product_id, product_name_snapshot, 
         diamonds_total, price_usd, status, payment_method, is_wallet_top_up, redemption_code
     ) VALUES (
-        v_user_id, p_player_id, p_player_tag, p_product_id, p_product_name_snapshot,
+        v_order_number, v_user_id, p_player_id, p_player_tag, p_product_id::UUID, p_product_name_snapshot,
         p_diamonds_total, p_price_usd, 
         CASE WHEN v_has_code THEN 'Completado' ELSE 'Pendiente' END, 
         'wallet_balance', false, 
@@ -172,13 +176,14 @@ BEGIN
     IF v_has_code THEN
         UPDATE public.redemption_codes
         SET is_used = true,
-            used_by_order_id = v_new_order_id
+            order_id = v_new_order_id,
+            used_at = NOW()
         WHERE id = v_available_code_id;
     END IF;
 
     RETURN json_build_object('success', true, 'order_id', v_new_order_id, 'has_code', v_has_code);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 5. SEGURIDAD: Blindar la inserción de recargas en wallet_transactions
 CREATE OR REPLACE FUNCTION public.check_user_not_blocked_on_topup()
@@ -197,7 +202,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS trg_check_blocked_topup ON public.wallet_transactions;
 CREATE TRIGGER trg_check_blocked_topup
@@ -205,7 +210,62 @@ BEFORE INSERT ON public.wallet_transactions
 FOR EACH ROW
 EXECUTE FUNCTION public.check_user_not_blocked_on_topup();
 
--- 6. Actualizar política RLS para wallet_transactions
+-- 6. Trigger para autoasignación de códigos en reposición de stock
+CREATE OR REPLACE FUNCTION public.auto_assign_code_to_pending_order()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_order_id UUID;
+BEGIN
+    IF NEW.is_used = false THEN
+        SELECT id INTO v_order_id
+        FROM public.orders
+        WHERE product_id::TEXT = NEW.product_id::TEXT
+          AND status IN ('Pendiente', 'En proceso')
+          AND (redemption_code IS NULL OR redemption_code = '')
+        ORDER BY created_at ASC
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED;
+
+        IF v_order_id IS NOT NULL THEN
+            UPDATE public.orders
+            SET status = 'Completado',
+                redemption_code = NEW.code
+            WHERE id = v_order_id;
+
+            INSERT INTO public.order_status_history (order_id, status, note)
+            VALUES (
+                v_order_id, 
+                'Completado', 
+                'Código asignado automáticamente tras reposición de stock.'
+            );
+
+            UPDATE public.redemption_codes
+            SET is_used = true,
+                order_id = v_order_id,
+                used_at = NOW()
+            WHERE id = NEW.id;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+DROP TRIGGER IF EXISTS trg_auto_assign_code ON public.redemption_codes;
+CREATE TRIGGER trg_auto_assign_code
+AFTER INSERT ON public.redemption_codes
+FOR EACH ROW
+EXECUTE FUNCTION public.auto_assign_code_to_pending_order();
+
+-- 7. OTORGAR PERMISOS A TODOS LOS ROLES
+GRANT EXECUTE ON FUNCTION public.purchase_with_wallet_v2(TEXT, TEXT, TEXT, TEXT, INTEGER, NUMERIC) TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.get_wallet_balance(UUID) TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.get_all_users_with_balance() TO authenticated, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.toggle_user_blocked_status(UUID, BOOLEAN) TO authenticated, anon, service_role;
+
+-- 8. Actualizar políticas RLS
+ALTER TABLE public.wallet_transactions ENABLE ROW LEVEL SECURITY;
+
 DROP POLICY IF EXISTS "Users can insert pending top_ups" ON public.wallet_transactions;
 CREATE POLICY "Users can insert pending top_ups"
     ON public.wallet_transactions FOR INSERT
@@ -214,11 +274,19 @@ CREATE POLICY "Users can insert pending top_ups"
         AND type = 'top_up' 
         AND status = 'Pendiente'
         AND amount > 0
-        AND NOT EXISTS (
-            SELECT 1 FROM public.profiles 
-            WHERE id = auth.uid() AND is_blocked = true
+        AND NOT (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_blocked IS TRUE))
+    );
+
+ALTER TABLE public.redemption_codes ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view codes assigned to their orders" ON public.redemption_codes;
+CREATE POLICY "Users can view codes assigned to their orders"
+    ON public.redemption_codes FOR SELECT
+    USING (
+        order_id IN (
+            SELECT id FROM public.orders WHERE user_id = auth.uid()
         )
     );
 
--- 7. Notificar a PostgREST para recargar la caché de esquema al instante
+-- 9. Notificar recarga de esquema a PostgREST
 NOTIFY pgrst, 'reload schema';
