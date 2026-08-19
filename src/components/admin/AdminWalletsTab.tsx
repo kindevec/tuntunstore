@@ -791,12 +791,12 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
               </div>
 
               {/* Account Status & Admin Block Control */}
-              <div className={`p-4 rounded-xl border flex items-center justify-between transition-colors ${
+              <div className={`p-3.5 sm:p-4 rounded-xl border flex items-center justify-between gap-3 transition-colors ${
                 selectedProfileUser.isBlocked 
                   ? 'bg-rose-500/10 border-rose-500/30' 
                   : 'bg-emerald-500/10 border-emerald-500/30'
               }`}>
-                <div className="space-y-1">
+                <div className="space-y-1 min-w-0 flex-1">
                   <p className="text-[10px] text-zinc-400 font-bold uppercase">Control de Estado / Acceso</p>
                   <p className={`text-xs sm:text-sm font-black uppercase flex items-center gap-1.5 ${
                     selectedProfileUser.isBlocked ? 'text-rose-400' : 'text-emerald-400'
@@ -804,16 +804,16 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                     {selectedProfileUser.isBlocked ? (
                       <>
                         <Ban className="w-4 h-4 text-rose-400 shrink-0" />
-                        <span>Cuenta Inhabilitada (Bloqueada)</span>
+                        <span className="truncate">Cuenta Inhabilitada</span>
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>Cuenta Activa (Desbloqueada)</span>
+                        <span className="truncate">Cuenta Activa</span>
                       </>
                     )}
                   </p>
-                  <p className="text-[10px] text-zinc-400 max-w-[220px] sm:max-w-xs leading-tight">
+                  <p className="text-[10px] text-zinc-400 leading-tight">
                     {selectedProfileUser.isBlocked 
                       ? 'Este usuario no puede realizar compras ni recargas de saldo.' 
                       : 'El usuario tiene acceso normal a recargar saldo y comprar productos.'}
