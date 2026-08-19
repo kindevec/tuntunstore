@@ -57,7 +57,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
 
   useEffect(() => {
     fetchPaginatedUsers(page, debouncedSearchQuery);
-  }, [page, debouncedSearchQuery]);
+  }, [page, debouncedSearchQuery, registeredUsers]);
 
   const fetchPaginatedUsers = async (pageNum: number, search: string) => {
     setLoadingUsers(true);

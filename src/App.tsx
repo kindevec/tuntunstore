@@ -181,7 +181,28 @@ export default function App() {
         table: 'profiles'
       }, (payload) => {
         const newProfile = payload.new as any;
-        if (currentUser && newProfile && newProfile.id === currentUser.uid) {
+        const oldProfile = payload.old as any;
+
+        if (currentUser && (newProfile?.id === currentUser.uid || oldProfile?.id === currentUser.uid)) {
+          if (newProfile && typeof newProfile.is_blocked === 'boolean') {
+            const wasBlocked = !!currentUser.isBlocked;
+            const nowBlocked = !!newProfile.is_blocked;
+            if (!wasBlocked && nowBlocked) {
+              showToast('⚠️ Tu cuenta ha sido inhabilitada por la administración.');
+            } else if (wasBlocked && !nowBlocked) {
+              showToast('✅ Tu cuenta ha sido reactivada por la administración.');
+            }
+            updateCurrentActiveUser({
+              ...currentUser,
+              isBlocked: nowBlocked,
+              role: newProfile.role || currentUser.role,
+              name: newProfile.name || currentUser.name,
+              gamerTag: newProfile.gamer_tag !== undefined ? newProfile.gamer_tag : currentUser.gamerTag,
+              playerIdDefault: newProfile.player_id_default !== undefined ? newProfile.player_id_default : currentUser.playerIdDefault,
+              phone: newProfile.phone !== undefined ? newProfile.phone : currentUser.phone,
+              preferredBank: newProfile.preferred_bank !== undefined ? newProfile.preferred_bank : currentUser.preferredBank,
+            });
+          }
           fetchUserProfile(currentUser.uid);
         }
         if (currentUser?.role === 'admin') {
