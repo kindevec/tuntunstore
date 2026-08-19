@@ -1,0 +1,5 @@
+﻿User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://tuntunstore-ec.web.app/sitemap.xml
