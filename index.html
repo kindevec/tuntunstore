@@ -6,6 +6,9 @@
     <link rel="icon" type="image/webp" href="/logo-transparent.webp" />
     <title>TunTun Store | Recargas de Diamantes Free Fire en Ecuador</title>
 
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://tuntunstore-ec.web.app/" />
+
     <!-- SEO Básico -->
     <meta name="description" content="TunTun Store - Tu plataforma de confianza en Ecuador para recargas de diamantes Free Fire, pases de batalla, membresías y tarjetas. Entrega rápida, métodos de pago locales y 100% seguro." />
     <meta name="keywords" content="recargas free fire, diamantes free fire, recargas ecuador, pases free fire, membresias free fire, tuntun store, tienda gaming ecuador, recargar diamantes id, deuna, pichincha" />
@@ -16,9 +19,10 @@
     <!-- Open Graph / Redes Sociales (WhatsApp, Facebook, Instagram) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TunTun Store" />
+    <meta property="og:url" content="https://tuntunstore-ec.web.app/" />
     <meta property="og:title" content="TunTun Store | Recargas de Diamantes Free Fire" />
     <meta property="og:description" content="Recargas de diamantes, pases y membresías para Free Fire con entrega rápida en Ecuador. Pagos seguros por transferencia y depósito." />
-    <meta property="og:image" content="/logo.webp" />
+    <meta property="og:image" content="https://tuntunstore-ec.web.app/logo.webp" />
     <meta property="og:image:alt" content="TunTun Store Logo" />
     <meta property="og:locale" content="es_EC" />
 
@@ -26,34 +30,52 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="TunTun Store | Recargas de Diamantes Free Fire" />
     <meta name="twitter:description" content="Recargas de diamantes, pases y membresías para Free Fire con entrega inmediata en Ecuador. Pagos 100% seguros." />
-    <meta name="twitter:image" content="/logo.webp" />
+    <meta name="twitter:image" content="https://tuntunstore-ec.web.app/logo.webp" />
 
-    <!-- Datos Estructurados Schema.org / JSON-LD -->
+    <!-- Datos Estructurados Schema.org / JSON-LD para Google Search & Site Name -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "OnlineStore",
-        "name": "TunTun Store",
-        "alternateName": "TunTunStore EC",
-        "description": "Tienda en línea especializada en recargas de diamantes, pases y membresías para Free Fire en Ecuador con entrega rápida y segura.",
-        "image": "/logo.webp",
-        "logo": "/logo-transparent.webp",
-        "priceRange": "$",
-        "currenciesAccepted": "USD",
-        "paymentAccepted": "Transferencia Bancaria, Banco Pichincha, Banco Guayaquil, DeUna",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "EC"
-        },
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": "+593968729952",
-          "contactType": "customer service",
-          "availableLanguage": "Spanish"
-        },
-        "sameAs": [
-          "https://wa.me/593968729952",
-          "https://tiktok.com/@tuntunstore1"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://tuntunstore-ec.web.app/#website",
+            "name": "TunTun Store",
+            "alternateName": [
+              "Tun Tun Store",
+              "TunTunStore",
+              "TunTunStore EC"
+            ],
+            "url": "https://tuntunstore-ec.web.app/",
+            "inLanguage": "es-EC"
+          },
+          {
+            "@type": "OnlineStore",
+            "@id": "https://tuntunstore-ec.web.app/#store",
+            "name": "TunTun Store",
+            "alternateName": "TunTunStore EC",
+            "description": "Tienda en línea especializada en recargas de diamantes, pases y membresías para Free Fire en Ecuador con entrega rápida y segura.",
+            "url": "https://tuntunstore-ec.web.app/",
+            "image": "https://tuntunstore-ec.web.app/logo.webp",
+            "logo": "https://tuntunstore-ec.web.app/logo-transparent.webp",
+            "priceRange": "$",
+            "currenciesAccepted": "USD",
+            "paymentAccepted": "Transferencia Bancaria, Banco Pichincha, Banco Guayaquil, DeUna",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "EC"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+593968729952",
+              "contactType": "customer service",
+              "availableLanguage": "Spanish"
+            },
+            "sameAs": [
+              "https://wa.me/593968729952",
+              "https://tiktok.com/@tuntunstore1"
+            ]
+          }
         ]
       }
     </script>

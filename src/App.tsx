@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product, BankAccount, Order, UserProfile, OrderStatus, ProductCategory, HeroSlide } from './types';
 import { supabase } from './supabaseClient';
-import { convertImageToWebp } from './utils/imageOptimization';
+import { convertImageToWebp, resizeImageForProcessing } from './utils/imageOptimization';
 
 import { Header } from './components/Header';
 import { HeroBanner } from './components/HeroBanner';
@@ -664,184 +664,236 @@ export default function App() {
     
     if (receiptFile) {
       showToast('Analizando comprobante por seguridad...');
+
+      // --- PASO 0: Redimensionar imagen para evitar colapso de memoria en celulares ---
+      let processableFile: File;
+      try {
+        processableFile = await resizeImageForProcessing(receiptFile, 1200);
+      } catch {
+        processableFile = receiptFile; // Fallback seguro: usar original
+      }
+
       try {
         // 1. Calculate SHA-256 Hash
-        const arrayBuffer = await receiptFile.arrayBuffer();
-        const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        receiptHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        try {
+          const arrayBuffer = await processableFile.arrayBuffer();
+          const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          receiptHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-        // 2. Check for duplicate hash
-        const { data: duplicateCheck } = await supabase
-          .from('wallet_transactions')
-          .select('id')
-          .eq('receipt_hash', receiptHash)
-          .limit(1);
+          // 2. Check for duplicate hash
+          const { data: duplicateCheck } = await supabase
+            .from('wallet_transactions')
+            .select('id')
+            .eq('receipt_hash', receiptHash)
+            .limit(1);
 
-        if (duplicateCheck && duplicateCheck.length > 0) {
-          verificationWarnings.push('⚠️ Imagen duplicada: este comprobante ya fue subido previamente.');
+          if (duplicateCheck && duplicateCheck.length > 0) {
+            verificationWarnings.push('⚠️ Imagen duplicada: este comprobante ya fue subido previamente.');
+          }
+        } catch (hashErr) {
+          console.warn('Hash SHA-256 omitido por contexto del navegador:', hashErr);
         }
 
-        // 3. OCR Processing with Tesseract
-        const Tesseract = (await import('tesseract.js')).default;
-        const result = await Tesseract.recognize(receiptFile, 'spa');
-        const text = result.data.text;
+        // 3. OCR Processing with Tesseract - CON TIMEOUT DE SEGURIDAD
+        // Si el OCR no responde en 4 segundos (red lenta, celular antiguo),
+        // se omite y el comprobante pasa a revisión manual del admin.
+        try {
+          const ocrTimeoutPromise = new Promise<null>((_resolve, reject) => {
+            setTimeout(() => reject(new Error('OCR_TIMEOUT')), 4000);
+          });
+
+          const ocrProcessPromise = (async () => {
+            const Tesseract = (await import('tesseract.js')).default;
+            const result = await Tesseract.recognize(processableFile, 'spa');
+            return result.data.text;
+          })();
+
+          const text = (await Promise.race([ocrProcessPromise, ocrTimeoutPromise])) as string;
         
-        // 4. Validate Date (Super Forgiving for OCR, allows up to 3 days ago)
-        const generateDateStrings = (date: Date) => {
-          const d = date.getDate().toString().padStart(2, '0');
-          const d_single = date.getDate().toString();
-          const m = (date.getMonth() + 1).toString().padStart(2, '0');
-          const m_single = (date.getMonth() + 1).toString();
-          const y = date.getFullYear().toString();
-          const shortY = y.substring(2);
-          
-          const shortM = date.toLocaleString('es', {month:'short'}).substring(0,3).toLowerCase().replace(/\./g, '');
-          const longM = date.toLocaleString('es', {month:'long'}).toLowerCase();
-          const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-          const shortMonth = monthNames[date.getMonth()];
-          
-          return {
-            strings: [
-              `${d}/${m}/${y}`, `${d}-${m}-${y}`, `${y}-${m}-${d}`, 
-              `${d}/${m}/${shortY}`, `${d}-${m}-${shortY}`,
-              `${d_single}/${m_single}/${y}`, `${d_single}-${m_single}-${y}`,
-              `${d_single}/${m_single}/${shortY}`, `${d_single}-${m_single}-${shortY}`,
-              `${d} ${shortMonth} ${y}`, `${d} ${shortMonth} ${shortY}`,
-              `${d_single} ${shortMonth} ${y}`, `${d_single} ${shortMonth} ${shortY}`,
-              `${d} de ${longM} de ${y}`, `${d} ${longM} ${y}`,
-              `${d}${m}${y}`, `${d}${m}${shortY}`
-            ],
-            d, d_single, m, m_single, y, shortY, shortMonth, longM
+          // 4. Validate Date (Super Forgiving for OCR, allows up to 3 days ago)
+          const generateDateStrings = (date: Date) => {
+            const d = date.getDate().toString().padStart(2, '0');
+            const d_single = date.getDate().toString();
+            const m = (date.getMonth() + 1).toString().padStart(2, '0');
+            const m_single = (date.getMonth() + 1).toString();
+            const y = date.getFullYear().toString();
+            const shortY = y.substring(2);
+            
+            const shortM = date.toLocaleString('es', {month:'short'}).substring(0,3).toLowerCase().replace(/\./g, '');
+            const longM = date.toLocaleString('es', {month:'long'}).toLowerCase();
+            const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            const shortMonth = monthNames[date.getMonth()];
+            
+            return {
+              strings: [
+                `${d}/${m}/${y}`, `${d}-${m}-${y}`, `${y}-${m}-${d}`, 
+                `${d}/${m}/${shortY}`, `${d}-${m}-${shortY}`,
+                `${d_single}/${m_single}/${y}`, `${d_single}-${m_single}-${y}`,
+                `${d_single}/${m_single}/${shortY}`, `${d_single}-${m_single}-${shortY}`,
+                `${d} ${shortMonth} ${y}`, `${d} ${shortMonth} ${shortY}`,
+                `${d_single} ${shortMonth} ${y}`, `${d_single} ${shortMonth} ${shortY}`,
+                `${d} de ${longM} de ${y}`, `${d} ${longM} ${y}`,
+                `${d}${m}${y}`, `${d}${m}${shortY}`
+              ],
+              d, d_single, m, m_single, y, shortY, shortMonth, longM
+            };
           };
-        };
 
-        const today = new Date();
-        const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-        const twoDaysAgo = new Date(today); twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-        
-        const datesToCheck = [today, yesterday, twoDaysAgo].map(generateDateStrings);
+          const today = new Date();
+          const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+          const twoDaysAgo = new Date(today); twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+          
+          const datesToCheck = [today, yesterday, twoDaysAgo].map(generateDateStrings);
 
-        // Clean text to handle common OCR mistakes
-        let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
-        cleanText = cleanText.replace(/o/g, '0'); // Often '0' is read as 'O'
-        cleanText = cleanText.replace(/\|/g, '1').replace(/l/g, '1'); // '1' read as 'l' or '|'
+          // Clean text to handle common OCR mistakes
+          let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+          cleanText = cleanText.replace(/o/g, '0'); // Often '0' is read as 'O'
+          cleanText = cleanText.replace(/\|/g, '1').replace(/l/g, '1'); // '1' read as 'l' or '|'
 
-        let isValidDate = false;
-        let matchedDateLabel = '';
-        
-        for (let i = 0; i < datesToCheck.length; i++) {
-           const dateObj = datesToCheck[i];
-           if (isValidDate) break;
-           
-           for (const dateStr of dateObj.strings) {
-             const flexibleStr = dateStr.replace(/[\/\-]/g, ' ?[\\/\\- ] ?'); 
-             const regex = new RegExp(flexibleStr, 'i');
-             if (regex.test(cleanText)) {
-               isValidDate = true;
-               matchedDateLabel = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : 'Hace 2 días';
-               break;
+          let isValidDate = false;
+          let matchedDateLabel = '';
+          
+          for (let i = 0; i < datesToCheck.length; i++) {
+             const dateObj = datesToCheck[i];
+             if (isValidDate) break;
+             
+             for (const dateStr of dateObj.strings) {
+               const flexibleStr = dateStr.replace(/[\/\-]/g, ' ?[\\\\/\\\\- ] ?'); 
+               const regex = new RegExp(flexibleStr, 'i');
+               if (regex.test(cleanText)) {
+                 isValidDate = true;
+                 matchedDateLabel = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : 'Hace 2 días';
+                 break;
+               }
              }
-           }
-           
-           if (!isValidDate) {
-             // Fallback parts match
-             if (
-               (cleanText.includes(dateObj.d) || cleanText.includes(dateObj.d_single)) && 
-               (cleanText.includes(dateObj.m) || cleanText.includes(dateObj.shortMonth) || cleanText.includes(dateObj.longM)) && 
-               (cleanText.includes(dateObj.y) || cleanText.includes(` ${dateObj.shortY} `) || cleanText.includes(` ${dateObj.shortY}`) || cleanText.includes(`${dateObj.shortY} `))
-             ) {
-               isValidDate = true;
-               matchedDateLabel = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : 'Hace 2 días';
+             
+             if (!isValidDate) {
+               // Fallback parts match
+               if (
+                 (cleanText.includes(dateObj.d) || cleanText.includes(dateObj.d_single)) && 
+                 (cleanText.includes(dateObj.m) || cleanText.includes(dateObj.shortMonth) || cleanText.includes(dateObj.longM)) && 
+                 (cleanText.includes(dateObj.y) || cleanText.includes(` ${dateObj.shortY} `) || cleanText.includes(` ${dateObj.shortY}`) || cleanText.includes(`${dateObj.shortY} `))
+               ) {
+                 isValidDate = true;
+                 matchedDateLabel = i === 0 ? 'Hoy' : i === 1 ? 'Ayer' : 'Hace 2 días';
+               }
              }
-           }
-        }
-        
-        if (isValidDate && matchedDateLabel !== 'Hoy') {
-           verificationWarnings.push(`⚠️ Fecha antigua: El comprobante detectado es de ${matchedDateLabel}.`);
-        }
+          }
+          
+          if (isValidDate && matchedDateLabel !== 'Hoy') {
+             verificationWarnings.push(`⚠️ Fecha antigua: El comprobante detectado es de ${matchedDateLabel}.`);
+          }
 
-        if (!isValidDate) {
-           // Let's see if we found ANY date to give a better error message
-           const anyDateRegex = /\b(\d{1,2}) ?[\/\- de]* ?([a-z]{3,9}|\d{1,2}) ?[\/\- del]* ?(\d{2,4})\b/g;
-           const matches = [...cleanText.matchAll(anyDateRegex)];
-           
-           if (matches.length === 0) {
-              verificationWarnings.push('⚠️ Fecha no detectada: El OCR no pudo encontrar ninguna fecha clara en el comprobante.');
-           } else {
-              const detectedDate = matches[0][0].trim();
-              verificationWarnings.push(`⚠️ Fecha muy antigua: Se detectó "${detectedDate}" pero está fuera de los 3 días válidos.`);
-           }
-        }
-        
-        // Validate if it is actually a receipt
-        const receiptKeywords = ['transferencia', 'depósito', 'deposito', 'comprobante', 'pago', 'monto', 'banco', 'cuenta', 'referencia', 'documento', 'saldo', 'exitoso', 'aprobado', 'detalles'];
-        const isReceipt = receiptKeywords.some(kw => cleanText.includes(kw));
-        
-        if (!isReceipt) {
-           verificationWarnings.push('⚠️ Imagen Sospechosa: El texto no contiene palabras típicas de un comprobante bancario (pago, transferencia, etc.).');
-        }
+          if (!isValidDate) {
+             // Let's see if we found ANY date to give a better error message
+             const anyDateRegex = /\b(\d{1,2}) ?[\/\- de]* ?([a-z]{3,9}|\d{1,2}) ?[\/\- del]* ?(\d{2,4})\b/g;
+             const matches = [...cleanText.matchAll(anyDateRegex)];
+             
+             if (matches.length === 0) {
+                verificationWarnings.push('⚠️ Fecha no detectada: El OCR no pudo encontrar ninguna fecha clara en el comprobante.');
+             } else {
+                const detectedDate = matches[0][0].trim();
+                verificationWarnings.push(`⚠️ Fecha muy antigua: Se detectó "${detectedDate}" pero está fuera de los 3 días válidos.`);
+             }
+          }
+          
+          // Validate if it is actually a receipt
+          const receiptKeywords = ['transferencia', 'depósito', 'deposito', 'comprobante', 'pago', 'monto', 'banco', 'cuenta', 'referencia', 'documento', 'saldo', 'exitoso', 'aprobado', 'detalles'];
+          const isReceipt = receiptKeywords.some(kw => cleanText.includes(kw));
+          
+          if (!isReceipt) {
+             verificationWarnings.push('⚠️ Imagen Sospechosa: El texto no contiene palabras típicas de un comprobante bancario (pago, transferencia, etc.).');
+          }
 
-        // 5. Amount Extraction OCR Check (Monto transferido vs Monto solicitado)
-        let detectedAmount: number | null = null;
-        const textUpper = text.toUpperCase();
-        
-        const currencyMatches = [...textUpper.matchAll(/(?:MONTO|VALOR|TOTAL|IMPORTE|RECIBIDO|USD|\$)\s*[:=]?\s*\$?\s*(\d+[\.\,]\d{2})\b/g)];
-        const dollarMatches = [...textUpper.matchAll(/\$\s*(\d+[\.\,]\d{2})\b/g)];
-        const allMatches = [...currencyMatches, ...dollarMatches];
-        
-        const extractedAmounts: number[] = [];
-        for (const m of allMatches) {
-          if (m[1]) {
-            const num = parseFloat(m[1].replace(',', '.'));
-            if (!isNaN(num) && num > 0 && num < 5000) {
-              extractedAmounts.push(num);
+          // 5. Amount Extraction OCR Check (Monto transferido vs Monto solicitado)
+          let detectedAmount: number | null = null;
+          const textUpper = text.toUpperCase();
+          
+          const currencyMatches = [...textUpper.matchAll(/(?:MONTO|VALOR|TOTAL|IMPORTE|RECIBIDO|USD|\$)\s*[:=]?\s*\$?\s*(\d+[\.\\,]\d{2})\b/g)];
+          const dollarMatches = [...textUpper.matchAll(/\$\s*(\d+[\.\\,]\d{2})\b/g)];
+          const allMatches = [...currencyMatches, ...dollarMatches];
+          
+          const extractedAmounts: number[] = [];
+          for (const m of allMatches) {
+            if (m[1]) {
+              const num = parseFloat(m[1].replace(',', '.'));
+              if (!isNaN(num) && num > 0 && num < 5000) {
+                extractedAmounts.push(num);
+              }
             }
           }
-        }
-        
-        if (extractedAmounts.length > 0) {
-          const exactMatch = extractedAmounts.find(v => Math.abs(v - amount) < 0.01);
-          if (exactMatch) {
-            detectedAmount = exactMatch;
-          } else {
-            detectedAmount = extractedAmounts[0];
-            verificationWarnings.push(
-              `⚠️ Diferencia de Monto: El usuario solicitó $${amount.toFixed(2)} USD pero el comprobante muestra $${detectedAmount.toFixed(2)} USD.`
-            );
-          }
-        } else {
-          const anyDecimals = [...textUpper.matchAll(/\b(\d+[\.\,]\d{2})\b/g)]
-            .map(m => parseFloat(m[1].replace(',', '.')))
-            .filter(n => n > 0 && n < 5000);
           
-          const exactMatch = anyDecimals.find(v => Math.abs(v - amount) < 0.01);
-          if (!exactMatch && anyDecimals.length > 0) {
-            verificationWarnings.push(
-              `⚠️ Posible Diferencia de Monto: El usuario solicitó $${amount.toFixed(2)} USD pero el comprobante contiene cifras como $${anyDecimals[0].toFixed(2)} USD.`
-            );
+          if (extractedAmounts.length > 0) {
+            const exactMatch = extractedAmounts.find(v => Math.abs(v - amount) < 0.01);
+            if (exactMatch) {
+              detectedAmount = exactMatch;
+            } else {
+              detectedAmount = extractedAmounts[0];
+              verificationWarnings.push(
+                `⚠️ Diferencia de Monto: El usuario solicitó $${amount.toFixed(2)} USD pero el comprobante muestra $${detectedAmount.toFixed(2)} USD.`
+              );
+            }
+          } else {
+            const anyDecimals = [...textUpper.matchAll(/\b(\d+[\.\\,]\d{2})\b/g)]
+              .map(m => parseFloat(m[1].replace(',', '.')))
+              .filter(n => n > 0 && n < 5000);
+            
+            const exactMatch = anyDecimals.find(v => Math.abs(v - amount) < 0.01);
+            if (!exactMatch && anyDecimals.length > 0) {
+              verificationWarnings.push(
+                `⚠️ Posible Diferencia de Monto: El usuario solicitó $${amount.toFixed(2)} USD pero el comprobante contiene cifras como $${anyDecimals[0].toFixed(2)} USD.`
+              );
+            }
+          }
+          
+        } catch (ocrError: any) {
+          // Si el OCR hizo timeout o falló por cualquier razón, NO bloqueamos la subida.
+          // El comprobante se sube de todas formas y queda para revisión manual del admin.
+          console.warn('OCR omitido (timeout o error):', ocrError?.message || ocrError);
+          if (ocrError?.message === 'OCR_TIMEOUT') {
+            verificationWarnings.push('⚠️ Verificación automática omitida: El análisis OCR tardó demasiado. El comprobante será revisado manualmente por el administrador.');
+          } else {
+            verificationWarnings.push('⚠️ Error OCR: No se pudo analizar automáticamente el texto de la imagen.');
           }
         }
         
       } catch (error) {
-        console.error('OCR Error:', error);
-        verificationWarnings.push('⚠️ Error OCR: No se pudo analizar automáticamente el texto de la imagen.');
+        console.error('Error en análisis de comprobante:', error);
+        verificationWarnings.push('⚠️ Error en pre-análisis: El comprobante será revisado manualmente por el administrador.');
       }
 
       autoVerified = verificationWarnings.length === 0;
 
-      // Optimizar comprobante a WebP para reducir hasta un 80% de almacenamiento
-      const optimizedReceipt = await convertImageToWebp(receiptFile, 0.8);
-      const fileExt = optimizedReceipt.name.split('.').pop() || 'webp';
-      const filePath = `${currentUser.uid}/${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('receipts')
-        .upload(filePath, optimizedReceipt, { contentType: 'image/webp' });
-      if (uploadError) {
-        showToast(`❌ Error al subir comprobante: ${uploadError.message}`);
+      // --- SUBIDA DEL COMPROBANTE (siempre se ejecuta, protegida con try/catch) ---
+      try {
+        // Optimizar comprobante a WebP para reducir almacenamiento
+        let fileToUpload: File;
+        let contentType = 'image/webp';
+        try {
+          fileToUpload = await convertImageToWebp(processableFile, 0.8);
+        } catch {
+          // Si la conversión WebP falla (formatos HEIC, imágenes corruptas), subir original
+          console.warn('Conversión WebP falló, subiendo imagen original.');
+          fileToUpload = processableFile;
+          contentType = processableFile.type || 'image/jpeg';
+        }
+
+        const fileExt = fileToUpload.name.split('.').pop() || 'webp';
+        const filePath = `${currentUser.uid}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(filePath, fileToUpload, { contentType });
+        if (uploadError) {
+          showToast(`❌ Error al subir comprobante: ${uploadError.message}`);
+          return;
+        }
+        uploadedReceiptPath = filePath;
+      } catch (uploadCatchError: any) {
+        showToast('❌ Error de conexión al subir imagen. Revisa tu señal e inténtalo de nuevo.');
+        console.error('Upload catch error:', uploadCatchError);
         return;
       }
-      uploadedReceiptPath = filePath;
     }
 
     const { error } = await supabase.from('wallet_transactions').insert({
@@ -859,7 +911,7 @@ export default function App() {
       showToast(`❌ Error al registrar recarga: ${error.message}`);
       return;
     }
-    showToast(`🎉 ¡Solicitud de recarga enviada! Pendiente de verificación.`);
+    showToast('🎉 ¡Solicitud de recarga enviada! Pendiente de verificación.');
     fetchUserProfile(currentUser.uid); // Refresh balance/history
   };
 
