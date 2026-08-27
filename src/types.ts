@@ -104,3 +104,17 @@ export interface HeroSlide {
   order_index: number;
   active: boolean;
 }
+
+// ========== PayPhone Payment Gateway Types ==========
+
+export interface PayPhoneTransaction {
+  id: string;
+  client_transaction_id: string;
+  amount_cents: number;
+  status: 'pending' | 'prepared' | 'confirmed' | 'approved' | 'failed' | 'cancelled' | 'reversed';
+  card_type?: string;
+  last_four_digits?: string;
+  authorization_code?: string;
+  error_message?: string;
+  created_at: string;
+}

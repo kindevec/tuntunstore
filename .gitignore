@@ -1,9 +1,30 @@
+# Dependencies & Builds
 node_modules/
 build/
 dist/
 coverage/
+
+# OS & Logs
 .DS_Store
+Thumbs.db
 *.log
+*.log.*
+
+# Environment Secrets & Credentials
 .env*
 !.env.example
+*.pem
+*.key
+*.p12
+*.crt
+*.pdf
 client_secret_*.json
+serviceAccountKey*.json
+firebase-adminsdk*.json
+
+# Supabase Secrets
+supabase/functions/.env
+supabase/.temp/
+
+# Firebase & Deployment Caches
+.firebase/

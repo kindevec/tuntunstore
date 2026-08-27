@@ -6,6 +6,11 @@
     <link rel="icon" type="image/webp" href="/logo-transparent.webp" />
     <title>TunTun Store | Recargas de Diamantes Free Fire en Ecuador</title>
 
+    <!-- Preconnect a servicios críticos -->
+    <link rel="preconnect" href="https://tkfpmmjnyzmulxkmtesf.supabase.co" crossorigin />
+    <link rel="preconnect" href="https://cdn.payphonetodoesposible.com" crossorigin />
+    <link rel="dns-prefetch" href="https://pay.payphonetodoesposible.com" />
+
     <!-- Canonical URL -->
     <link rel="canonical" href="https://tuntunstore-ec.web.app/" />
 
@@ -79,6 +84,65 @@
         ]
       }
     </script>
+    <meta name="referrer" content="origin-when-cross-origin" />
+
+    <!-- CDN Oficial PayPhone Payment Box v2.0 -->
+    <link rel="stylesheet" href="https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box.css" />
+    <script type="module" src="https://cdn.payphonetodoesposible.com/box/v2.0/payphone-payment-box.js"></script>
+
+    <style>
+      /* Neutraliza estilos invasivos de PayPhone sobre el root de la aplicación */
+      html, :root {
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+      }
+      #root {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: 100vh !important;
+      }
+      /* Estilos fluidos y limpios para la pasarela PayPhone (Móvil y PC) */
+      #pp-button,
+      #pp-button-mobile {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #pp-button-desktop {
+        width: 100% !important;
+        max-width: 410px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 0 !important;
+      }
+      #pp-button iframe,
+      #pp-button-desktop iframe,
+      #pp-button-desktop .payphone-box,
+      #pp-button-desktop .pp-payment-box,
+      #pp-button-desktop .payphone.btn-container,
+      .payphone-box,
+      .pp-payment-box,
+      .payphone.btn-container {
+        width: 100% !important;
+        max-width: 410px !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+      #pp-button-mobile iframe {
+        max-width: 440px !important;
+        max-height: calc(100dvh - 56px) !important;
+        overflow: hidden !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

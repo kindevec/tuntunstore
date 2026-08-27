@@ -8,14 +8,17 @@ import { HeroBanner } from './components/HeroBanner';
 import { ProductCatalog } from './components/ProductCatalog';
 import { OrderModal } from './components/OrderModal';
 import { MyOrders } from './components/MyOrders';
-import { AdminPanel } from './components/AdminPanel';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { BottomNavigation } from './components/BottomNavigation';
-import { LoginPage } from './components/LoginPage';
 import { ProfileView } from './components/ProfileView';
 import { WalletView } from './components/WalletView';
 import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
+
+// 🚀 Lazy-Loaded Components: Se descargan bajo demanda solo cuando el usuario accede a esa vista
+const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const PayPhoneConfirmPage = React.lazy(() => import('./components/PayPhoneConfirmPage').then(m => ({ default: m.PayPhoneConfirmPage })));
+const LoginPage = React.lazy(() => import('./components/LoginPage').then(m => ({ default: m.LoginPage })));
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
@@ -36,12 +39,13 @@ export default function App() {
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
 
   const [loginRedirectReason, setLoginRedirectReason] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login' | 'payphone-confirm'>('home');
   const [adminSubTab, setAdminSubTab] = useState<'orders' | 'catalog' | 'wallets' | 'codes' | 'banners'>('orders');
   const [selectedCatalogCategory, setSelectedCatalogCategory] = useState<ProductCategory | 'all'>('all');
   const [selectedProductForOrder, setSelectedProductForOrder] = useState<Product | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [pendingTopUps, setPendingTopUps] = useState<any[]>([]);
+  const [isPayPhoneGatewayActive, setIsPayPhoneGatewayActive] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -103,6 +107,8 @@ export default function App() {
         .select('*')
         .eq('type', 'top_up')
         .eq('status', 'Pendiente')
+        .order('created_at', { ascending: false })
+        .limit(100)
         .then(({ data }) => {
           if (data) setPendingTopUps(data);
         });
@@ -245,12 +251,6 @@ export default function App() {
     };
   }, [activeTab]);
 
-  useEffect(() => {
-    if (activeTab === 'home') {
-      fetchInitialData();
-    }
-  }, [activeTab]);
-
   const fetchInitialData = async () => {
     const { data: slidesData } = await supabase.from('hero_slides').select('*').eq('active', true).order('order_index', { ascending: true });
     if (slidesData) {
@@ -315,7 +315,8 @@ export default function App() {
     let query = supabase
       .from('orders')
       .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(userRole === 'admin' ? 200 : 50);
       
     if (userRole !== 'admin') {
       query = query.eq('user_id', userId);
@@ -355,7 +356,10 @@ export default function App() {
   };
   
   const fetchAllUsersForAdmin = async () => {
-    const { data } = await supabase.rpc('get_all_users_with_balance');
+    const { data } = await supabase
+      .rpc('get_all_users_with_balance')
+      .limit(200);
+
     if (data) {
       setRegisteredUsers(data.map((p: any) => ({
         uid: p.id,
@@ -433,9 +437,23 @@ export default function App() {
         return;
       }
 
-      const parts = hash.split('/');
+      const cleanHash = hash.split('?')[0];
+      const parts = cleanHash.split('/');
       let tab = (parts[0] || 'home') as any;
       let subTab = parts[1] as any;
+
+      // Handle PayPhone return query params (?id=...&clientTransactionId=...)
+      const searchParams = new URLSearchParams(window.location.search);
+      const isPayPhoneReturn = searchParams.has('id') && (searchParams.has('clientTransactionId') || searchParams.has('clientTxId'));
+
+      if (isPayPhoneReturn) {
+        tab = 'payphone-confirm';
+      }
+
+      // Handle PayPhone confirm route in hash (#payphone/confirm or #payphone-confirm)
+      if ((tab === 'payphone' && (subTab === 'confirm' || (subTab && subTab.startsWith('confirm')))) || tab === 'payphone-confirm') {
+        tab = 'payphone-confirm';
+      }
 
       if (currentUser?.role === 'admin') {
         if (tab === 'orders') { tab = 'admin'; subTab = 'orders'; window.history.replaceState(null, '', '#admin/orders'); }
@@ -470,10 +488,11 @@ export default function App() {
   };
 
   const handleLoginGoogle = async () => {
+    const currentOrigin = window.location.origin;
     await supabase.auth.signInWithOAuth({ 
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: `${currentOrigin}/`
       }
     });
   };
@@ -498,7 +517,10 @@ export default function App() {
     if (error) showToast(`❌ Error al guardar perfil: ${error.message}`);
     else showToast('✨ Perfil guardado exitosamente');
   };
-  const handleSelectTab = (tab: string, subTab?: string) => window.location.hash = subTab ? `#${tab}/${subTab}` : `#${tab}`;
+  const handleSelectTab = (tab: string, subTab?: string) => {
+    setIsPayPhoneGatewayActive(false);
+    window.location.hash = subTab ? `#${tab}/${subTab}` : `#${tab}`;
+  };
 
   const handleSelectProductForPurchase = (product: Product) => {
     if (!currentUser) return openLoginWithReason('Para realizar tu compra de diamantes, inicia sesión con Google primero.');
@@ -984,10 +1006,19 @@ export default function App() {
           </div>
         )}
         {activeTab === 'login' && (
-          <LoginPage onLoginGoogle={handleLoginGoogle} onLoginSuccess={() => {}} onRegisterUser={() => {}} redirectReason={loginRedirectReason} onBackToCatalog={() => window.location.hash = '#catalog'} registeredUsers={registeredUsers} />
+          <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+            <LoginPage onLoginGoogle={handleLoginGoogle} onLoginSuccess={() => {}} onRegisterUser={() => {}} redirectReason={loginRedirectReason} onBackToCatalog={() => window.location.hash = '#catalog'} registeredUsers={registeredUsers} />
+          </React.Suspense>
         )}
         {activeTab === 'wallet' && currentUser && (
-          <WalletView currentUser={currentUser} bankAccounts={bankAccounts} walletHistory={walletHistory} onSubmitTopUpOrder={handleSubmitTopUpOrder} onNavigateToCatalog={() => window.location.hash = '#catalog'} />
+          <WalletView 
+            currentUser={currentUser} 
+            bankAccounts={bankAccounts} 
+            walletHistory={walletHistory} 
+            onSubmitTopUpOrder={handleSubmitTopUpOrder} 
+            onNavigateToCatalog={() => window.location.hash = '#catalog'} 
+            onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
+          />
         )}
         {activeTab === 'orders' && (
           <MyOrders orders={orders} currentUserEmail={currentUser?.email} onOpenWhatsAppSupport={(order) => {
@@ -998,28 +1029,34 @@ export default function App() {
             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
           }} />
         )}
+        {activeTab === 'payphone-confirm' && (
+          <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+            <PayPhoneConfirmPage currentUser={currentUser} />
+          </React.Suspense>
+        )}
         {activeTab === 'profile' && currentUser && (
           <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
         )}
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
-          <AdminPanel 
-            orders={orders} 
-            products={products} 
-            registeredUsers={registeredUsers} 
-            activeSubTab={adminSubTab as any} 
-            onSubTabChange={(st) => window.location.hash = `#admin/${st}`} 
-            onUpdateOrderStatus={handleUpdateOrderStatus} 
-            onAddProduct={handleAddProduct} 
-            onUpdateProduct={handleUpdateProduct} 
-            onDeleteProduct={handleDeleteProduct} 
-            pendingTopUps={pendingTopUps} 
-            onUpdateTopUpStatus={handleUpdateTopUpStatus} 
-            onUpdateTopUpAmount={handleUpdateTopUpAmount}
-            onRefreshBanners={fetchInitialData}
-            onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
-              const user = registeredUsers.find(u => u.email === email);
-              if (user) {
-                let adjustment = amount;
+          <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+            <AdminPanel 
+              orders={orders} 
+              products={products} 
+              registeredUsers={registeredUsers} 
+              activeSubTab={adminSubTab as any} 
+              onSubTabChange={(st) => window.location.hash = `#admin/${st}`} 
+              onUpdateOrderStatus={handleUpdateOrderStatus} 
+              onAddProduct={handleAddProduct} 
+              onUpdateProduct={handleUpdateProduct} 
+              onDeleteProduct={handleDeleteProduct} 
+              pendingTopUps={pendingTopUps} 
+              onUpdateTopUpStatus={handleUpdateTopUpStatus} 
+              onUpdateTopUpAmount={handleUpdateTopUpAmount}
+              onRefreshBanners={fetchInitialData}
+              onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
+                const user = registeredUsers.find(u => u.email === email);
+                if (user) {
+                  let adjustment = amount;
                 if (isSetExact) {
                   const { data: balanceData } = await supabase.rpc('get_wallet_balance', { p_user_id: user.uid });
                   const currentBalance = Number(balanceData || 0);
@@ -1045,13 +1082,14 @@ export default function App() {
               }
             }} 
           />
+          </React.Suspense>
         )}
       </main>
       </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
-      {currentUser?.role !== 'admin' && activeTab !== 'login' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login'} />}
-      {activeTab !== 'login' && <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />}
-      {currentUser && activeTab !== 'login' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
+      {currentUser?.role !== 'admin' && activeTab !== 'login' && activeTab !== 'payphone-confirm' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login' && !isPayPhoneGatewayActive} />}
+      {activeTab !== 'login' && activeTab !== 'payphone-confirm' && <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />}
+      {!isPayPhoneGatewayActive && currentUser && activeTab !== 'login' && activeTab !== 'payphone-confirm' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
     </div>
   );
 }

@@ -18,6 +18,25 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      proxy: {
+        '/api/payphone': {
+          target: 'https://pay.payphonetodoesposible.com/api',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/payphone/, ''),
+        },
+      },
+    },
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom'],
+            'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-icons': ['lucide-react'],
+          },
+        },
+      },
     },
   };
 });

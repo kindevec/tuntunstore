@@ -55,9 +55,27 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  const [payphoneStats, setPayphoneStats] = useState<{ totalUSD: number; count: number }>({ totalUSD: 0, count: 0 });
+
   useEffect(() => {
     fetchPaginatedUsers(page, debouncedSearchQuery);
+    fetchPayphoneStats();
   }, [page, debouncedSearchQuery, registeredUsers]);
+
+  const fetchPayphoneStats = async () => {
+    try {
+      const { data } = await supabase
+        .from('payphone_transactions')
+        .select('amount_cents')
+        .eq('status', 'approved');
+      if (data) {
+        const totalUSD = data.reduce((acc: number, row: any) => acc + ((row.amount_cents || 0) / 100), 0);
+        setPayphoneStats({ totalUSD, count: data.length });
+      }
+    } catch (e) {
+      console.warn('Error fetching payphone stats:', e);
+    }
+  };
 
   const fetchPaginatedUsers = async (pageNum: number, search: string) => {
     setLoadingUsers(true);
@@ -233,15 +251,34 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-4 bg-black/60 p-3 rounded-xl border border-amber-500/30 w-full md:w-auto">
-            <div className="p-2.5 rounded-lg bg-amber-400/20 text-amber-400">
-              <Wallet className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            {/* Tarjeta 1: Fondo Billeteras */}
+            <div className="flex items-center gap-3.5 bg-black/60 p-3 rounded-xl border border-amber-500/30 flex-1 md:flex-initial min-w-[170px]">
+              <div className="p-2.5 rounded-lg bg-amber-400/20 text-amber-400 shrink-0">
+                <Wallet className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[10px] text-zinc-400 font-black uppercase">Fondo Billeteras</p>
+                <p className="text-base sm:text-lg font-black text-amber-400">
+                  ${registeredUsers.reduce((sum, u) => sum + (u.walletBalanceUSD || 0), 0).toFixed(2)} USD
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] text-zinc-400 font-black uppercase">Fondo Total en Billeteras</p>
-              <p className="text-lg sm:text-xl font-black text-amber-400">
-                ${registeredUsers.reduce((sum, u) => sum + (u.walletBalanceUSD || 0), 0).toFixed(2)} USD
-              </p>
+
+            {/* Tarjeta 2: Pasarela PayPhone */}
+            <div className="flex items-center gap-3.5 bg-black/60 p-3 rounded-xl border border-orange-500/30 flex-1 md:flex-initial min-w-[190px]">
+              <div className="w-9 h-9 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center p-1 text-orange-400 shrink-0">
+                <img src="/payphone-orange.webp" alt="PayPhone" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[10px] text-orange-400 font-black uppercase tracking-wider">Pasarela PayPhone</p>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                </div>
+                <p className="text-base sm:text-lg font-black text-white">
+                  ${payphoneStats.totalUSD.toFixed(2)} <span className="text-[10px] text-zinc-400 font-bold">({payphoneStats.count} cobros)</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

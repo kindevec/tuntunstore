@@ -444,7 +444,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>Pedidos ({orders.length})</span>
+          <span>Pedidos ({orders.length.toLocaleString()})</span>
         </button>
 
         <button
@@ -456,7 +456,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           }`}
         >
           <DollarSign className="w-4 h-4" />
-          <span>Saldos USD ({registeredUsers.length})</span>
+          <span>Saldos USD ({registeredUsers.length.toLocaleString()})</span>
         </button>
 
         <button
@@ -594,15 +594,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 selectedUserHistory.map((t) => (
                   <div key={t.id} className="bg-black/40 border border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="font-black text-white text-lg">+${t.amount.toFixed(2)} USD</span>
                         {t.status === 'Aprobado' && <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Aprobado</span>}
                         {t.status === 'Rechazado' && <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-rose-500/10 text-rose-400 border border-rose-500/20">Rechazado</span>}
                         {t.status === 'Pendiente' && <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">Pendiente</span>}
+                        {t.admin_note?.includes('PayPhone') && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span> PayPhone
+                          </span>
+                        )}
                       </div>
-                      <div className="text-xs text-zinc-500 space-y-0.5">
+                      <div className="text-xs text-zinc-400 space-y-0.5">
                         <p>{new Date(t.created_at).toLocaleString()}</p>
-                        {t.auto_verified ? (
+                        {t.admin_note?.includes('PayPhone') ? (
+                          <p className="text-orange-300 font-mono text-[11px] flex items-center gap-1.5">
+                            ⚡ <span className="font-bold">{t.admin_note}</span> • Acreditación Automática 24/7
+                          </p>
+                        ) : t.auto_verified ? (
                           <p className="text-emerald-500/80 flex items-center gap-1"><ShieldCheck className="w-3 h-3"/> Verificado por OCR</p>
                         ) : t.verification_warnings && t.verification_warnings.length > 0 ? (
                           <p className="text-rose-400 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Alertas: {t.verification_warnings.length}</p>
