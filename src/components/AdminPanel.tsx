@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Order, OrderStatus, Product, UserProfile, EmailAlertConfig, AdminDashboardStats } from '../types';
+import { supabase } from '../supabaseClient';
 import { DiamondIcon } from './DiamondIcon';
 import { AdminOrdersTab } from './admin/AdminOrdersTab';
 import { AdminCatalogTab } from './admin/AdminCatalogTab';
@@ -112,15 +113,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setIsLoadingHistory(true);
     setSelectedUserHistoryName(userName);
     setSelectedUserHistory([]);
-    const { data } = await supabase
-      .from('wallet_transactions')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('type', 'top_up')
-      .order('created_at', { ascending: false });
-    
-    setSelectedUserHistory(data || []);
-    setIsLoadingHistory(false);
+    try {
+      const { data } = await supabase
+        .from('wallet_transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('type', 'top_up')
+        .order('created_at', { ascending: false });
+      
+      setSelectedUserHistory(data || []);
+    } catch (err) {
+      console.error('Error fetching user history:', err);
+      setSelectedUserHistory([]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
   };
 
   // Catalog CRUD Form state
