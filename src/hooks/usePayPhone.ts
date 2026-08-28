@@ -1,4 +1,4 @@
-﻿import { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { payphoneService, RenderPaymentBoxParams, PayPhoneConfirmResult } from '../services/payphoneService';
 

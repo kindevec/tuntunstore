@@ -134,3 +134,7 @@ BEGIN
     END IF;
 END;
 $$;
+
+-- Permisos de ejecución de la función
+GRANT EXECUTE ON FUNCTION confirm_payphone_payment(TEXT, JSONB) TO anon, authenticated, service_role;
+

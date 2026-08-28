@@ -198,7 +198,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
           containerId: targetContainer,
           total: finalAmount,
           clientTransactionId: clientTxId,
-          reference: `Recarga TunTun Store #${currentUser.name || 'Cliente'}`,
+          reference: `Recarga TunTun Store ${currentUser.name || 'Cliente'}`,
           email: currentUser.email,
           phoneNumber: currentUser.phone || undefined,
         });
@@ -208,7 +208,7 @@ export const WalletView: React.FC<WalletViewProps> = ({
             containerId: isMobileScreen ? 'pp-button-desktop' : 'pp-button-mobile',
             total: finalAmount,
             clientTransactionId: clientTxId,
-            reference: `Recarga TunTun Store #${currentUser.name || 'Cliente'}`,
+            reference: `Recarga TunTun Store ${currentUser.name || 'Cliente'}`,
             email: currentUser.email,
             phoneNumber: currentUser.phone || undefined,
           });

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Wallet, Clock, ShieldCheck, CheckCircle2, Eye, XCircle, History, User, Phone, Mail, Gamepad2, CreditCard, X, Edit3, Zap, Search, AlertTriangle, Ban } from 'lucide-react';
-import { UserProfile } from '../../types';
+import { UserProfile, AdminDashboardStats } from '../../types';
 import { AdminConfirmModal } from './AdminConfirmModal';
 
 export interface AdminWalletsTabProps {
   registeredUsers: UserProfile[];
   pendingTopUps: any[];
+  adminStats?: AdminDashboardStats;
   onUpdateTopUpStatus?: (id: string, status: string) => void;
   onUpdateTopUpAmount?: (id: string, newAmount: number) => void;
   setSelectedReceiptUrl: (url: string) => void;
@@ -16,6 +17,7 @@ export interface AdminWalletsTabProps {
 export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   registeredUsers,
   pendingTopUps,
+  adminStats,
   onUpdateTopUpStatus,
   onUpdateTopUpAmount,
   setSelectedReceiptUrl,
@@ -260,7 +262,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
               <div>
                 <p className="text-[10px] text-zinc-400 font-black uppercase">Fondo Billeteras</p>
                 <p className="text-base sm:text-lg font-black text-amber-400">
-                  ${registeredUsers.reduce((sum, u) => sum + (u.walletBalanceUSD || 0), 0).toFixed(2)} USD
+                  ${(adminStats?.total_wallet_funds ?? registeredUsers.reduce((sum, u) => sum + (u.walletBalanceUSD || 0), 0)).toFixed(2)} USD
                 </p>
               </div>
             </div>
@@ -276,7 +278,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 </div>
                 <p className="text-base sm:text-lg font-black text-white">
-                  ${payphoneStats.totalUSD.toFixed(2)} <span className="text-[10px] text-zinc-400 font-bold">({payphoneStats.count} cobros)</span>
+                  ${(adminStats?.payphone_total_usd ?? payphoneStats.totalUSD).toFixed(2)} <span className="text-[10px] text-zinc-400 font-bold">({adminStats?.payphone_count ?? payphoneStats.count} cobros)</span>
                 </p>
               </div>
             </div>

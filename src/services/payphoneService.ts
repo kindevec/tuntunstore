@@ -115,7 +115,7 @@ export const payphoneService = {
         service: 0,
         tip: 0,
         currency: 'USD',
-        reference: reference || 'Recarga TunTun Store',
+        reference: (reference || 'Recarga TunTun Store').replace(/[^a-zA-Z0-9 ]/g, '').trim() || 'Recarga TunTun Store',
         lang: 'es',
         defaultMethod: 'card',
         responseUrl,
@@ -128,10 +128,13 @@ export const payphoneService = {
         config.storeId = envStoreId;
       }
 
-      if (email) config.email = email;
-      if (phoneNumber) config.phoneNumber = phoneNumber;
+      if (email && email.includes('@')) config.email = email.trim();
+      if (phoneNumber) {
+        const cleanPhone = phoneNumber.replace(/[^0-9+]/g, '');
+        if (cleanPhone.length >= 9) config.phoneNumber = cleanPhone;
+      }
       if (documentId) {
-        config.documentId = documentId;
+        config.documentId = documentId.trim();
         config.identificationType = 1; // 1: Cédula de Identidad
       }
 

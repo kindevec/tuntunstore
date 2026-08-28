@@ -118,3 +118,19 @@ export interface PayPhoneTransaction {
   error_message?: string;
   created_at: string;
 }
+
+export interface AdminDashboardStats {
+  total_orders: number;
+  total_sales_usd: number;
+  total_diamonds_delivered: number;
+  pending_orders: number;
+  in_progress_orders: number;
+  completed_orders: number;
+  cancelled_orders: number;
+  total_users: number;
+  total_wallet_funds: number;
+  pending_topups: number;
+  payphone_total_usd: number;
+  payphone_count: number;
+}
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Product, BankAccount, Order, UserProfile, OrderStatus, ProductCategory, HeroSlide } from './types';
+import { Product, BankAccount, Order, UserProfile, OrderStatus, ProductCategory, HeroSlide, AdminDashboardStats } from './types';
 import { supabase } from './supabaseClient';
 import { convertImageToWebp, resizeImageForProcessing } from './utils/imageOptimization';
 
@@ -37,6 +37,7 @@ export default function App() {
   const [walletHistory, setWalletHistory] = useState<any[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
+  const [adminStats, setAdminStats] = useState<AdminDashboardStats | null>(null);
 
   const [loginRedirectReason, setLoginRedirectReason] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login' | 'payphone-confirm'>('home');
@@ -108,10 +109,10 @@ export default function App() {
         .eq('type', 'top_up')
         .eq('status', 'Pendiente')
         .order('created_at', { ascending: false })
-        .limit(100)
         .then(({ data }) => {
           if (data) setPendingTopUps(data);
         });
+      fetchAdminStats();
     }
 
     const channel = supabase.channel('global_realtime_changes')
@@ -125,6 +126,7 @@ export default function App() {
         
         // Admin Top-up Badge Logic
         if (currentUser.role === 'admin') {
+          fetchAdminStats();
           if (newRecord && newRecord.type === 'top_up' && newRecord.status === 'Pendiente') {
             setPendingTopUps(prev => {
               if (prev.find(t => t.id === newRecord.id)) return prev;
@@ -166,6 +168,7 @@ export default function App() {
         
         if (currentUser.role === 'admin') {
           fetchOrders('admin', currentUser.uid);
+          fetchAdminStats();
         } else {
           // Si es un cliente y la orden es suya, actualizar
           if (newRecord && newRecord.user_id === currentUser.uid) {
@@ -213,6 +216,7 @@ export default function App() {
         }
         if (currentUser?.role === 'admin') {
           fetchAllUsersForAdmin();
+          fetchAdminStats();
         }
       })
       .subscribe();
@@ -311,15 +315,28 @@ export default function App() {
     setBankAccounts(officialBanks);
   };
 
+  const fetchAdminStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
+      if (!error && data) {
+        setAdminStats(data as AdminDashboardStats);
+      }
+    } catch (e) {
+      console.warn('Error fetching admin dashboard stats:', e);
+    }
+  };
+
   const fetchOrders = async (userRole: string, userId: string) => {
     let query = supabase
       .from('orders')
       .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
-      .order('created_at', { ascending: false })
-      .limit(userRole === 'admin' ? 200 : 50);
+      .order('created_at', { ascending: false });
       
     if (userRole !== 'admin') {
-      query = query.eq('user_id', userId);
+      query = query.eq('user_id', userId).limit(50);
+    } else {
+      // Para administradores: cargar todos los pedidos sin cortes arbitrarios
+      query = query.range(0, 9999);
     }
     
     const { data: ordData, error } = await query;
@@ -358,7 +375,7 @@ export default function App() {
   const fetchAllUsersForAdmin = async () => {
     const { data } = await supabase
       .rpc('get_all_users_with_balance')
-      .limit(200);
+      .range(0, 9999);
 
     if (data) {
       setRegisteredUsers(data.map((p: any) => ({
@@ -1043,6 +1060,7 @@ export default function App() {
               orders={orders} 
               products={products} 
               registeredUsers={registeredUsers} 
+              adminStats={adminStats || undefined}
               activeSubTab={adminSubTab as any} 
               onSubTabChange={(st) => window.location.hash = `#admin/${st}`} 
               onUpdateOrderStatus={handleUpdateOrderStatus} 

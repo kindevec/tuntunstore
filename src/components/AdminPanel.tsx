@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Order, OrderStatus, Product, UserProfile, EmailAlertConfig } from '../types';
+import { Order, OrderStatus, Product, UserProfile, EmailAlertConfig, AdminDashboardStats } from '../types';
 import { DiamondIcon } from './DiamondIcon';
 import { AdminOrdersTab } from './admin/AdminOrdersTab';
 import { AdminCatalogTab } from './admin/AdminCatalogTab';
@@ -36,13 +36,25 @@ import {
   History,
   Image as ImageIcon
 } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+const formatCompactNumber = (num: number): string => {
+  if (!num) return '0';
+  if (num >= 1_000_000) {
+    const val = (num / 1_000_000).toFixed(1);
+    return (val.endsWith('.0') ? val.slice(0, -2) : val) + 'M';
+  }
+  if (num >= 1_000) {
+    const val = (num / 1_000).toFixed(1);
+    return (val.endsWith('.0') ? val.slice(0, -2) : val) + 'k';
+  }
+  return num.toLocaleString();
+};
 
 interface AdminPanelProps {
   orders: Order[];
   products: Product[];
-  emailConfig: EmailAlertConfig;
+  emailConfig?: EmailAlertConfig;
   registeredUsers?: UserProfile[];
+  adminStats?: AdminDashboardStats;
   activeSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners';
   onSubTabChange?: (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners') => void;
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus, note?: string) => void;
@@ -61,6 +73,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   products,
   emailConfig,
   registeredUsers = [],
+  adminStats,
   activeSubTab,
   onSubTabChange,
   onUpdateOrderStatus,
@@ -300,15 +313,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   // Stats Calculations
-  const totalSalesUSD = orders
+  const totalSalesUSD = adminStats?.total_sales_usd ?? orders
     .filter((o) => o.status === 'Completado')
     .reduce((sum, o) => sum + o.priceUSD, 0);
 
-  const pendingOrdersCount = orders.filter((o) => o.status === 'Pendiente').length;
-  const inProgressOrdersCount = orders.filter((o) => o.status === 'En proceso').length;
-  const totalDiamondsDelivered = orders
+  const pendingOrdersCount = adminStats?.pending_orders ?? orders.filter((o) => o.status === 'Pendiente').length;
+  const inProgressOrdersCount = adminStats?.in_progress_orders ?? orders.filter((o) => o.status === 'En proceso').length;
+  const totalDiamondsDelivered = adminStats?.total_diamonds_delivered ?? orders
     .filter((o) => o.status === 'Completado')
     .reduce((sum, o) => sum + o.diamondsTotal, 0);
+  const totalOrdersCount = adminStats?.total_orders ?? orders.length;
+  const totalUsersCount = adminStats?.total_users ?? registeredUsers.length;
 
   // Filtered Orders
   const filteredOrders = orders.filter((o) => {
@@ -437,6 +452,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       <div className="hidden md:flex items-center gap-2 border-b border-emerald-900/30 pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => handleTabChange('orders')}
+          title={`${totalOrdersCount.toLocaleString()} Pedidos Totales`}
           className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
             activeTab === 'orders'
               ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]'
@@ -444,11 +460,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           }`}
         >
           <Clock className="w-4 h-4" />
-          <span>Pedidos ({orders.length.toLocaleString()})</span>
+          <span>Pedidos ({formatCompactNumber(totalOrdersCount)})</span>
         </button>
 
         <button
           onClick={() => handleTabChange('wallets')}
+          title={`${totalUsersCount.toLocaleString()} Usuarios Registrados`}
           className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
             activeTab === 'wallets'
               ? 'bg-amber-400 text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]'
@@ -456,7 +473,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           }`}
         >
           <DollarSign className="w-4 h-4" />
-          <span>Saldos USD ({registeredUsers.length.toLocaleString()})</span>
+          <span>Saldos USD ({formatCompactNumber(totalUsersCount)})</span>
         </button>
 
         <button
@@ -532,6 +549,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <AdminWalletsTab
           registeredUsers={registeredUsers}
           pendingTopUps={pendingTopUps}
+          adminStats={adminStats}
           onUpdateTopUpStatus={onUpdateTopUpStatus}
           onUpdateTopUpAmount={onUpdateTopUpAmount}
           setSelectedReceiptUrl={setSelectedReceiptUrl}
