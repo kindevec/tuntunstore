@@ -21,10 +21,10 @@ export const PayPhoneConfirmPage: React.FC<Props> = ({ currentUser }) => {
   const { confirmPayment } = usePayPhone();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [amount, setAmount] = useState<number | null>(null);
-  const [authCode, setAuthCode] = useState<string>('PP-849201');
+  const [authCode, setAuthCode] = useState<string>('N/A');
   const [cardInfo, setCardInfo] = useState<{ cardType?: string; last4?: string }>({
-    cardType: 'Visa',
-    last4: '5520'
+    cardType: 'Tarjeta',
+    last4: '••••'
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
