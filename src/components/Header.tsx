@@ -19,7 +19,8 @@ import {
   Bell,
   Home,
   Code,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Download
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -35,6 +36,8 @@ interface HeaderProps {
   ) => void;
   pendingOrdersCount: number;
   pendingTopUps?: any[];
+  showPWAHeaderBtn?: boolean;
+  onTriggerInstallPWA?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -47,6 +50,8 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   pendingOrdersCount,
   pendingTopUps = [],
+  showPWAHeaderBtn = false,
+  onTriggerInstallPWA,
 }) => {
   const [showAuthMenu, setShowAuthMenu] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -183,10 +188,22 @@ export const Header: React.FC<HeaderProps> = ({
           <div id="user-auth-section" className="relative flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Balance Badge Pill or Admin Mode Indicator */}
             {isAdmin ? (
-              <div className="relative" ref={notifRef}>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {showPWAHeaderBtn && (
+                  <button
+                    id="header-install-pwa-btn-admin"
+                    onClick={onTriggerInstallPWA}
+                    className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-amber-950/90 hover:bg-amber-900 border border-amber-500/50 hover:border-amber-400 text-amber-400 hover:text-white shadow-[0_0_12px_rgba(245,158,11,0.35)] active:scale-90 transition-all cursor-pointer shrink-0 animate-in fade-in zoom-in-95 group"
+                    title="Instalar TunTun Store App"
+                    aria-label="Descargar App"
+                  >
+                    <Download className="w-5 h-5 stroke-[2.5] text-amber-400 group-hover:text-amber-300 transition-transform group-hover:translate-y-0.5" />
+                  </button>
+                )}
+                <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => setShowNotifs(!showNotifs)}
-                  className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] transition-all cursor-pointer relative group"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] transition-all cursor-pointer relative group"
                   title="Notificaciones"
                 >
                   <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 shrink-0 group-hover:rotate-12 transition-transform" />
@@ -245,33 +262,48 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 )}
               </div>
+            </div>
             ) : currentUser ? (
-              <button
-                onClick={() => setActiveTab('wallet')}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)] transition-all cursor-pointer group"
-                title="Ir a la página de Billetera Virtual y Recargar Saldo"
-              >
-                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/40 group-hover:scale-110 transition-transform shrink-0">
-                  <Wallet className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                </div>
-                <div className="text-right leading-none">
-                  <span className="hidden xs:block text-[8px] sm:text-[9px] uppercase font-black text-emerald-400/90 tracking-wider">Balance</span>
-                  <span className="text-xs sm:text-sm font-black text-emerald-300 font-mono">
-                    ${(currentUser?.walletBalanceUSD ?? 0).toFixed(2)}
-                  </span>
-                </div>
-                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-md bg-emerald-500 text-black flex items-center justify-center font-black text-xs shadow-sm shrink-0">
-                  <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[3]" />
-                </div>
-              </button>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* 1. Botón PWA en vista móvil — Altura exacta h-10 (40px) */}
+                {showPWAHeaderBtn && (
+                  <button
+                    id="header-install-pwa-btn"
+                    onClick={onTriggerInstallPWA}
+                    className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/50 hover:border-emerald-400 text-emerald-400 hover:text-white shadow-[0_0_12px_rgba(16,185,129,0.35)] active:scale-90 transition-all cursor-pointer shrink-0 animate-in fade-in zoom-in-95 group"
+                    title="Instalar TunTun Store App"
+                    aria-label="Descargar App"
+                  >
+                    <Download className="w-5 h-5 stroke-[2.5] text-emerald-400 group-hover:text-emerald-300 transition-transform group-hover:translate-y-0.5" />
+                  </button>
+                )}
+
+                {/* 2. Botón Saldo Billetera — Altura exacta h-10 (40px) */}
+                <button
+                  onClick={() => setActiveTab('wallet')}
+                  className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)] transition-all active:scale-95 cursor-pointer group shrink-0"
+                  title="Ir a la página de Billetera Virtual y Recargar Saldo"
+                >
+                  <div className="w-7 h-7 sm:w-7 sm:h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/40 group-hover:scale-110 transition-transform shrink-0">
+                    <Wallet className="w-4 h-4 sm:w-4 sm:h-4" />
+                  </div>
+                  <div className="text-right leading-none flex flex-col justify-center">
+                    <span className="text-[9px] sm:text-[10px] uppercase font-black text-emerald-400/90 tracking-wider block mb-0.5">Saldo</span>
+                    <span className="text-sm sm:text-sm font-black text-emerald-300 font-mono tracking-tight block">
+                      ${(currentUser?.walletBalanceUSD ?? 0).toFixed(2)}
+                    </span>
+                  </div>
+                </button>
+              </div>
             ) : null}
 
             {currentUser ? (
-              <div className="relative" ref={menuRef}>
+              <div className="relative shrink-0" ref={menuRef}>
+                {/* 3. Botón Perfil / Avatar — Altura exacta h-10 (40px) */}
                 <button
                   id="user-profile-menu-btn"
                   onClick={() => setShowAuthMenu(!showAuthMenu)}
-                  className={`flex items-center gap-1.5 sm:gap-2.5 p-1 sm:p-1.5 sm:pl-3 rounded-xl border transition-all text-left cursor-pointer shadow-lg hover:shadow-xl ${
+                  className={`flex items-center gap-1.5 sm:gap-2.5 h-10 px-1.5 sm:px-2.5 sm:pl-3 rounded-xl border transition-all text-left cursor-pointer shrink-0 shadow-lg hover:shadow-xl ${
                     isAdmin 
                       ? 'bg-gradient-to-r from-amber-950/40 to-black border-amber-500/30 hover:border-amber-400/50' 
                       : 'bg-gradient-to-r from-emerald-950/40 to-black border-emerald-500/30 hover:border-emerald-400/50'
@@ -280,7 +312,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <img
                     src={currentUser.avatar}
                     alt={currentUser.name}
-                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover ring-2 shrink-0 shadow-md ${isAdmin ? 'ring-amber-500/50' : 'ring-emerald-500/50'}`}
+                    className={`w-7 h-7 sm:w-7 sm:h-7 rounded-lg object-cover ring-2 shrink-0 shadow-md ${isAdmin ? 'ring-amber-500/50' : 'ring-emerald-500/50'}`}
                   />
                   <div className="hidden sm:block leading-tight pr-1">
                     <p className="text-xs font-black text-white line-clamp-1 drop-shadow-md">{currentUser.name}</p>
@@ -375,14 +407,25 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {showPWAHeaderBtn && (
+                  <button
+                    id="header-install-pwa-btn-guest"
+                    onClick={onTriggerInstallPWA}
+                    className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/50 hover:border-emerald-400 text-emerald-400 hover:text-white shadow-[0_0_12px_rgba(16,185,129,0.35)] active:scale-90 transition-all cursor-pointer shrink-0 animate-in fade-in zoom-in-95 group"
+                    title="Instalar TunTun Store App"
+                    aria-label="Descargar App"
+                  >
+                    <Download className="w-5 h-5 stroke-[2.5] text-emerald-400 group-hover:text-emerald-300 transition-transform group-hover:translate-y-0.5" />
+                  </button>
+                )}
                 <button
                   id="site-login-btn"
                   onClick={onOpenLoginModal}
-                  className="flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-black text-xs shadow-[0_0_15px_rgba(16,185,129,0.35)] transition-all active:scale-95 border border-emerald-300 cursor-pointer whitespace-nowrap uppercase tracking-wider"
+                  className="flex items-center gap-2 px-3.5 sm:px-4 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-black font-black text-xs shadow-[0_0_15px_rgba(16,185,129,0.35)] transition-all active:scale-95 border border-emerald-300 cursor-pointer whitespace-nowrap uppercase tracking-wider"
                 >
                   <LogIn className="w-4 h-4 stroke-[2.5]" />
-                  <span>Iniciar Sesión</span>
+                  <span>Inicio</span>
                 </button>
               </div>
             )}

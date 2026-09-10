@@ -91,7 +91,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, activeTab }) => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-zinc-500 text-[11px] font-bold uppercase text-center sm:text-left">
             <p>© 2026 TunTun Store. Todos los derechos reservados. Operado en Ecuador 🇪🇨.</p>
             <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-1.5 gap-y-1">
-              <span>Desarrollado por <a href="https://kindevx.web.app/" target="_blank" rel="noreferrer" className="text-emerald-400 font-extrabold tracking-wider hover:underline">KinDev S.A.S</a></span>
+              <span>Desarrollado por <a href="https://www.kindevsas.com/" target="_blank" rel="noreferrer" className="text-emerald-400 font-extrabold tracking-wider hover:underline">KinDev S.A.S</a></span>
               <span className="text-zinc-600 hidden sm:inline">•</span>
               <span className="flex items-center gap-1">
                 Diseñado con <Heart className="w-3 h-3 text-rose-500 fill-current" /> para Gamers
@@ -122,7 +122,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab, activeTab }) => {
 
         {/* 3. Mensaje de Copyright */}
         <div className="text-zinc-500 text-center sm:text-right">
-          <span>© 2026 TunTun Store • <a href="https://kindevx.web.app/" target="_blank" rel="noreferrer" className="text-emerald-400 font-extrabold hover:underline">KinDev S.A.S</a></span>
+          <span>© 2026 TunTun Store • <a href="https://www.kindevsas.com/" target="_blank" rel="noreferrer" className="text-emerald-400 font-extrabold hover:underline">KinDev S.A.S</a></span>
         </div>
       </div>
     </footer>

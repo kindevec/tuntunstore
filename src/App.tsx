@@ -14,6 +14,8 @@ import { ProfileView } from './components/ProfileView';
 import { WalletView } from './components/WalletView';
 import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
+import { InstallPWAPrompt } from './components/InstallPWAPrompt';
+import { useIsPWA } from './hooks/useIsPWA';
 
 // 🚀 Lazy-Loaded Components: Se descargan bajo demanda solo cuando el usuario accede a esa vista
 const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
@@ -21,6 +23,7 @@ const PayPhoneConfirmPage = React.lazy(() => import('./components/PayPhoneConfir
 const LoginPage = React.lazy(() => import('./components/LoginPage').then(m => ({ default: m.LoginPage })));
 
 export default function App() {
+  const isPWA = useIsPWA();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem('tuntun_current_user');
@@ -47,6 +50,13 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [pendingTopUps, setPendingTopUps] = useState<any[]>([]);
   const [isPayPhoneGatewayActive, setIsPayPhoneGatewayActive] = useState<boolean>(false);
+  const [isInstallPromptActive, setIsInstallPromptActive] = useState<boolean>(false);
+  const [showPWAHeaderBtn, setShowPWAHeaderBtn] = useState<boolean>(false);
+  const [installModalTrigger, setInstallModalTrigger] = useState<number>(0);
+
+  const handlePWAElapsed = React.useCallback(() => {
+    setShowPWAHeaderBtn(true);
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -996,7 +1006,19 @@ export default function App() {
         </div>
       )}
       {activeTab !== 'login' && (
-        <Header currentUser={currentUser} onLoginGoogle={handleLoginGoogle} onLogout={handleLogout} onOpenLoginModal={() => openLoginWithReason('')} activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} pendingTopUps={pendingTopUps} />
+        <Header 
+          currentUser={currentUser} 
+          onLoginGoogle={handleLoginGoogle} 
+          onLogout={handleLogout} 
+          onOpenLoginModal={() => openLoginWithReason('')} 
+          activeTab={activeTab} 
+          adminSubTab={adminSubTab} 
+          setActiveTab={handleSelectTab} 
+          pendingOrdersCount={activePendingOrdersCount} 
+          pendingTopUps={pendingTopUps} 
+          showPWAHeaderBtn={!isPWA && showPWAHeaderBtn && !isInstallPromptActive}
+          onTriggerInstallPWA={() => setInstallModalTrigger(prev => prev + 1)}
+        />
       )}
       <main className="flex-1">
         {activeTab === 'home' && (
@@ -1105,9 +1127,30 @@ export default function App() {
       </main>
       </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
-      {currentUser?.role !== 'admin' && activeTab !== 'login' && activeTab !== 'payphone-confirm' && <WhatsAppButton hasBottomNav={!!currentUser && activeTab !== 'login' && !isPayPhoneGatewayActive} />}
+      {currentUser?.role !== 'admin' && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
+        <WhatsAppButton 
+          hasBottomNav={!!currentUser && activeTab !== 'login' && !isPayPhoneGatewayActive} 
+          visible={!isInstallPromptActive}
+        />
+      )}
       {activeTab !== 'login' && activeTab !== 'payphone-confirm' && <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />}
-      {!isPayPhoneGatewayActive && currentUser && activeTab !== 'login' && activeTab !== 'payphone-confirm' && <BottomNavigation activeTab={activeTab} adminSubTab={adminSubTab} setActiveTab={handleSelectTab} pendingOrdersCount={activePendingOrdersCount} currentUser={currentUser} />}
+      {!isPayPhoneGatewayActive && currentUser && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
+        <BottomNavigation 
+          activeTab={activeTab} 
+          adminSubTab={adminSubTab} 
+          setActiveTab={handleSelectTab} 
+          pendingOrdersCount={activePendingOrdersCount} 
+          currentUser={currentUser} 
+          isPWA={isPWA} 
+        />
+      )}
+      {activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
+        <InstallPWAPrompt 
+          onVisibilityChange={setIsInstallPromptActive} 
+          onPromptElapsed={handlePWAElapsed}
+          openTrigger={installModalTrigger}
+        />
+      )}
     </div>
   );
 }

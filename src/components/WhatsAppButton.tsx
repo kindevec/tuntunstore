@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg
@@ -15,9 +16,14 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 interface WhatsAppButtonProps {
   customMessage?: string;
   hasBottomNav?: boolean;
+  visible?: boolean;
 }
 
-export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, hasBottomNav = false }) => {
+export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ 
+  customMessage, 
+  hasBottomNav = false,
+  visible = true 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [userQuery, setUserQuery] = useState('');
   const [selectedOption, setSelectedOption] = useState<'id' | 'bank' | null>(null);
@@ -32,10 +38,16 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
   };
 
   return (
-    <div
-      id="whatsapp-floating-widget"
-      className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-6'} right-0 z-[100] transition-all duration-300 flex flex-col items-end`}
-    >
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          id="whatsapp-floating-widget"
+          initial={{ opacity: 0, scale: 0.8, x: 20 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          exit={{ opacity: 0, scale: 0.8, x: 20 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-6'} right-0 z-[100] transition-[bottom] duration-300 flex flex-col items-end`}
+        >
       
       {/* Expanded Quick Chat Drawer */}
       {isOpen && (
@@ -135,6 +147,8 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({ customMessage, h
         </button>
       </div>
 
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

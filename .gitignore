@@ -2,6 +2,7 @@
 node_modules/
 build/
 dist/
+dev-dist/
 coverage/
 
 # OS & Logs
@@ -9,6 +10,7 @@ coverage/
 Thumbs.db
 *.log
 *.log.*
+~$*
 
 # Environment Secrets & Credentials
 .env*
@@ -18,6 +20,9 @@ Thumbs.db
 *.p12
 *.crt
 *.pdf
+!contrato/**/*.pdf
+!contrato/**/*.docx
+contrato/**/~$*
 client_secret_*.json
 serviceAccountKey*.json
 firebase-adminsdk*.json

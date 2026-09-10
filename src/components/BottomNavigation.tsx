@@ -1,5 +1,6 @@
-import React from 'react';
-import { ShoppingBag, ClipboardList, Wallet, UserCog, Mail, Sparkles, Code, Home } from 'lucide-react';
+import React, { useRef, useLayoutEffect, useEffect, useCallback } from 'react';
+import { ShoppingBag, ClipboardList, Wallet, UserCog, Sparkles, Code, Home } from 'lucide-react';
+import { motion, useMotionValue, useSpring } from 'motion/react';
 import { UserProfile } from '../types';
 
 interface BottomNavigationProps {
@@ -12,7 +13,27 @@ interface BottomNavigationProps {
   pendingOrdersCount: number;
   lowStockCodesCount?: number;
   currentUser: UserProfile | null;
+  isPWA?: boolean;
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// 📐 GENERADORES GEOMÉTRICOS DEL EFECTO ONDULACIÓN / HUECO (IDÉNTICO A EMPAQUE AL TOQUE)
+// Se hace un hueco suave hacia abajo y la bolita flota dejando un espacio visible
+// ════════════════════════════════════════════════════════════════════════════
+const SCOOP_HALF_W = 50; // Ancho del hueco
+const SCOOP_DEPTH = 40;  // Profundidad del hueco hacia abajo
+
+const getBorderPath = (cx: number, w: number) => {
+  const leftX = cx - SCOOP_HALF_W;
+  const rightX = cx + SCOOP_HALF_W;
+  return `M 0,1.5 L ${Math.max(0, leftX)},1.5 C ${cx - 28},1.5 ${cx - 16},${SCOOP_DEPTH} ${cx},${SCOOP_DEPTH} C ${cx + 16},${SCOOP_DEPTH} ${cx + 28},1.5 ${Math.min(w, rightX)},1.5 L ${w},1.5`;
+};
+
+const getBgPath = (cx: number, w: number, totalH: number) => {
+  const leftX = cx - SCOOP_HALF_W;
+  const rightX = cx + SCOOP_HALF_W;
+  return `M 0,1.5 L ${Math.max(0, leftX)},1.5 C ${cx - 28},1.5 ${cx - 16},${SCOOP_DEPTH} ${cx},${SCOOP_DEPTH} C ${cx + 16},${SCOOP_DEPTH} ${cx + 28},1.5 ${Math.min(w, rightX)},1.5 L ${w},1.5 L ${w},${totalH} L 0,${totalH} Z`;
+};
 
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab,
@@ -21,16 +42,275 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   pendingOrdersCount,
   lowStockCodesCount = 0,
   currentUser,
+  isPWA = false,
 }) => {
   const isAdmin = currentUser?.role === 'admin';
 
+  // Refs para animación fluida directa al DOM (60-120 fps sin re-renders de React)
+  const menuRef = useRef<HTMLDivElement>(null);
+  const borderPathRef = useRef<SVGPathElement>(null);
+  const bgPathRef = useRef<SVGPathElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const navWidthRef = useRef<number>(
+    typeof window !== 'undefined' ? window.innerWidth : 390
+  );
+
+  // Lista de items según rol (SOLO ÍCONOS EN MODO PWA)
+  const clientItems = [
+    { id: 'catalog' as const, label: 'Catálogo', icon: ShoppingBag },
+    { id: 'wallet' as const, label: 'Billetera', icon: Wallet },
+    { id: 'home' as const, label: 'Inicio', icon: Home },
+    { id: 'orders' as const, label: 'Pedidos', icon: ClipboardList },
+    { id: 'profile' as const, label: 'Perfil', icon: UserCog },
+  ];
+
+  const adminItems = [
+    { id: 'catalog' as const, subTab: undefined, label: 'Catálogo', icon: ShoppingBag },
+    { id: 'admin' as const, subTab: 'orders' as const, label: 'Pedidos', icon: ClipboardList },
+    { id: 'admin' as const, subTab: 'wallets' as const, label: 'Saldos', icon: Wallet },
+    { id: 'admin' as const, subTab: 'catalog' as const, label: 'CRUD', icon: Sparkles },
+    { id: 'admin' as const, subTab: 'codes' as const, label: 'Códigos', icon: Code },
+  ];
+
+  const currentItems = isAdmin ? adminItems : clientItems;
+
+  const getActiveIndex = useCallback((): number => {
+    if (isAdmin) {
+      if (activeTab === 'catalog') return 0;
+      if (activeTab === 'admin' && adminSubTab === 'orders') return 1;
+      if (activeTab === 'admin' && adminSubTab === 'wallets') return 2;
+      if (activeTab === 'admin' && adminSubTab === 'catalog') return 3;
+      if (activeTab === 'admin' && adminSubTab === 'codes') return 4;
+      return 0;
+    }
+    if (activeTab === 'catalog') return 0;
+    if (activeTab === 'wallet') return 1;
+    if (activeTab === 'home') return 2;
+    if (activeTab === 'orders') return 3;
+    if (activeTab === 'profile') return 4;
+    return 2; // Por defecto Inicio
+  }, [isAdmin, activeTab, adminSubTab]);
+
+  const activeIndex = getActiveIndex();
+
+  // Física de resorte suave ultra-fluida (estilo Empaque al Toque)
+  const rawX = useMotionValue(
+    typeof window !== 'undefined' ? window.innerWidth / 2 : 195
+  );
+  const springX = useSpring(rawX, { stiffness: 240, damping: 26, mass: 0.85 });
+
+  const updateScoopPosition = useCallback(() => {
+    const activeItem = itemRefs.current[activeIndex];
+    const menu = menuRef.current;
+    if (activeItem && menu) {
+      const activeRect = activeItem.getBoundingClientRect();
+      const menuRect = menu.getBoundingClientRect();
+      const centerX = activeRect.left - menuRect.left + activeRect.width / 2;
+      navWidthRef.current = menuRect.width || window.innerWidth;
+      rawX.set(centerX);
+
+      if (borderPathRef.current && bgPathRef.current) {
+        const w = navWidthRef.current;
+        const totalH = 90;
+        borderPathRef.current.setAttribute('d', getBorderPath(centerX, w));
+        bgPathRef.current.setAttribute('d', getBgPath(centerX, w, totalH));
+      }
+    }
+  }, [activeIndex, rawX]);
+
+  useLayoutEffect(() => {
+    if (!isPWA) return;
+    updateScoopPosition();
+
+    const handleResize = () => {
+      updateScoopPosition();
+    };
+
+    window.addEventListener('resize', handleResize);
+    const rId = requestAnimationFrame(updateScoopPosition);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(rId);
+    };
+  }, [updateScoopPosition, isPWA, activeTab, adminSubTab]);
+
+  // Actualización directa al DOM del SVG a 60-120fps sin re-renders de React
+  useEffect(() => {
+    if (!isPWA) return;
+    return springX.on('change', (cx) => {
+      const w = navWidthRef.current;
+      const totalH = 90;
+      if (borderPathRef.current) {
+        borderPathRef.current.setAttribute('d', getBorderPath(cx, w));
+      }
+      if (bgPathRef.current) {
+        bgPathRef.current.setAttribute('d', getBgPath(cx, w, totalH));
+      }
+    });
+  }, [springX, isPWA]);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 📱 MODO 1: ESTILO PWA — 100% ANCHO, PEGADO AL PISO, HUECO ONDULADO + BOLITA FLOTANTE (SIN LETRAS)
+  // ════════════════════════════════════════════════════════════════════════════
+  if (isPWA) {
+    const initialW = typeof window !== 'undefined' ? window.innerWidth : 390;
+    const initialCx = initialW / 2;
+    const totalH = 90;
+
+    return (
+      <nav
+        ref={menuRef}
+        id="bottom-navigation-bar"
+        className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 h-[54px] pb-[env(safe-area-inset-bottom)] select-none overflow-visible pointer-events-none"
+      >
+        {/* FONDO Y LÍNEA SUPERIOR DE NEÓN SVG CON HUECO ONDULADO (MUTABLE DIRECTO POR SPRING) */}
+        <svg
+          className="absolute inset-0 w-full h-[calc(54px+env(safe-area-inset-bottom,0px)+30px)] pointer-events-none overflow-visible will-change-transform"
+          style={{ filter: isAdmin ? 'drop-shadow(0 -4px 16px rgba(245, 158, 11, 0.25))' : 'drop-shadow(0 -4px 16px rgba(16, 185, 129, 0.35))' }}
+        >
+          <defs>
+            <linearGradient id="tuntun-pwa-border-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              {isAdmin ? (
+                <>
+                  <stop offset="0%" stopColor="#d97706" />
+                  <stop offset="50%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#d97706" />
+                </>
+              ) : (
+                <>
+                  <stop offset="0%" stopColor="#059669" />
+                  <stop offset="50%" stopColor="#34d399" />
+                  <stop offset="100%" stopColor="#059669" />
+                </>
+              )}
+            </linearGradient>
+            <filter id="tuntun-pwa-glow" x="-10%" y="-30%" width="120%" height="160%">
+              <feDropShadow
+                dx="0"
+                dy="1"
+                stdDeviation="2"
+                floodColor={isAdmin ? '#f59e0b' : '#10b981'}
+                floodOpacity="0.75"
+              />
+            </filter>
+          </defs>
+
+          {/* Fondo oscuro con hueco ondulado hacia abajo (idéntico a Empaque al Toque) */}
+          <path
+            ref={bgPathRef}
+            d={getBgPath(initialCx, initialW, totalH)}
+            fill="#07090e"
+            fillOpacity="0.98"
+          />
+
+          {/* Borde superior continuo con el hueco y resplandor de neón */}
+          <path
+            ref={borderPathRef}
+            d={getBorderPath(initialCx, initialW)}
+            fill="none"
+            stroke="url(#tuntun-pwa-border-gradient)"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            filter="url(#tuntun-pwa-glow)"
+          />
+        </svg>
+
+        {/* CONTENEDOR DE BOTONES (OCUPANDO EL 100% DEL ANCHO, SOLO ÍCONOS) */}
+        <div className="flex items-center justify-around w-full h-full relative z-30 pointer-events-auto px-1">
+          {currentItems.map((item, index) => {
+            const Icon = item.icon;
+            const isActive = activeIndex === index;
+
+            const handleClick = () => {
+              if (isAdmin && 'subTab' in item) {
+                setActiveTab(item.id, item.subTab);
+              } else {
+                setActiveTab(item.id);
+              }
+            };
+
+            return (
+              <button
+                key={`${item.id}-${index}`}
+                ref={(el) => {
+                  itemRefs.current[index] = el;
+                }}
+                onClick={handleClick}
+                className="relative flex-1 h-full flex items-center justify-center cursor-pointer select-none py-1 group"
+                aria-label={item.label}
+              >
+                {/* LA BOLITA ELEVADA QUE FLOTA DEJANDO UN ESPACIO SOBRE EL HUECO */}
+                <motion.div
+                  initial={false}
+                  animate={{
+                    y: isActive ? -17 : 0,
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 320,
+                    damping: 24,
+                  }}
+                  whileTap={{ scale: 0.88 }}
+                  className="flex items-center justify-center will-change-transform relative"
+                >
+                  {isActive ? (
+                    <div
+                      className={`w-[44px] h-[44px] rounded-full p-[2px] flex items-center justify-center shadow-lg transition-transform ${
+                        isAdmin
+                          ? 'bg-gradient-to-tr from-amber-500 to-amber-300 shadow-[0_4px_20px_rgba(245,158,11,0.6)]'
+                          : 'bg-gradient-to-tr from-emerald-500 to-emerald-300 shadow-[0_4px_20px_rgba(16,185,129,0.6)]'
+                      }`}
+                    >
+                      <div className="w-full h-full rounded-full bg-[#07090e] flex items-center justify-center">
+                        <Icon
+                          className={`w-[21px] h-[21px] stroke-[2.5] ${
+                            isAdmin ? 'text-amber-400' : 'text-emerald-400'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-9 h-9 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                      <Icon className="w-[21px] h-[21px] stroke-[2]" />
+                    </div>
+                  )}
+
+                  {/* Badges de notificación */}
+                  {item.id === 'orders' && pendingOrdersCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-amber-400 text-black text-[7.5px] font-black px-1.5 rounded-full border border-black animate-pulse leading-none py-0.5 shadow-sm">
+                      {pendingOrdersCount}
+                    </span>
+                  )}
+                  {item.id === 'wallet' && currentUser && (
+                    <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-black text-[7px] font-black px-1.5 rounded-full font-mono leading-none py-0.5 shadow-sm">
+                      ${(currentUser?.walletBalanceUSD ?? 0).toFixed(0)}
+                    </span>
+                  )}
+                  {isAdmin && 'subTab' in item && item.subTab === 'codes' && lowStockCodesCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[7.5px] font-black px-1.5 rounded-full border border-black animate-pulse leading-none py-0.5 shadow-sm">
+                      {lowStockCodesCount}
+                    </span>
+                  )}
+                </motion.div>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // 🌐 MODO 2: ESTILO BROWSER WEB NORMAL (100% INTACTO Y ORIGINAL)
+  // ════════════════════════════════════════════════════════════════════════════
   if (isAdmin) {
     return (
       <nav
         id="bottom-navigation-bar"
         className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090e]/95 border-t border-amber-500/30 backdrop-blur-xl px-1 py-1.5 flex items-center justify-around gap-0.5 shadow-[0_-10px_25px_rgba(0,0,0,0.8)]"
       >
-        {/* Admin Tab 1: Catálogo (Permanent for everyone) */}
+        {/* Admin Tab 1: Catálogo */}
         <button
           onClick={() => setActiveTab('catalog')}
           className={`flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer px-1 ${
@@ -112,6 +392,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     );
   }
 
+  // Cliente en Browser Web Normal
   return (
     <nav
       id="bottom-navigation-bar"
@@ -183,7 +464,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         <span className="text-[8.5px] xs:text-[10px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">Pedidos</span>
       </button>
 
-      {/* Tab 4: Mi Perfil */}
+      {/* Tab 5: Mi Perfil */}
       {currentUser && (
         <button
           onClick={() => setActiveTab('profile')}
