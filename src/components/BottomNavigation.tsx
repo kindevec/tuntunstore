@@ -1,6 +1,6 @@
 import React, { useRef, useLayoutEffect, useEffect, useCallback } from 'react';
 import { ShoppingBag, ClipboardList, Wallet, UserCog, Sparkles, Code, Home } from 'lucide-react';
-import { motion, useMotionValue, useSpring } from 'motion/react';
+import { useMotionValue, useSpring } from 'motion/react';
 import { UserProfile } from '../types';
 
 interface BottomNavigationProps {
@@ -152,6 +152,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
   // ════════════════════════════════════════════════════════════════════════════
   // 📱 MODO 1: ESTILO PWA — 100% ANCHO, PEGADO AL PISO, HUECO ONDULADO + BOLITA FLOTANTE (SIN LETRAS)
+  // Optimizado: CSS transforms nativas (GPU), sin motion.div por botón, sin SVG filters costosos
   // ════════════════════════════════════════════════════════════════════════════
   if (isPWA) {
     const initialW = typeof window !== 'undefined' ? window.innerWidth : 390;
@@ -164,10 +165,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         id="bottom-navigation-bar"
         className="md:hidden fixed bottom-0 left-0 right-0 w-full z-50 h-[54px] pb-[env(safe-area-inset-bottom)] select-none overflow-visible pointer-events-none"
       >
-        {/* FONDO Y LÍNEA SUPERIOR DE NEÓN SVG CON HUECO ONDULADO (MUTABLE DIRECTO POR SPRING) */}
+        {/* FONDO Y LÍNEA SUPERIOR SVG CON HUECO ONDULADO (MUTABLE DIRECTO POR SPRING, SIN FILTERS) */}
         <svg
-          className="absolute inset-0 w-full h-[calc(54px+env(safe-area-inset-bottom,0px)+30px)] pointer-events-none overflow-visible will-change-transform"
-          style={{ filter: isAdmin ? 'drop-shadow(0 -4px 16px rgba(245, 158, 11, 0.25))' : 'drop-shadow(0 -4px 16px rgba(16, 185, 129, 0.35))' }}
+          className="absolute inset-0 w-full h-[calc(54px+env(safe-area-inset-bottom,0px)+30px)] pointer-events-none overflow-visible"
         >
           <defs>
             <linearGradient id="tuntun-pwa-border-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -185,18 +185,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                 </>
               )}
             </linearGradient>
-            <filter id="tuntun-pwa-glow" x="-10%" y="-30%" width="120%" height="160%">
-              <feDropShadow
-                dx="0"
-                dy="1"
-                stdDeviation="2"
-                floodColor={isAdmin ? '#f59e0b' : '#10b981'}
-                floodOpacity="0.75"
-              />
-            </filter>
           </defs>
 
-          {/* Fondo oscuro con hueco ondulado hacia abajo (idéntico a Empaque al Toque) */}
+          {/* Fondo oscuro con hueco ondulado hacia abajo */}
           <path
             ref={bgPathRef}
             d={getBgPath(initialCx, initialW, totalH)}
@@ -204,7 +195,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
             fillOpacity="0.98"
           />
 
-          {/* Borde superior continuo con el hueco y resplandor de neón */}
+          {/* Borde superior continuo con el hueco — sin filter SVG costoso, glow via CSS */}
           <path
             ref={borderPathRef}
             d={getBorderPath(initialCx, initialW)}
@@ -212,7 +203,11 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
             stroke="url(#tuntun-pwa-border-gradient)"
             strokeWidth="2.4"
             strokeLinecap="round"
-            filter="url(#tuntun-pwa-glow)"
+            style={{
+              filter: isAdmin
+                ? 'drop-shadow(0 0 4px rgba(245, 158, 11, 0.5))'
+                : 'drop-shadow(0 0 4px rgba(16, 185, 129, 0.45))',
+            }}
           />
         </svg>
 
@@ -240,59 +235,65 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                 className="relative flex-1 h-full flex items-center justify-center cursor-pointer select-none py-1 group"
                 aria-label={item.label}
               >
-                {/* LA BOLITA ELEVADA QUE FLOTA DEJANDO UN ESPACIO SOBRE EL HUECO */}
-                <motion.div
-                  initial={false}
-                  animate={{
-                    y: isActive ? -17 : 0,
+                {/* BOLITA ELEVADA — CSS transform + transition nativa (GPU-acelerada, 0 re-renders React) */}
+                <div
+                  className="flex items-center justify-center relative will-change-transform"
+                  style={{
+                    transform: isActive ? 'translateY(-17px) scale(1)' : 'translateY(0) scale(1)',
+                    transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
                   }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 320,
-                    damping: 24,
-                  }}
-                  whileTap={{ scale: 0.88 }}
-                  className="flex items-center justify-center will-change-transform relative"
                 >
-                  {isActive ? (
-                    <div
-                      className={`w-[44px] h-[44px] rounded-full p-[2px] flex items-center justify-center shadow-lg transition-transform ${
-                        isAdmin
-                          ? 'bg-gradient-to-tr from-amber-500 to-amber-300 shadow-[0_4px_20px_rgba(245,158,11,0.6)]'
-                          : 'bg-gradient-to-tr from-emerald-500 to-emerald-300 shadow-[0_4px_20px_rgba(16,185,129,0.6)]'
+                  {/* Aro activo — siempre en DOM, controlado por opacity+scale para evitar mount/unmount */}
+                  <div
+                    className={`absolute inset-0 w-[44px] h-[44px] rounded-full p-[2px] flex items-center justify-center will-change-[opacity,transform] ${
+                      isAdmin
+                        ? 'bg-gradient-to-tr from-amber-500 to-amber-300 shadow-[0_4px_15px_rgba(245,158,11,0.45)]'
+                        : 'bg-gradient-to-tr from-emerald-500 to-emerald-300 shadow-[0_4px_15px_rgba(16,185,129,0.45)]'
+                    }`}
+                    style={{
+                      opacity: isActive ? 1 : 0,
+                      transform: isActive ? 'scale(1)' : 'scale(0.7)',
+                      transition: 'opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      // Centrar el aro respecto al contenedor del ícono
+                      left: '50%',
+                      top: '50%',
+                      marginLeft: '-22px',
+                      marginTop: '-22px',
+                    }}
+                  >
+                    <div className="w-full h-full rounded-full bg-[#07090e]" />
+                  </div>
+
+                  {/* Ícono — siempre montado, color cambia via CSS transition */}
+                  <div className="w-9 h-9 flex items-center justify-center relative z-10">
+                    <Icon
+                      className={`w-[21px] h-[21px] transition-colors duration-200 ${
+                        isActive
+                          ? isAdmin
+                            ? 'text-amber-400 stroke-[2.5]'
+                            : 'text-emerald-400 stroke-[2.5]'
+                          : 'text-zinc-400 stroke-[2] group-hover:text-white'
                       }`}
-                    >
-                      <div className="w-full h-full rounded-full bg-[#07090e] flex items-center justify-center">
-                        <Icon
-                          className={`w-[21px] h-[21px] stroke-[2.5] ${
-                            isAdmin ? 'text-amber-400' : 'text-emerald-400'
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-9 h-9 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
-                      <Icon className="w-[21px] h-[21px] stroke-[2]" />
-                    </div>
-                  )}
+                    />
+                  </div>
 
                   {/* Badges de notificación */}
                   {item.id === 'orders' && pendingOrdersCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-amber-400 text-black text-[7.5px] font-black px-1.5 rounded-full border border-black animate-pulse leading-none py-0.5 shadow-sm">
+                    <span className="absolute -top-1 -right-1 bg-amber-400 text-black text-[7.5px] font-black px-1.5 rounded-full border border-black leading-none py-0.5 shadow-sm z-20">
                       {pendingOrdersCount}
                     </span>
                   )}
                   {item.id === 'wallet' && currentUser && (
-                    <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-black text-[7px] font-black px-1.5 rounded-full font-mono leading-none py-0.5 shadow-sm">
+                    <span className="absolute -top-1.5 -right-2 bg-emerald-500 text-black text-[7px] font-black px-1.5 rounded-full font-mono leading-none py-0.5 shadow-sm z-20">
                       ${(currentUser?.walletBalanceUSD ?? 0).toFixed(0)}
                     </span>
                   )}
                   {isAdmin && 'subTab' in item && item.subTab === 'codes' && lowStockCodesCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[7.5px] font-black px-1.5 rounded-full border border-black animate-pulse leading-none py-0.5 shadow-sm">
+                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[7.5px] font-black px-1.5 rounded-full border border-black leading-none py-0.5 shadow-sm z-20">
                       {lowStockCodesCount}
                     </span>
                   )}
-                </motion.div>
+                </div>
               </button>
             );
           })}
