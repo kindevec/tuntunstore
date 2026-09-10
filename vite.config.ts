@@ -11,7 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'prompt',
-        includeAssets: ['logo-transparent.webp', 'logo.webp', 'icons/*.png'],
+        includeAssets: ['logo-transparent.webp', 'logo.webp'],
         manifest: false, // We use our own manifest.webmanifest in public/
         workbox: {
           globPatterns: ['**/*.{js,css,html,png,webp,svg,woff2}'],
@@ -98,6 +98,7 @@ export default defineConfig(() => {
             'vendor-react': ['react', 'react-dom'],
             'vendor-supabase': ['@supabase/supabase-js'],
             'vendor-icons': ['lucide-react'],
+            'vendor-motion': ['motion'],
           },
         },
       },

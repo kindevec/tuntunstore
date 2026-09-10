@@ -14,19 +14,21 @@ import { ProfileView } from './components/ProfileView';
 import { WalletView } from './components/WalletView';
 import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
-import { InstallPWAPrompt } from './components/InstallPWAPrompt';
 import { useIsPWA } from './hooks/useIsPWA';
-import { PWAAppBar } from './components/pwa/PWAAppBar';
-import { PWAHomeView } from './components/pwa/PWAHomeView';
-import { PWACatalogView } from './components/pwa/PWACatalogView';
-import { PWAWalletView } from './components/pwa/PWAWalletView';
-import { PWAOrdersView } from './components/pwa/PWAOrdersView';
-import { PWAProfileView } from './components/pwa/PWAProfileView';
 
 // 🚀 Lazy-Loaded Components: Se descargan bajo demanda solo cuando el usuario accede a esa vista
 const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
 const PayPhoneConfirmPage = React.lazy(() => import('./components/PayPhoneConfirmPage').then(m => ({ default: m.PayPhoneConfirmPage })));
 const LoginPage = React.lazy(() => import('./components/LoginPage').then(m => ({ default: m.LoginPage })));
+const InstallPWAPrompt = React.lazy(() => import('./components/InstallPWAPrompt').then(m => ({ default: m.InstallPWAPrompt })));
+
+// 📱 Componentes PWA exclusivos: Code-split para que visitantes web NO los descarguen
+const PWAAppBar = React.lazy(() => import('./components/pwa/PWAAppBar').then(m => ({ default: m.PWAAppBar })));
+const PWAHomeView = React.lazy(() => import('./components/pwa/PWAHomeView').then(m => ({ default: m.PWAHomeView })));
+const PWACatalogView = React.lazy(() => import('./components/pwa/PWACatalogView').then(m => ({ default: m.PWACatalogView })));
+const PWAWalletView = React.lazy(() => import('./components/pwa/PWAWalletView').then(m => ({ default: m.PWAWalletView })));
+const PWAOrdersView = React.lazy(() => import('./components/pwa/PWAOrdersView').then(m => ({ default: m.PWAOrdersView })));
+const PWAProfileView = React.lazy(() => import('./components/pwa/PWAProfileView').then(m => ({ default: m.PWAProfileView })));
 
 export default function App() {
   const isPWA = useIsPWA();
@@ -1009,15 +1011,17 @@ export default function App() {
       )}
       {activeTab !== 'login' && (
         isPWA ? (
-          <PWAAppBar
-            currentUser={currentUser}
-            onOpenLogin={() => openLoginWithReason('')}
-            onNavigateToWallet={() => handleSelectTab('wallet')}
-            onNavigateToProfile={() => handleSelectTab('profile')}
-            onNavigateToOrders={() => handleSelectTab('orders')}
-            pendingOrdersCount={activePendingOrdersCount}
-            pendingTopUpsCount={pendingTopUps.length}
-          />
+          <React.Suspense fallback={<div className="h-14 bg-[#05140f] border-b border-emerald-500/20" />}>
+            <PWAAppBar
+              currentUser={currentUser}
+              onOpenLogin={() => openLoginWithReason('')}
+              onNavigateToWallet={() => handleSelectTab('wallet')}
+              onNavigateToProfile={() => handleSelectTab('profile')}
+              onNavigateToOrders={() => handleSelectTab('orders')}
+              pendingOrdersCount={activePendingOrdersCount}
+              pendingTopUpsCount={pendingTopUps.length}
+            />
+          </React.Suspense>
         ) : (
           <Header 
             currentUser={currentUser} 
@@ -1035,6 +1039,7 @@ export default function App() {
         )
       )}
       <main className="flex-1">
+        <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
         {activeTab === 'home' && (
           isPWA ? (
             <PWAHomeView
@@ -1210,6 +1215,7 @@ export default function App() {
           />
           </React.Suspense>
         )}
+        </React.Suspense>
       </main>
       </div>
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
@@ -1233,11 +1239,13 @@ export default function App() {
         />
       )}
       {activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
-        <InstallPWAPrompt 
-          onVisibilityChange={setIsInstallPromptActive}
-          onPromptElapsed={() => setShowPWATopBar(true)}
-          openTrigger={installPromptTrigger}
-        />
+        <React.Suspense fallback={null}>
+          <InstallPWAPrompt 
+            onVisibilityChange={setIsInstallPromptActive}
+            onPromptElapsed={() => setShowPWATopBar(true)}
+            openTrigger={installPromptTrigger}
+          />
+        </React.Suspense>
       )}
     </div>
   );
