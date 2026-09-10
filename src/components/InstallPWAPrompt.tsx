@@ -164,13 +164,16 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed bottom-[68px] md:bottom-6 left-3 right-3 md:left-auto md:right-6 md:max-w-md z-[60]"
           >
-            <div className="relative bg-gradient-to-r from-[#032219]/98 via-[#06382a]/98 to-[#021a13]/98 backdrop-blur-2xl border-2 border-amber-400 rounded-2xl p-2.5 sm:p-3 shadow-[0_0_35px_rgba(245,158,11,0.55),0_15px_45px_rgba(0,0,0,0.95)] ring-2 ring-amber-300/80 ring-offset-2 ring-offset-black/70 overflow-hidden">
-              {/* Barra de progreso dorada TunTun de 5 segundos */}
+            <div className="relative bg-gradient-to-r from-[#032219]/95 via-[#053225]/95 to-[#021a13]/95 backdrop-blur-xl border border-amber-400/30 rounded-2xl p-2.5 sm:p-3 shadow-[0_10px_35px_rgba(0,0,0,0.8),0_0_15px_rgba(245,158,11,0.08)] overflow-hidden">
+              {/* Delicado destello de luz en el borde superior */}
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-300/35 to-transparent pointer-events-none" />
+
+              {/* Barra de progreso sutil TunTun de 5 segundos */}
               <motion.div
                 initial={{ width: '100%' }}
                 animate={{ width: '0%' }}
                 transition={{ duration: 5, ease: 'linear' }}
-                className="absolute bottom-0 left-0 h-[2.5px] bg-gradient-to-r from-amber-400 via-yellow-200 to-amber-400 shadow-[0_0_12px_rgba(245,158,11,1)]"
+                className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-amber-400/60 via-yellow-200/80 to-amber-400/60"
               />
 
               {isNonChromeAndroid ? (
@@ -178,8 +181,8 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                 <div className="flex flex-col gap-2">
                   {/* Fila 1: Logo + Título + Botón "En Chrome" + Botón X */}
                   <div className="flex items-center gap-2.5">
-                    {/* Logo de TunTun con aro dorado */}
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/25 via-emerald-950/80 to-[#021a13] border-2 border-amber-400/80 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                    {/* Logo de TunTun con marco sutil */}
+                    <div className="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-sm">
                       <img src="/logo-transparent.webp" alt="TunTun Store" className="w-7 h-7 object-contain drop-shadow" />
                     </div>
 
@@ -187,11 +190,11 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-white text-xs font-black tracking-tight leading-tight">Instala TunTun</span>
-                        <span className="text-[8.5px] bg-gradient-to-r from-amber-400 to-yellow-300 text-black font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider shadow-sm">
+                        <span className="text-[8.5px] bg-amber-400/15 border border-amber-400/30 text-amber-300 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                           {browserInfo.displayName}
                         </span>
                       </div>
-                      <p className="text-amber-200/90 text-[10.5px] leading-tight mt-0.5 truncate">
+                      <p className="text-emerald-100/80 text-[10.5px] leading-tight mt-0.5 truncate">
                         {copiedLink ? '¡Enlace copiado! Abre Chrome' : 'Recomendado abrir en Chrome'}
                       </p>
                     </div>
@@ -199,7 +202,7 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                     {/* Botón principal directo: Abrir en Chrome */}
                     <button
                       onClick={handleOpenInChrome}
-                      className="px-3 py-1.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-black font-black text-xs rounded-xl flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.5)] cursor-pointer active:scale-95 transition-all shrink-0"
+                      className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm hover:shadow-amber-500/15 cursor-pointer active:scale-95 transition-all shrink-0"
                       title="Abrir en Google Chrome para instalar limpio sin sello"
                     >
                       <ExternalLink className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -209,7 +212,7 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                     {/* Botón cerrar */}
                     <button
                       onClick={handleDismiss}
-                      className="p-1.5 text-amber-200/80 hover:text-white transition-colors rounded-lg hover:bg-amber-400/20 cursor-pointer shrink-0"
+                      className="p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 cursor-pointer shrink-0"
                       aria-label="Cerrar"
                     >
                       <X className="w-4 h-4" />
@@ -217,7 +220,7 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                   </div>
 
                   {/* Fila 2: Franja informativa TunTun con opción de instalar aquí inline */}
-                  <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-[#021a13]/90 border border-amber-400/40 text-[10.5px] leading-tight text-emerald-100">
+                  <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-black/40 border border-white/10 text-[10.5px] leading-tight text-emerald-100/90">
                     <span className="truncate">
                       💡 <strong>Para icono sin sello de {browserInfo.displayName}</strong>, usa Chrome.
                     </span>
@@ -232,8 +235,8 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
               ) : (
                 /* 🟢 VISTA ULTRA COMPACTA PARA CHROME / ESTÁNDAR (1 SOLA FILA HORIZONTAL, CERO HUECOS) */
                 <div className="flex items-center gap-2.5">
-                  {/* Logo de TunTun con aro dorado */}
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/25 via-emerald-950/80 to-[#021a13] border-2 border-amber-400/80 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
+                  {/* Logo de TunTun con marco sutil */}
+                  <div className="w-10 h-10 rounded-xl bg-emerald-950/70 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-sm">
                     <img src="/logo-transparent.webp" alt="TunTun Store" className="w-7 h-7 object-contain drop-shadow" />
                   </div>
 
@@ -244,11 +247,11 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                         Instala TunTun Store
                       </span>
                       {browserInfo.isChrome ? (
-                        <span className="text-[8.5px] bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-0.5">
+                        <span className="text-[8.5px] bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
                           <CheckCircle2 className="w-2.5 h-2.5 stroke-[3]" /> Chrome
                         </span>
                       ) : (
-                        <span className="text-[8.5px] bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black px-1.5 py-0.2 rounded-full uppercase tracking-wider shadow-sm">
+                        <span className="text-[8.5px] bg-amber-400/15 border border-amber-400/30 text-amber-300 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                           App Web
                         </span>
                       )}
@@ -258,10 +261,10 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                     </p>
                   </div>
 
-                  {/* Botón de acción dorado llamativo */}
+                  {/* Botón de acción sutil y elegante */}
                   <button
                     onClick={handleInstallClick}
-                    className="px-3.5 py-2 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.6)] cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+                    className="px-3.5 py-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm hover:shadow-amber-500/15 cursor-pointer active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
                   >
                     <Download className="w-3.5 h-3.5 stroke-[2.5]" />
                     <span>Instalar</span>
@@ -270,7 +273,7 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                   {/* Botón cerrar */}
                   <button
                     onClick={handleDismiss}
-                    className="p-1.5 text-amber-200/80 hover:text-white transition-colors rounded-lg hover:bg-amber-400/20 cursor-pointer shrink-0"
+                    className="p-1.5 text-zinc-400 hover:text-white transition-colors rounded-lg hover:bg-white/10 cursor-pointer shrink-0"
                     aria-label="Cerrar"
                   >
                     <X className="w-4 h-4" />
@@ -297,15 +300,15 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="w-full max-w-md bg-gradient-to-b from-[#06382a] via-[#032219] to-[#021610] border-t sm:border-2 border-amber-400/90 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.4),0_25px_60px_rgba(0,0,0,0.95)] ring-2 ring-amber-300/40 max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-md bg-gradient-to-b from-[#06382a] via-[#032219] to-[#021610] border-t sm:border border-amber-400/30 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_20px_rgba(245,158,11,0.06)] max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Barra superior de arrastre móvil */}
-              <div className="w-12 h-1 bg-amber-400/40 rounded-full mx-auto mb-4 sm:hidden" />
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4 sm:hidden" />
 
               {/* Cabecera del modal */}
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400/25 via-emerald-950/80 to-[#021610] border-2 border-amber-400/80 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.35)]">
+                <div className="w-11 h-11 rounded-2xl bg-[#03241b] border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-sm">
                   <img src="/logo-transparent.webp" alt="TunTun Store" className="w-8 h-8 object-contain drop-shadow" />
                 </div>
                 <div>
@@ -519,7 +522,7 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
                   {canInstall && (
                     <button
                       onClick={handleInstallClick}
-                      className="w-full py-3 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 hover:from-amber-300 hover:to-yellow-200 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer active:scale-95 shadow-[0_4px_20px_rgba(245,158,11,0.55)] flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer active:scale-95 shadow-md hover:shadow-amber-500/15 flex items-center justify-center gap-2"
                     >
                       <Download className="w-4 h-4 stroke-[2.5]" />
                       <span>Instalar TunTun App Ahora</span>

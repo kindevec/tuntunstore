@@ -378,17 +378,6 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             ) : (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                {showPWAHeaderBtn && (
-                  <button
-                    id="header-install-pwa-btn-guest"
-                    onClick={onTriggerInstallPWA}
-                    className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/50 hover:border-emerald-400 text-emerald-400 hover:text-white shadow-[0_0_12px_rgba(16,185,129,0.35)] active:scale-90 transition-all cursor-pointer shrink-0 animate-in fade-in zoom-in-95 group"
-                    title="Instalar TunTun Store App"
-                    aria-label="Descargar App"
-                  >
-                    <Download className="w-5 h-5 stroke-[2.5] text-emerald-400 group-hover:text-emerald-300 transition-transform group-hover:translate-y-0.5" />
-                  </button>
-                )}
                 <button
                   id="site-login-btn"
                   onClick={onOpenLoginModal}
