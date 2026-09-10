@@ -16,6 +16,12 @@ import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
 import { InstallPWAPrompt } from './components/InstallPWAPrompt';
 import { useIsPWA } from './hooks/useIsPWA';
+import { PWAAppBar } from './components/pwa/PWAAppBar';
+import { PWAHomeView } from './components/pwa/PWAHomeView';
+import { PWACatalogView } from './components/pwa/PWACatalogView';
+import { PWAWalletView } from './components/pwa/PWAWalletView';
+import { PWAOrdersView } from './components/pwa/PWAOrdersView';
+import { PWAProfileView } from './components/pwa/PWAProfileView';
 
 // 🚀 Lazy-Loaded Components: Se descargan bajo demanda solo cuando el usuario accede a esa vista
 const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
@@ -1002,43 +1008,92 @@ export default function App() {
         </div>
       )}
       {activeTab !== 'login' && (
-        <Header 
-          currentUser={currentUser} 
-          onLoginGoogle={handleLoginGoogle} 
-          onLogout={handleLogout} 
-          onOpenLoginModal={() => openLoginWithReason('')} 
-          activeTab={activeTab} 
-          adminSubTab={adminSubTab} 
-          setActiveTab={handleSelectTab} 
-          pendingOrdersCount={activePendingOrdersCount} 
-          pendingTopUps={pendingTopUps} 
-          showPWATopBar={!isPWA && showPWATopBar}
-          onTriggerInstallPWA={() => setInstallPromptTrigger(Date.now())}
-        />
+        isPWA ? (
+          <PWAAppBar
+            currentUser={currentUser}
+            onOpenLogin={() => openLoginWithReason('')}
+            onNavigateToWallet={() => handleSelectTab('wallet')}
+            onNavigateToProfile={() => handleSelectTab('profile')}
+            onNavigateToOrders={() => handleSelectTab('orders')}
+            pendingOrdersCount={activePendingOrdersCount}
+            pendingTopUpsCount={pendingTopUps.length}
+          />
+        ) : (
+          <Header 
+            currentUser={currentUser} 
+            onLoginGoogle={handleLoginGoogle} 
+            onLogout={handleLogout} 
+            onOpenLoginModal={() => openLoginWithReason('')} 
+            activeTab={activeTab} 
+            adminSubTab={adminSubTab} 
+            setActiveTab={handleSelectTab} 
+            pendingOrdersCount={activePendingOrdersCount} 
+            pendingTopUps={pendingTopUps} 
+            showPWATopBar={!isPWA && showPWATopBar}
+            onTriggerInstallPWA={() => setInstallPromptTrigger(Date.now())}
+          />
+        )
       )}
       <main className="flex-1">
         {activeTab === 'home' && (
-          <HomeView 
-            products={products}
-            heroSlides={heroSlides}
-            currentUser={currentUser}
-            onNavigateToAdminBanners={() => {
-              setAdminSubTab('banners');
-              setActiveTab('admin');
-              window.location.hash = '#admin/banners';
-            }}
-            onSelectProduct={handleSelectProductForPurchase}
-            onNavigateToWallet={() => handleSelectTab('wallet')}
-            onNavigateToCatalog={() => handleSelectTab('catalog')}
-          />
+          isPWA ? (
+            <PWAHomeView
+              products={products}
+              heroSlides={heroSlides}
+              currentUser={currentUser}
+              onSelectProduct={handleSelectProductForPurchase}
+              onNavigateToWallet={() => handleSelectTab('wallet')}
+              onNavigateToCatalog={(category) => {
+                if (category) setSelectedCatalogCategory(category as any);
+                handleSelectTab('catalog');
+              }}
+            />
+          ) : (
+            <HomeView 
+              products={products}
+              heroSlides={heroSlides}
+              currentUser={currentUser}
+              onNavigateToAdminBanners={() => {
+                setAdminSubTab('banners');
+                setActiveTab('admin');
+                window.location.hash = '#admin/banners';
+              }}
+              onSelectProduct={handleSelectProductForPurchase}
+              onNavigateToWallet={() => handleSelectTab('wallet')}
+              onNavigateToCatalog={() => handleSelectTab('catalog')}
+            />
+          )
         )}
         {activeTab === 'catalog' && (
-          <div>
-            <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />
-            {/* Smooth gradient fade between hero and catalog */}
-            <div className="h-16 sm:h-24 bg-gradient-to-b from-[#050505] via-[#050505]/60 to-transparent -mb-16 sm:-mb-24 relative z-[1] pointer-events-none" />
-            <ProductCatalog products={products} onSelectProduct={handleSelectProductForPurchase} selectedCategory={selectedCatalogCategory} setSelectedCategory={setSelectedCatalogCategory} currentUser={currentUser} onOpenWalletModal={() => handleSelectTab('wallet')} onUpdateProduct={handleUpdateProduct} onDeleteProduct={handleDeleteProduct} onAddProduct={handleAddProduct} />
-          </div>
+          isPWA ? (
+            <PWACatalogView
+              products={products}
+              currentUser={currentUser}
+              onPurchaseProduct={async (product, pId) => {
+                await handleCreateOrder({
+                  userEmail: currentUser?.email || '',
+                  userName: currentUser?.name || 'Gamer',
+                  playerId: pId,
+                  productId: product.id,
+                  productName: product.name,
+                  diamondsTotal: product.diamonds + (product.bonusDiamonds || 0),
+                  priceUSD: product.priceUSD,
+                  bankName: 'Billetera Virtual',
+                  receiptUrl: '',
+                  paymentMethod: 'wallet_balance',
+                });
+              }}
+              onNavigateToWallet={() => handleSelectTab('wallet')}
+              onOpenLogin={() => openLoginWithReason('')}
+            />
+          ) : (
+            <div>
+              <HeroBanner onSelectProductGroup={(category) => { setSelectedCatalogCategory(category); document.getElementById('catalog-section')?.scrollIntoView({ behavior: 'smooth' }); }} onOpenQuickIDCheck={() => handleSelectTab('orders')} />
+              {/* Smooth gradient fade between hero and catalog */}
+              <div className="h-16 sm:h-24 bg-gradient-to-b from-[#050505] via-[#050505]/60 to-transparent -mb-16 sm:-mb-24 relative z-[1] pointer-events-none" />
+              <ProductCatalog products={products} onSelectProduct={handleSelectProductForPurchase} selectedCategory={selectedCatalogCategory} setSelectedCategory={setSelectedCatalogCategory} currentUser={currentUser} onOpenWalletModal={() => handleSelectTab('wallet')} onUpdateProduct={handleUpdateProduct} onDeleteProduct={handleDeleteProduct} onAddProduct={handleAddProduct} />
+            </div>
+          )
         )}
         {activeTab === 'login' && (
           <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
@@ -1046,23 +1101,49 @@ export default function App() {
           </React.Suspense>
         )}
         {activeTab === 'wallet' && currentUser && (
-          <WalletView 
-            currentUser={currentUser} 
-            bankAccounts={bankAccounts} 
-            walletHistory={walletHistory} 
-            onSubmitTopUpOrder={handleSubmitTopUpOrder} 
-            onNavigateToCatalog={() => window.location.hash = '#catalog'} 
-            onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
-          />
+          isPWA ? (
+            <PWAWalletView
+              currentUser={currentUser}
+              bankAccounts={bankAccounts}
+              walletHistory={walletHistory}
+              onSubmitTopUpOrder={handleSubmitTopUpOrder}
+              onNavigateToCatalog={() => handleSelectTab('catalog')}
+              onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
+            />
+          ) : (
+            <WalletView 
+              currentUser={currentUser} 
+              bankAccounts={bankAccounts} 
+              walletHistory={walletHistory} 
+              onSubmitTopUpOrder={handleSubmitTopUpOrder} 
+              onNavigateToCatalog={() => window.location.hash = '#catalog'} 
+              onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
+            />
+          )
         )}
         {activeTab === 'orders' && (
-          <MyOrders orders={orders} currentUserEmail={currentUser?.email} onOpenWhatsAppSupport={(order) => {
-            const phone = '593968729952';
-            const msg = order 
-              ? `Hola TunTunStore, necesito soporte con mi pedido #${order.id} (${order.productName}). ID Jugador: ${order.playerId}`
-              : `Hola TunTunStore, necesito soporte con una compra.`;
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
-          }} />
+          isPWA ? (
+            <PWAOrdersView
+              orders={orders}
+              currentUserEmail={currentUser?.email}
+              onOpenWhatsAppSupport={(order) => {
+                const phone = '593968729952';
+                const msg = order 
+                  ? `Hola TunTunStore, necesito soporte con mi pedido #${order.id} (${order.productName}). ID Jugador: ${order.playerId}`
+                  : `Hola TunTunStore, necesito soporte con una compra.`;
+                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+              }}
+              onNavigateToCatalog={() => handleSelectTab('catalog')}
+            />
+          ) : (
+            <MyOrders orders={orders} currentUserEmail={currentUser?.email} onOpenWhatsAppSupport={(order) => {
+              const phone = '593968729952';
+              const msg = order 
+                ? `Hola TunTunStore, necesito soporte con mi pedido #${order.id} (${order.productName}). ID Jugador: ${order.playerId}`
+                : `Hola TunTunStore, necesito soporte con una compra.`;
+              window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+            }} />
+          )
         )}
         {activeTab === 'payphone-confirm' && (
           <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div></div>}>
@@ -1070,7 +1151,16 @@ export default function App() {
           </React.Suspense>
         )}
         {activeTab === 'profile' && currentUser && (
-          <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
+          isPWA ? (
+            <PWAProfileView
+              currentUser={currentUser}
+              onSaveProfile={handleSaveProfile}
+              onLogout={handleLogout}
+              onNavigateToWallet={() => handleSelectTab('wallet')}
+            />
+          ) : (
+            <ProfileView currentUser={currentUser} onSaveProfile={handleSaveProfile} onLogout={handleLogout} onNavigateToWallet={() => window.location.hash = '#wallet'} />
+          )
         )}
         {activeTab === 'admin' && currentUser?.role === 'admin' && (
           <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
@@ -1125,12 +1215,14 @@ export default function App() {
       <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
       {currentUser?.role !== 'admin' && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
         <WhatsAppButton 
-          hasBottomNav={!!currentUser && activeTab !== 'login' && !isPayPhoneGatewayActive} 
+          hasBottomNav={(isPWA || !!currentUser) && activeTab !== 'login' && !isPayPhoneGatewayActive} 
           visible={!isInstallPromptActive}
         />
       )}
-      {activeTab !== 'login' && activeTab !== 'payphone-confirm' && <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />}
-      {!isPayPhoneGatewayActive && currentUser && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
+      {!isPWA && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
+        <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />
+      )}
+      {!isPayPhoneGatewayActive && (isPWA || currentUser) && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
         <BottomNavigation 
           activeTab={activeTab} 
           adminSubTab={adminSubTab} 
