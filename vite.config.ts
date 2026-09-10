@@ -66,8 +66,7 @@ export default defineConfig(() => {
           navigateFallbackDenylist: [/^\/api\//, /\/googlea04c1dce4977fc72\.html$/],
         },
         devOptions: {
-          enabled: true,
-          type: 'module',
+          enabled: false,
         },
       }),
     ],

@@ -24,6 +24,9 @@ const LoginPage = React.lazy(() => import('./components/LoginPage').then(m => ({
 
 export default function App() {
   const isPWA = useIsPWA();
+  const [showPWATopBar, setShowPWATopBar] = useState(false);
+  const [isInstallPromptActive, setIsInstallPromptActive] = useState(false);
+  const [installPromptTrigger, setInstallPromptTrigger] = useState(0);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem('tuntun_current_user');
@@ -50,13 +53,6 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [pendingTopUps, setPendingTopUps] = useState<any[]>([]);
   const [isPayPhoneGatewayActive, setIsPayPhoneGatewayActive] = useState<boolean>(false);
-  const [isInstallPromptActive, setIsInstallPromptActive] = useState<boolean>(false);
-  const [showPWAHeaderBtn, setShowPWAHeaderBtn] = useState<boolean>(false);
-  const [installModalTrigger, setInstallModalTrigger] = useState<number>(0);
-
-  const handlePWAElapsed = React.useCallback(() => {
-    setShowPWAHeaderBtn(true);
-  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -1016,8 +1012,8 @@ export default function App() {
           setActiveTab={handleSelectTab} 
           pendingOrdersCount={activePendingOrdersCount} 
           pendingTopUps={pendingTopUps} 
-          showPWAHeaderBtn={!isPWA && showPWAHeaderBtn && !isInstallPromptActive}
-          onTriggerInstallPWA={() => setInstallModalTrigger(prev => prev + 1)}
+          showPWATopBar={!isPWA && showPWATopBar}
+          onTriggerInstallPWA={() => setInstallPromptTrigger(Date.now())}
         />
       )}
       <main className="flex-1">
@@ -1146,9 +1142,9 @@ export default function App() {
       )}
       {activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
         <InstallPWAPrompt 
-          onVisibilityChange={setIsInstallPromptActive} 
-          onPromptElapsed={handlePWAElapsed}
-          openTrigger={installModalTrigger}
+          onVisibilityChange={setIsInstallPromptActive}
+          onPromptElapsed={() => setShowPWATopBar(true)}
+          openTrigger={installPromptTrigger}
         />
       )}
     </div>

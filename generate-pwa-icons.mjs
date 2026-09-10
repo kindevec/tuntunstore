@@ -36,61 +36,60 @@ async function generateIcons() {
       .toFile(path.join(outputDir, 'pwa-512x512.png'));
     console.log('Created pwa-512x512.png');
 
-    // 512x512 Maskable icon (with ~20% padding)
+    // Helper to generate a vibrant TunTun emerald gradient background SVG
+    const createEmeraldBg = (width, height) => Buffer.from(`
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="tunGrad" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+            <stop offset="0%" stop-color="#059669" />
+            <stop offset="55%" stop-color="#064e3b" />
+            <stop offset="100%" stop-color="#022c22" />
+          </radialGradient>
+        </defs>
+        <rect width="${width}" height="${height}" fill="url(#tunGrad)" />
+      </svg>
+    `);
+
+    // 512x512 Maskable icon (with ~20% padding on vibrant TunTun emerald background)
     // 512 * 0.6 = 307.2 (approx 308) size of the logo to have ~20% padding on each side
     const maskableLogo = await sharp(sourceImagePath)
       .resize(308, 308, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .toBuffer();
 
-    await sharp({
-      create: {
-        width: 512,
-        height: 512,
-        channels: 4,
-        background: '#07090e'
-      }
-    })
+    const bg512 = await sharp(createEmeraldBg(512, 512)).png().toBuffer();
+
+    await sharp(bg512)
       .composite([{ input: maskableLogo, gravity: 'center' }])
       .png()
       .toFile(path.join(outputDir, 'pwa-maskable-512x512.png'));
-    console.log('Created pwa-maskable-512x512.png');
+    console.log('Created pwa-maskable-512x512.png (with TunTun emerald gradient)');
 
-    // 192x192 Maskable icon (with ~20% padding)
+    // 192x192 Maskable icon (with ~20% padding on vibrant TunTun emerald background)
     // 192 * 0.6 = 115.2 (approx 115)
     const maskableLogo192 = await sharp(sourceImagePath)
       .resize(115, 115, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .toBuffer();
 
-    await sharp({
-      create: {
-        width: 192,
-        height: 192,
-        channels: 4,
-        background: '#07090e'
-      }
-    })
+    const bg192 = await sharp(createEmeraldBg(192, 192)).png().toBuffer();
+
+    await sharp(bg192)
       .composite([{ input: maskableLogo192, gravity: 'center' }])
       .png()
       .toFile(path.join(outputDir, 'pwa-maskable-192x192.png'));
-    console.log('Created pwa-maskable-192x192.png');
+    console.log('Created pwa-maskable-192x192.png (with TunTun emerald gradient)');
 
-    // 180x180 Apple touch icon (with ~20% padding on #07090e background)
+    // 180x180 Apple touch icon (with ~20% padding on vibrant TunTun emerald background)
     const appleLogo = await sharp(sourceImagePath)
       .resize(120, 120, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
       .toBuffer();
 
-    await sharp({
-      create: {
-        width: 180,
-        height: 180,
-        channels: 4,
-        background: '#07090e'
-      }
-    })
+    const bg180 = await sharp(createEmeraldBg(180, 180)).png().toBuffer();
+
+    await sharp(bg180)
       .composite([{ input: appleLogo, gravity: 'center' }])
       .png()
       .toFile(path.join(outputDir, 'apple-touch-icon.png'));
-    console.log('Created apple-touch-icon.png');
+    console.log('Created apple-touch-icon.png (with TunTun emerald gradient)');
 
     // 32x32 Favicon
     await sharp(sourceImagePath)

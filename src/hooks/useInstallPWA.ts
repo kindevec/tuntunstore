@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getInitialBrowserDetection, checkIsBraveAsync, BrowserDetectionResult } from '../utils/browserDetection';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -23,6 +24,8 @@ export interface UseInstallPWAReturn {
   isAndroid: boolean;
   /** Whether the device is any mobile device */
   isMobile: boolean;
+  /** Detailed browser information (Chrome, Brave, Firefox, Edge, etc.) */
+  browserInfo: BrowserDetectionResult;
   /** Whether to show the install UI (respects dismissal cooldown) */
   shouldShowPrompt: boolean;
   /** Trigger the native install prompt (Android/Chrome only) */
@@ -49,6 +52,23 @@ export function useInstallPWA(): UseInstallPWAReturn {
   const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(globalDeferredPrompt);
   const [canInstall, setCanInstall] = useState<boolean>(() => !!globalDeferredPrompt);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [browserInfo, setBrowserInfo] = useState<BrowserDetectionResult>(getInitialBrowserDetection);
+
+  // Asynchronously refine Brave browser detection
+  useEffect(() => {
+    checkIsBraveAsync().then((isBrave) => {
+      if (isBrave) {
+        setBrowserInfo((prev) => ({
+          ...prev,
+          browser: 'brave',
+          displayName: 'Brave Browser',
+          isBrave: true,
+          isChrome: false,
+          isWebAPKSupported: false,
+        }));
+      }
+    });
+  }, []);
 
   // Device detection
   const isIOS = typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent) && !(window as any).MSStream;
@@ -132,6 +152,7 @@ export function useInstallPWA(): UseInstallPWAReturn {
     isIOS,
     isAndroid,
     isMobile,
+    browserInfo,
     shouldShowPrompt,
     installApp,
     dismissPrompt,

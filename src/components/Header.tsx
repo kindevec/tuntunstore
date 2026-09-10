@@ -19,9 +19,9 @@ import {
   Bell,
   Home,
   Code,
-  Image as ImageIcon,
-  Download
+  Image as ImageIcon
 } from 'lucide-react';
+import { PWATopBar } from './PWATopBar';
 
 interface HeaderProps {
   currentUser: UserProfile | null;
@@ -36,7 +36,7 @@ interface HeaderProps {
   ) => void;
   pendingOrdersCount: number;
   pendingTopUps?: any[];
-  showPWAHeaderBtn?: boolean;
+  showPWATopBar?: boolean;
   onTriggerInstallPWA?: () => void;
 }
 
@@ -50,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   pendingOrdersCount,
   pendingTopUps = [],
-  showPWAHeaderBtn = false,
+  showPWATopBar = false,
   onTriggerInstallPWA,
 }) => {
   const [showAuthMenu, setShowAuthMenu] = useState(false);
@@ -76,14 +76,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header id="header-main" className="sticky top-0 z-50 bg-black/80 backdrop-blur-md text-white border-b border-emerald-900/40 shadow-2xl">
-      {/* Top Banner Notice - Hidden on mobile as explicitly requested */}
-      <div id="header-top-bar" className="hidden md:flex bg-[#030914] px-4 py-1.5 text-[11px] text-center border-b border-emerald-900/30 items-center justify-center gap-3 font-bold tracking-wider uppercase text-zinc-300">
-        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]"></span>
-        <span>Estamos activos por el Contacto: <strong className="text-white">+593 96 872 9952</strong> ⚠️ Verificá la información.</span>
-        <span className="inline-block text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded text-[10px] border border-emerald-500/30 font-black">
-          🟢 ACREDITACIÓN INSTANTÁNEA ECUADOR
-        </span>
-      </div>
+      {/* Barra Superior Promocional PWA — 100% Clicleable */}
+      <PWATopBar visible={showPWATopBar} onTriggerInstall={onTriggerInstallPWA} />
 
       {/* PERSISTENT ADMIN ALERT FOR PENDING WALLET TOP UPS */}
       {isAdmin && pendingTopUps.length > 0 && (
@@ -189,17 +183,6 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Balance Badge Pill or Admin Mode Indicator */}
             {isAdmin ? (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                {showPWAHeaderBtn && (
-                  <button
-                    id="header-install-pwa-btn-admin"
-                    onClick={onTriggerInstallPWA}
-                    className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-amber-950/90 hover:bg-amber-900 border border-amber-500/50 hover:border-amber-400 text-amber-400 hover:text-white shadow-[0_0_12px_rgba(245,158,11,0.35)] active:scale-90 transition-all cursor-pointer shrink-0 animate-in fade-in zoom-in-95 group"
-                    title="Instalar TunTun Store App"
-                    aria-label="Descargar App"
-                  >
-                    <Download className="w-5 h-5 stroke-[2.5] text-amber-400 group-hover:text-amber-300 transition-transform group-hover:translate-y-0.5" />
-                  </button>
-                )}
                 <div className="relative" ref={notifRef}>
                 <button
                   onClick={() => setShowNotifs(!showNotifs)}
@@ -265,20 +248,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             ) : currentUser ? (
               <div className="flex items-center gap-1.5 sm:gap-2">
-                {/* 1. Botón PWA en vista móvil — Altura exacta h-10 (40px) */}
-                {showPWAHeaderBtn && (
-                  <button
-                    id="header-install-pwa-btn"
-                    onClick={onTriggerInstallPWA}
-                    className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/50 hover:border-emerald-400 text-emerald-400 hover:text-white shadow-[0_0_12px_rgba(16,185,129,0.35)] active:scale-90 transition-all cursor-pointer shrink-0 animate-in fade-in zoom-in-95 group"
-                    title="Instalar TunTun Store App"
-                    aria-label="Descargar App"
-                  >
-                    <Download className="w-5 h-5 stroke-[2.5] text-emerald-400 group-hover:text-emerald-300 transition-transform group-hover:translate-y-0.5" />
-                  </button>
-                )}
-
-                {/* 2. Botón Saldo Billetera — Altura exacta h-10 (40px) */}
+                {/* 1. Botón Saldo Billetera — Altura exacta h-10 (40px) */}
                 <button
                   onClick={() => setActiveTab('wallet')}
                   className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 h-10 rounded-xl bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)] transition-all active:scale-95 cursor-pointer group shrink-0"
