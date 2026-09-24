@@ -292,7 +292,7 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md p-0 sm:p-4"
+            className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md p-0 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] sm:pb-4"
             onClick={handleDismiss}
           >
             <motion.div
@@ -300,7 +300,7 @@ export const InstallPWAPrompt: React.FC<InstallPWAPromptProps> = ({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="w-full max-w-md bg-gradient-to-b from-[#06382a] via-[#032219] to-[#021610] border-t sm:border border-amber-400/30 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_20px_rgba(245,158,11,0.06)] max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-md bg-gradient-to-b from-[#06382a] via-[#032219] to-[#021610] border-t sm:border border-amber-400/30 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_20px_rgba(245,158,11,0.06)] max-h-[90vh] overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:pb-6"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Barra superior de arrastre móvil */}

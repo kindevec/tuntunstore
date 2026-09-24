@@ -2,9 +2,59 @@
 @theme { --breakpoint-xs: 375px; }
 
 @layer base {
-  body {
-    background-color: #022c22;
+  html, body {
+    background-color: #05070a;
+    color: #ffffff;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
   }
+
+  /* Evitar que el CSS externo de PayPhone sobreescriba el padding global de la app */
+  #root {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
+/* 💳 Estilos de despeje y ajuste para la pasarela PayPhone v2 */
+#pwa-payphone-element,
+#pp-button-mobile,
+#pp-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#pwa-payphone-element .payment-box,
+#pp-button-mobile .payment-box {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  background-color: #ffffff !important;
+}
+
+#pwa-payphone-element .ppb-btn-control,
+#pp-button-mobile .ppb-btn-control {
+  border-radius: 12px !important;
+}
+
+#pwa-payphone-element .ppb-btn-pay,
+#pp-button-mobile .ppb-btn-pay {
+  border-radius: 14px !important;
+  font-weight: 800 !important;
+  transition: transform 0.15s ease, filter 0.15s ease !important;
+}
+
+#pwa-payphone-element .ppb-btn-pay:active,
+#pp-button-mobile .ppb-btn-pay:active {
+  transform: scale(0.98) !important;
 }
 
 @layer utilities {
@@ -21,5 +71,17 @@
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #3f3f46; /* zinc-700 */
+  }
+
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .no-scrollbar,
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

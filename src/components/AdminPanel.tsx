@@ -56,6 +56,7 @@ interface AdminPanelProps {
   emailConfig?: EmailAlertConfig;
   registeredUsers?: UserProfile[];
   adminStats?: AdminDashboardStats;
+  isPWA?: boolean;
   activeSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners';
   onSubTabChange?: (tab: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners') => void;
   onUpdateOrderStatus: (orderId: string, newStatus: OrderStatus, note?: string) => void;
@@ -67,6 +68,7 @@ interface AdminPanelProps {
   onUpdateTopUpStatus?: (transactionId: string, newStatus: 'Aprobado' | 'Rechazado') => void;
   onUpdateTopUpAmount?: (transactionId: string, newAmount: number) => void;
   onRefreshBanners?: () => void;
+  onLogout?: () => void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -75,6 +77,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   emailConfig,
   registeredUsers = [],
   adminStats,
+  isPWA = false,
   activeSubTab,
   onSubTabChange,
   onUpdateOrderStatus,
@@ -398,62 +401,152 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   return (
-    <section id="admin-panel-section" className="py-4 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-full mx-auto space-y-4 sm:space-y-8">
+    <section 
+      id="admin-panel-section" 
+      className={`pt-4 sm:pt-8 px-3 sm:px-6 lg:px-8 max-w-full mx-auto space-y-4 sm:space-y-8 ${
+        isPWA 
+          ? 'pb-[calc(5rem+env(safe-area-inset-bottom,0px))]' 
+          : 'pb-16'
+      }`}
+    >
       
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-        
-        {/* Ventas Totales */}
-        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
-          <div className="min-w-0">
-            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Ventas Totales</p>
-            <p className="text-sm sm:text-2xl font-black text-white mt-0.5 truncate">${totalSalesUSD.toFixed(2)}</p>
-            <p className="text-[8px] sm:text-[10px] text-emerald-400 font-extrabold uppercase mt-0.5 flex items-center gap-1 truncate">
-              <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" /> <span className="truncate">Acreditación</span>
-            </p>
+      {/* KPI Stats Section */}
+      {isPWA ? (
+        /* PWA Hero Card (Diseño Premium App-Like) */
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-[#071813] via-[#04100c] to-[#020b08] p-4 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.15)] select-none">
+          {/* Ambient Glows */}
+          <div className="absolute -top-14 -right-14 w-40 h-40 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-14 -left-14 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Top Status Badge */}
+          <div className="relative z-10 flex items-center justify-between gap-2 pb-3 border-b border-emerald-500/15">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                Panel TunTun Admin
+              </span>
+            </div>
+            <span className="text-[9px] font-extrabold text-zinc-400 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10 flex items-center gap-1.5">
+              <TrendingUp className="w-3 h-3 text-emerald-400" /> Free Fire Ecuador
+            </span>
           </div>
-          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
-            <DollarSign className="w-4 h-4 sm:w-6 sm:h-6" />
+
+          {/* Hero Sales Display */}
+          <div className="relative z-10 py-3.5 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-zinc-400">
+                Ventas Totales
+              </p>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-[0_2px_12px_rgba(16,185,129,0.35)]">
+                  ${totalSalesUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <span className="text-xs font-bold text-emerald-400">USD</span>
+              </div>
+            </div>
+            <div className="p-3 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.25)] shrink-0">
+              <DollarSign className="w-6 h-6 stroke-[2.5]" />
+            </div>
+          </div>
+
+          {/* Micro-Metrics Row */}
+          <div className="relative z-10 grid grid-cols-3 gap-2 pt-3 border-t border-emerald-500/15">
+            {/* Pendientes */}
+            <div className="bg-black/50 backdrop-blur-md rounded-xl p-2 sm:p-2.5 border border-amber-500/20 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-amber-400 mb-1">
+                <span className="text-[9px] font-black uppercase tracking-wider">Pendientes</span>
+                <Clock className="w-3.5 h-3.5 shrink-0" />
+              </div>
+              <p className="text-lg sm:text-xl font-black text-amber-300">
+                {pendingOrdersCount}
+              </p>
+              <span className="text-[8px] text-amber-400/80 font-semibold truncate">Por revisar</span>
+            </div>
+
+            {/* En Proceso */}
+            <div className="bg-black/50 backdrop-blur-md rounded-xl p-2 sm:p-2.5 border border-sky-500/20 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-sky-400 mb-1">
+                <span className="text-[9px] font-black uppercase tracking-wider">En Proceso</span>
+                <RefreshCw className="w-3.5 h-3.5 shrink-0" />
+              </div>
+              <p className="text-lg sm:text-xl font-black text-sky-300">
+                {inProgressOrdersCount}
+              </p>
+              <span className="text-[8px] text-sky-400/80 font-semibold truncate">Cargando a ID</span>
+            </div>
+
+            {/* Diamantes */}
+            <div className="bg-black/50 backdrop-blur-md rounded-xl p-2 sm:p-2.5 border border-emerald-500/20 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-emerald-400 mb-1">
+                <span className="text-[9px] font-black uppercase tracking-wider">Diamantes</span>
+                <DiamondIcon size="sm" variant="emerald" />
+              </div>
+              <p className="text-lg sm:text-xl font-black text-emerald-300 truncate">
+                {formatCompactNumber(totalDiamondsDelivered)}
+              </p>
+              <span className="text-[8px] text-emerald-400/80 font-semibold truncate">Entregados 💎</span>
+            </div>
           </div>
         </div>
+      ) : (
+        /* Cuadrícula estándar de 4 tarjetas para Browser / Desktop */
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+          
+          {/* Ventas Totales */}
+          <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+            <div className="min-w-0">
+              <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Ventas Totales</p>
+              <p className="text-sm sm:text-2xl font-black text-white mt-0.5 truncate">${totalSalesUSD.toFixed(2)}</p>
+              <p className="text-[8px] sm:text-[10px] text-emerald-400 font-extrabold uppercase mt-0.5 flex items-center gap-1 truncate">
+                <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" /> <span className="truncate">Acreditación</span>
+              </p>
+            </div>
+            <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+              <DollarSign className="w-4 h-4 sm:w-6 sm:h-6" />
+            </div>
+          </div>
 
-        {/* Pedidos Pendientes */}
-        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
-          <div className="min-w-0">
-            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Pendientes</p>
-            <p className="text-sm sm:text-2xl font-black text-amber-400 mt-0.5 truncate">{pendingOrdersCount}</p>
-            <p className="text-[8px] sm:text-[10px] text-amber-400/80 font-extrabold uppercase mt-0.5 truncate">Comprobante</p>
+          {/* Pedidos Pendientes */}
+          <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+            <div className="min-w-0">
+              <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Pendientes</p>
+              <p className="text-sm sm:text-2xl font-black text-amber-400 mt-0.5 truncate">{pendingOrdersCount}</p>
+              <p className="text-[8px] sm:text-[10px] text-amber-400/80 font-extrabold uppercase mt-0.5 truncate">Comprobante</p>
+            </div>
+            <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/30 shrink-0">
+              <Clock className="w-4 h-4 sm:w-6 sm:h-6" />
+            </div>
           </div>
-          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/30 shrink-0">
-            <Clock className="w-4 h-4 sm:w-6 sm:h-6" />
+
+          {/* En Proceso */}
+          <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+            <div className="min-w-0">
+              <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">En Proceso</p>
+              <p className="text-sm sm:text-2xl font-black text-sky-400 mt-0.5 truncate">{inProgressOrdersCount}</p>
+              <p className="text-[8px] sm:text-[10px] text-sky-400/80 font-extrabold uppercase mt-0.5 truncate">Cargando a ID</p>
+            </div>
+            <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/30 shrink-0">
+              <RefreshCw className="w-4 h-4 sm:w-6 sm:h-6" />
+            </div>
           </div>
+
+          {/* Diamantes Entregados */}
+          <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
+            <div className="min-w-0">
+              <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Diamantes</p>
+              <p className="text-sm sm:text-2xl font-black text-emerald-400 mt-0.5 truncate">{totalDiamondsDelivered.toLocaleString()} 💎</p>
+              <p className="text-[8px] sm:text-[10px] text-emerald-400/80 font-extrabold uppercase mt-0.5 truncate">Free Fire Ecuador</p>
+            </div>
+            <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+              <DiamondIcon size="sm" variant="emerald" />
+            </div>
+          </div>
+
         </div>
-
-        {/* En Proceso */}
-        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-sky-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
-          <div className="min-w-0">
-            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">En Proceso</p>
-            <p className="text-sm sm:text-2xl font-black text-sky-400 mt-0.5 truncate">{inProgressOrdersCount}</p>
-            <p className="text-[8px] sm:text-[10px] text-sky-400/80 font-extrabold uppercase mt-0.5 truncate">Cargando a ID</p>
-          </div>
-          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/30 shrink-0">
-            <RefreshCw className="w-4 h-4 sm:w-6 sm:h-6" />
-          </div>
-        </div>
-
-        {/* Diamantes Entregados */}
-        <div className="bg-zinc-800/90 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-emerald-500/20 shadow-lg flex items-center justify-between gap-2 text-white">
-          <div className="min-w-0">
-            <p className="text-[8px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-wider truncate">Diamantes</p>
-            <p className="text-sm sm:text-2xl font-black text-emerald-400 mt-0.5 truncate">{totalDiamondsDelivered.toLocaleString()} 💎</p>
-            <p className="text-[8px] sm:text-[10px] text-emerald-400/80 font-extrabold uppercase mt-0.5 truncate">Free Fire Ecuador</p>
-          </div>
-          <div className="p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
-            <DiamondIcon size="sm" variant="emerald" />
-          </div>
-        </div>
-
-      </div>
+      )}
 
       {/* Navigation Sub-Tabs - Hidden on mobile since they are present in bottom navigation */}
       <div className="hidden md:flex items-center gap-2 border-b border-emerald-900/30 pb-2 overflow-x-auto scrollbar-none">
@@ -538,6 +631,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           copiedPlayerId={copiedPlayerId}
           onUpdateOrderStatus={onUpdateOrderStatus}
           setSelectedReceiptUrl={setSelectedReceiptUrl}
+          isPWA={isPWA}
+          adminStats={adminStats}
         />
       )}
 
@@ -548,6 +643,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onAddProduct={onAddProduct}
           onUpdateProduct={onUpdateProduct}
           onDeleteProduct={onDeleteProduct}
+          isPWA={isPWA}
         />
       )}
 
@@ -561,6 +657,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           onUpdateTopUpAmount={onUpdateTopUpAmount}
           setSelectedReceiptUrl={setSelectedReceiptUrl}
           handleViewUserHistory={handleViewUserHistory}
+          isPWA={isPWA}
         />
       )}
 
@@ -575,6 +672,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           handleUploadCodes={handleUploadCodes}
           isUploadingCodes={isUploadingCodes}
           codesStats={codesStats}
+          isPWA={isPWA}
         />
       )}
 

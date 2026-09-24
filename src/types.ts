@@ -12,6 +12,7 @@ export interface Product {
   isGoldPromo?: boolean; // Strictly for membership or promo gold highlights
   imageType?: 'diamond-small' | 'diamond-medium' | 'diamond-large' | 'pass-level' | 'membership-weekly' | 'membership-monthly' | 'promo-bundle';
   badgeText?: string;
+  active?: boolean;
 }
 
 export type OrderStatus = 'Pendiente' | 'En proceso' | 'Completado' | 'Cancelado';

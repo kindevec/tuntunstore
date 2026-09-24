@@ -44,6 +44,21 @@ export const PayPhoneConfirmPage: React.FC<Props> = ({ currentUser }) => {
       if (!clientTransactionId) clientTransactionId = hashParams.get('clientTransactionId') || hashParams.get('clientTxId');
     }
 
+    // Fallback de estado previo (por si se reintenta tras limpiar URL)
+    if (!id && txDetails?.id) id = txDetails.id;
+    if (!clientTransactionId && txDetails?.clientTransactionId) clientTransactionId = txDetails.clientTransactionId;
+
+    // Fallback de localStorage
+    if (!clientTransactionId) {
+      try {
+        const savedOrder = localStorage.getItem('tuntun_pending_payphone_order');
+        if (savedOrder) {
+          const parsed = JSON.parse(savedOrder);
+          if (parsed?.clientTxId) clientTransactionId = parsed.clientTxId;
+        }
+      } catch (_) {}
+    }
+
     if (!id || !clientTransactionId) {
       setStatus('error');
       setErrorMessage('No se encontraron los identificadores de la transacción en la URL de retorno.');
@@ -78,6 +93,12 @@ export const PayPhoneConfirmPage: React.FC<Props> = ({ currentUser }) => {
               last4: result.last_four_digits || '••••'
             });
           }
+
+          // Limpiar orden pendiente y notificar actualización de saldo
+          try {
+            localStorage.removeItem('tuntun_pending_payphone_order');
+            window.dispatchEvent(new CustomEvent('tuntun_wallet_updated'));
+          } catch (_) {}
 
           // Limpiar parámetros de la URL para evitar re-ejecuciones accidentales
           try {
@@ -144,7 +165,7 @@ export const PayPhoneConfirmPage: React.FC<Props> = ({ currentUser }) => {
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
   };
 
-  if (!currentUser) {
+  if (!currentUser && status !== 'loading') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
         <h2 className="text-xl font-black text-white uppercase mb-2">Inicia Sesión</h2>

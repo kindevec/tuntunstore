@@ -39,6 +39,7 @@ export const PWAProfileView: React.FC<PWAProfileViewProps> = ({
 }) => {
   const [formData, setFormData] = useState<UserProfile>({
     ...currentUser,
+    name: currentUser.name || '',
     playerIdDefault: currentUser.playerIdDefault || '',
     gamerTag: currentUser.gamerTag || '',
     phone: currentUser.phone || '',
@@ -80,18 +81,54 @@ export const PWAProfileView: React.FC<PWAProfileViewProps> = ({
         <h3 className="text-base font-black text-white tracking-tight">{formData.name || 'Gamer TunTun'}</h3>
         <p className="text-xs text-zinc-400 font-mono mt-0.5">{formData.email}</p>
 
-        {/* Badge de Billetera */}
-        <div
-          onClick={() => {
-            triggerHaptic('light');
-            onNavigateToWallet();
-          }}
-          className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-bold text-xs cursor-pointer active:scale-95 transition-all"
-        >
-          <Wallet className="w-3.5 h-3.5" />
-          <span>Billetera: ${(currentUser.walletBalanceUSD ?? 0).toFixed(2)} USD</span>
-          <ArrowRight className="w-3 h-3" />
+        {/* Badges de Estado y Rol */}
+        <div className="flex items-center justify-center gap-2 mt-2">
+          <span
+            className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+              currentUser.role === 'admin'
+                ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+            }`}
+          >
+            {currentUser.role === 'admin' ? '⭐ Administrador' : '🎮 Gamer Oficial'}
+          </span>
+          {currentUser.role === 'admin' ? (
+            <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" /> Administrador
+            </span>
+          ) : (
+            <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" /> Gamer Verificado
+            </span>
+          )}
         </div>
+
+        {/* Badge de Acción Rápida: Panel Admin si es Admin, o Billetera si es Cliente */}
+        {currentUser.role === 'admin' ? (
+          <div
+            onClick={() => {
+              triggerHaptic('light');
+              window.location.hash = '#admin';
+            }}
+            className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 font-black text-xs cursor-pointer active:scale-95 transition-all shadow-sm"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+            <span>Ir al Panel Administrador</span>
+            <ArrowRight className="w-3 h-3 text-amber-400" />
+          </div>
+        ) : (
+          <div
+            onClick={() => {
+              triggerHaptic('light');
+              onNavigateToWallet();
+            }}
+            className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-bold text-xs cursor-pointer active:scale-95 transition-all"
+          >
+            <Wallet className="w-3.5 h-3.5" />
+            <span>Billetera: ${(currentUser.walletBalanceUSD ?? 0).toFixed(2)} USD</span>
+            <ArrowRight className="w-3 h-3" />
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -124,6 +161,39 @@ export const PWAProfileView: React.FC<PWAProfileViewProps> = ({
           </div>
         </div>
 
+        {/* 👤 GRUPO 0: DATOS DE LA CUENTA */}
+        <div className="p-4 rounded-2xl bg-[#061711] border border-emerald-500/20 space-y-3">
+          <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+            <User className="w-4 h-4" />
+            <span>Datos Personales</span>
+          </h4>
+
+          <div>
+            <label className="text-[11px] font-bold text-zinc-400 block mb-1">
+              Nombre de Usuario o Alias
+            </label>
+            <input
+              type="text"
+              value={formData.name || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Tu nombre o apodo"
+              className="w-full px-3.5 py-2.5 bg-[#03130d] border border-emerald-500/30 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-400"
+            />
+          </div>
+
+          <div>
+            <label className="text-[11px] font-bold text-zinc-400 block mb-1">
+              Correo Electrónico (Asociado a tu cuenta)
+            </label>
+            <input
+              type="email"
+              value={formData.email}
+              disabled
+              className="w-full px-3.5 py-2.5 bg-[#03130d]/50 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-500 cursor-not-allowed"
+            />
+          </div>
+        </div>
+
         {/* 🎮 GRUPO 1: DATOS DE JUEGO */}
         <div className="p-4 rounded-2xl bg-[#061711] border border-emerald-500/20 space-y-3">
           <h4 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
@@ -137,6 +207,7 @@ export const PWAProfileView: React.FC<PWAProfileViewProps> = ({
             </label>
             <input
               type="text"
+              inputMode="numeric"
               value={formData.playerIdDefault || ''}
               onChange={(e) => setFormData({ ...formData, playerIdDefault: e.target.value })}
               placeholder="Ej. 1234567890"
@@ -174,6 +245,7 @@ export const PWAProfileView: React.FC<PWAProfileViewProps> = ({
             </label>
             <input
               type="tel"
+              inputMode="tel"
               value={formData.phone || ''}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="Ej. 0991234567"
@@ -217,18 +289,20 @@ export const PWAProfileView: React.FC<PWAProfileViewProps> = ({
           )}
         </button>
 
-        {/* BOTÓN CERRAR SESIÓN */}
-        <button
-          type="button"
-          onClick={() => {
-            triggerHaptic('medium');
-            onLogout();
-          }}
-          className="w-full py-3 rounded-2xl bg-rose-950/40 hover:bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Cerrar Sesión</span>
-        </button>
+        {/* BOTÓN CERRAR SESIÓN CON SEPARACIÓN */}
+        <div className="pt-4 mt-6 border-t border-zinc-800/80">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('medium');
+              onLogout();
+            }}
+            className="w-full py-3 rounded-2xl bg-rose-950/40 hover:bg-rose-950/60 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Product } from '../../types';
 import { DiamondIcon } from '../DiamondIcon';
-import { Sparkles, Plus, Edit, Save, Trash2 } from 'lucide-react';
+import { Sparkles, Plus, Edit, Edit3, Save, Trash2, DollarSign, Check, X } from 'lucide-react';
 
 export interface AdminCatalogTabProps {
   products: Product[];
   onAddProduct: (product: Omit<Product, 'id'>) => void;
   onUpdateProduct: (product: Product) => void;
   onDeleteProduct: (productId: string) => void;
+  isPWA?: boolean;
 }
 
 export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
@@ -15,6 +16,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
   onAddProduct,
   onUpdateProduct,
   onDeleteProduct,
+  isPWA = false,
 }) => {
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -266,67 +268,132 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       )}
 
       {/* Mobile Catalog Cards (Visible on mobile/tablet) */}
-      <div className="grid grid-cols-1 gap-2.5 md:hidden">
+      <div className="grid grid-cols-1 gap-3 md:hidden">
         {products.map((p) => {
           const isEditingInline = editingInlinePriceId === p.id;
+          const isGold = p.isGoldPromo || p.category === 'memberships';
           return (
-            <div key={p.id} className="bg-zinc-800 rounded-xl border border-zinc-700/50 overflow-hidden shadow-md">
-              {/* Card Header */}
-              <div className="bg-emerald-600 px-2.5 py-1.5 flex items-center justify-between">
-                <div className="flex items-center gap-2 min-w-0">
-                  <DiamondIcon size="sm" variant={p.isGoldPromo || p.category === 'memberships' ? 'gold' : 'emerald'} />
+            <div 
+              key={p.id} 
+              className={`relative overflow-hidden rounded-2xl border transition-all duration-200 shadow-lg ${
+                isGold 
+                  ? 'bg-gradient-to-br from-[#121008] via-[#0d0c07] to-[#080703] border-amber-500/30 shadow-[0_4px_20px_rgba(245,158,11,0.08)]' 
+                  : 'bg-gradient-to-br from-zinc-900/95 via-[#08120e] to-[#030906] border-emerald-500/25 shadow-[0_4px_20px_rgba(16,185,129,0.08)]'
+              }`}
+            >
+              {/* Ambient Radial Glow */}
+              <div 
+                className={`absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl pointer-events-none ${
+                  isGold ? 'bg-amber-500/15' : 'bg-emerald-500/12'
+                }`} 
+              />
+
+              {/* Top Accent Gradient Line */}
+              <div 
+                className={`h-1 w-full ${
+                  isGold 
+                    ? 'bg-gradient-to-r from-amber-500 via-amber-300 to-amber-600' 
+                    : 'bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-500'
+                }`} 
+              />
+
+              <div className="p-3.5 space-y-3 relative z-10">
+                {/* Header: Icon, Name & Badges */}
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div 
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                        isGold 
+                          ? 'bg-amber-500/15 border-amber-500/35 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]' 
+                          : 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                      }`}
+                    >
+                      <DiamondIcon size="sm" variant={isGold ? 'gold' : 'emerald'} />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-black text-white text-sm sm:text-base leading-tight truncate">
+                        {p.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${isGold ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {p.category}
+                        </span>
+                        {p.isPopular && (
+                          <span className="text-[9px] font-black uppercase text-amber-300 bg-amber-400/10 px-1.5 py-0.2 rounded border border-amber-400/30">
+                            ★ Top
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Badges on right */}
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    {p.badgeText && (
+                      <span className="text-[9px] font-black text-white bg-white/10 px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap uppercase tracking-wide">
+                        {p.badgeText}
+                      </span>
+                    )}
+                    {p.isGoldPromo && (
+                      <span className="bg-amber-400 text-black text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.4)]">
+                        VIP DORADO
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Metrics Bar: Integrated, no ugly box-in-box */}
+                <div className="bg-black/50 backdrop-blur-md rounded-xl p-2.5 border border-white/10 flex items-center justify-between gap-3">
+                  {/* Diamantes */}
                   <div className="min-w-0">
-                    <p className="font-black text-white text-xs sm:text-sm truncate">{p.name}</p>
-                    <span className="text-[9px] sm:text-[10px] text-emerald-100/80 font-bold uppercase">{p.category}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {p.badgeText && (
-                    <span className="text-[8px] sm:text-[9px] text-white font-bold bg-white/20 px-1.5 py-0.5 rounded-full">
-                      {p.badgeText}
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-wider block">
+                      Diamantes FF
                     </span>
-                  )}
-                  {p.isGoldPromo && (
-                    <span className="bg-amber-400 text-black text-[8px] sm:text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full">
-                      VIP
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="p-2.5 space-y-2">
-                {/* Stats Row */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-zinc-900/60 p-1.5 sm:p-2.5 rounded-lg border border-zinc-700/40 text-center">
-                    <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase block mb-0.5">Diamantes</span>
-                    <p className="font-black text-emerald-400 text-xs sm:text-sm">
-                      {p.diamonds.toLocaleString()}
-                    </p>
-                    {p.bonusDiamonds > 0 && (
-                      <span className="text-[8px] text-emerald-300/70 font-bold">+{p.bonusDiamonds} bonus</span>
-                    )}
+                    <div className="flex items-baseline gap-1.5 mt-0.5">
+                      <span className="text-base sm:text-lg font-black text-emerald-400 tracking-tight">
+                        {p.diamonds.toLocaleString()}
+                      </span>
+                      {p.bonusDiamonds > 0 && (
+                        <span className="text-[9px] font-black text-emerald-300 bg-emerald-500/20 px-1.5 py-0.5 rounded-md border border-emerald-500/30 leading-none">
+                          +{p.bonusDiamonds} bonus
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="bg-zinc-900/60 p-1.5 sm:p-2.5 rounded-lg border border-zinc-700/40 text-center">
-                    <span className="text-[8px] sm:text-[9px] text-zinc-500 font-bold uppercase block mb-0.5">Precio USD</span>
+                  {/* Divider */}
+                  <div className="h-8 w-px bg-white/10 shrink-0" />
+
+                  {/* Precio USD */}
+                  <div className="text-right shrink-0">
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-wider block">
+                      Precio Venta
+                    </span>
                     {isEditingInline ? (
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={inlinePriceValue}
-                        onChange={(e) => setInlinePriceValue(e.target.value)}
-                        className="w-full px-1 py-0.5 rounded bg-zinc-800 border border-amber-400 text-amber-300 font-black text-xs text-center focus:outline-none"
-                        autoFocus
-                      />
+                      <div className="flex items-center justify-end gap-1 mt-0.5">
+                        <span className="text-amber-400 font-black text-sm">$</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={inlinePriceValue}
+                          onChange={(e) => setInlinePriceValue(e.target.value)}
+                          className="w-20 px-2 py-0.5 rounded-lg bg-black border-2 border-amber-400 text-amber-300 font-black text-sm text-center focus:outline-none shadow-[0_0_10px_rgba(251,191,36,0.3)]"
+                          autoFocus
+                        />
+                      </div>
                     ) : (
-                      <p className="font-black text-white text-xs sm:text-sm">${p.priceUSD.toFixed(2)}</p>
+                      <div className="flex items-baseline justify-end gap-1 mt-0.5">
+                        <span className="text-base sm:text-lg font-black text-white tracking-tight">
+                          ${p.priceUSD.toFixed(2)}
+                        </span>
+                        <span className="text-[10px] font-black text-zinc-400">USD</span>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                {/* Action Buttons Row */}
+                <div className="flex items-center gap-2 pt-0.5">
                   {isEditingInline ? (
                     <>
                       <button
@@ -337,15 +404,17 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           }
                           setEditingInlinePriceId(null);
                         }}
-                        className="col-span-2 py-1 bg-emerald-500 hover:bg-emerald-400 text-black text-[9px] sm:text-[10px] font-black rounded-md cursor-pointer uppercase transition-colors text-center"
+                        className="flex-1 py-2 px-3 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black uppercase rounded-xl cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.3)] flex items-center justify-center gap-1.5 transition-all active:scale-95"
                       >
-                        ✓ Guardar
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>Guardar</span>
                       </button>
                       <button
                         onClick={() => setEditingInlinePriceId(null)}
-                        className="py-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-[9px] sm:text-[10px] font-bold rounded-md cursor-pointer transition-colors text-center"
+                        className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold uppercase rounded-xl cursor-pointer transition-colors flex items-center justify-center gap-1"
                       >
-                        ✕
+                        <X className="w-4 h-4" />
+                        <span>Cancelar</span>
                       </button>
                     </>
                   ) : (
@@ -355,23 +424,27 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           setEditingInlinePriceId(p.id);
                           setInlinePriceValue(p.priceUSD.toString());
                         }}
-                        className="py-1 bg-zinc-700 hover:bg-zinc-600 text-amber-400 font-black text-[9px] sm:text-[10px] rounded-md uppercase transition-colors cursor-pointer text-center"
+                        className="flex-1 py-2 px-2.5 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                        title="Cambio rápido de precio"
                       >
-                        💲 Precio
+                        <DollarSign className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Precio</span>
                       </button>
 
                       <button
                         onClick={() => startEditProduct(p)}
-                        className="py-1 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] sm:text-[10px] rounded-md uppercase transition-colors cursor-pointer text-center"
+                        className="flex-[1.2] py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.35)] transition-all active:scale-95 cursor-pointer"
                       >
-                        ✏️ Editar
+                        <Edit3 className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Editar</span>
                       </button>
 
                       <button
                         onClick={() => onDeleteProduct(p.id)}
-                        className="py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-black text-[9px] sm:text-[10px] rounded-md border border-rose-500/30 transition-colors cursor-pointer text-center flex justify-center items-center"
+                        className="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center transition-all active:scale-95 cursor-pointer shrink-0"
+                        title="Eliminar producto"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </>
                   )}

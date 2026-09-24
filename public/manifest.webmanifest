@@ -8,8 +8,8 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "window-controls-overlay"],
   "prefer_related_applications": false,
-  "background_color": "#022c22",
-  "theme_color": "#10b981",
+  "background_color": "#05070a",
+  "theme_color": "#05070a",
   "orientation": "portrait",
   "categories": ["games", "shopping"],
   "lang": "es-EC",
@@ -21,5 +21,28 @@
     { "src": "/icons/pwa-maskable-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
     { "src": "/icons/pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icons/pwa-maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Recargar Diamantes",
+      "short_name": "Recargar",
+      "description": "Comprar diamantes y pases Free Fire al instante",
+      "url": "/?tab=catalog&source=pwa_shortcut",
+      "icons": [{ "src": "/icons/pwa-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Mi Billetera TunTun",
+      "short_name": "Billetera",
+      "description": "Ver saldo y recargar billetera",
+      "url": "/?tab=wallet&source=pwa_shortcut",
+      "icons": [{ "src": "/icons/pwa-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Mis Pedidos",
+      "short_name": "Pedidos",
+      "description": "Consultar estado de tus compras",
+      "url": "/?tab=orders&source=pwa_shortcut",
+      "icons": [{ "src": "/icons/pwa-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }

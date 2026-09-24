@@ -1,19 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Copy, Check } from 'lucide-react';
-import { Order, OrderStatus } from '../../types';
+import { Search, Copy, Check, Layers, Clock, RefreshCw, CheckCircle2, XCircle, Filter } from 'lucide-react';
+import { Order, OrderStatus, AdminDashboardStats } from '../../types';
 
 interface AdminOrdersTabProps {
+  orders?: Order[];
   searchQuery: string;
   setSearchQuery: (val: string) => void;
   statusFilter: string;
-  setStatusFilter: (val: string) => void;
+  setStatusFilter: (val: any) => void;
   filteredOrders: Order[];
   handleCopyPlayerId: (id: string) => void;
   copiedPlayerId: string | null;
   onUpdateOrderStatus: (id: string, status: OrderStatus) => void;
+  setSelectedReceiptUrl?: (url: string | null) => void;
+  isPWA?: boolean;
+  adminStats?: AdminDashboardStats;
 }
 
+const formatCount = (n: number): string => {
+  if (!n) return '';
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace('.0', '')}k`;
+  return n.toString();
+};
+
 export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
+  orders,
   searchQuery,
   setSearchQuery,
   statusFilter,
@@ -21,10 +32,12 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
   filteredOrders,
   handleCopyPlayerId,
   copiedPlayerId,
-  onUpdateOrderStatus
+  onUpdateOrderStatus,
+  isPWA = false,
+  adminStats,
 }) => {
   const [page, setPage] = useState(1);
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     setPage(1);
@@ -33,38 +46,144 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
   const totalPages = Math.max(1, Math.ceil(filteredOrders.length / ITEMS_PER_PAGE));
   const paginatedOrders = filteredOrders.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
+  // Status configuration for PWA icon filters
+  const statusConfigs = [
+    {
+      id: 'all' as const,
+      label: 'Todos los pedidos',
+      icon: Layers,
+      activeBg: 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]',
+      inactiveText: 'text-zinc-400 hover:text-zinc-200',
+      count: adminStats?.total_orders ?? orders?.length ?? filteredOrders.length,
+      badgeBg: '',
+    },
+    {
+      id: 'Pendiente' as const,
+      label: 'Pedidos pendientes',
+      icon: Clock,
+      activeBg: 'bg-amber-400 text-black shadow-[0_0_15px_rgba(251,191,36,0.4)]',
+      inactiveText: 'text-amber-400 hover:text-amber-300',
+      count: adminStats?.pending_orders ?? (orders ? orders.filter(o => o.status === 'Pendiente').length : 0),
+      badgeBg: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+    },
+    {
+      id: 'En proceso' as const,
+      label: 'En proceso de carga a ID',
+      icon: RefreshCw,
+      activeBg: 'bg-sky-400 text-black shadow-[0_0_15px_rgba(56,189,248,0.4)]',
+      inactiveText: 'text-sky-400 hover:text-sky-300',
+      count: adminStats?.in_progress_orders ?? (orders ? orders.filter(o => o.status === 'En proceso').length : 0),
+      badgeBg: 'bg-sky-500/20 text-sky-400 border border-sky-500/30',
+    },
+    {
+      id: 'Completado' as const,
+      label: 'Pedidos completados',
+      icon: CheckCircle2,
+      activeBg: 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]',
+      inactiveText: 'text-emerald-400 hover:text-emerald-300',
+      count: adminStats?.completed_orders ?? (orders ? orders.filter(o => o.status === 'Completado').length : 0),
+      badgeBg: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+    },
+    {
+      id: 'Cancelado' as const,
+      label: 'Pedidos cancelados',
+      icon: XCircle,
+      activeBg: 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.4)]',
+      inactiveText: 'text-rose-400 hover:text-rose-300',
+      count: adminStats?.cancelled_orders ?? (orders ? orders.filter(o => o.status === 'Cancelado').length : 0),
+      badgeBg: 'bg-rose-500/20 text-rose-400 border border-rose-500/30',
+    },
+  ];
+
   return (
     <div className="space-y-4 sm:space-y-6 w-full">
-      {/* Controls Bar */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-zinc-800 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-zinc-700/50">
-        <div className="w-full md:w-80 relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-zinc-500" />
+      {/* Controls Bar: Amplio, limpio y ergonómico */}
+      <div className="bg-gradient-to-b from-zinc-900/95 via-zinc-900/80 to-[#040c09] p-3 sm:p-4 rounded-2xl border border-white/10 shadow-xl space-y-3">
+        {/* Search input */}
+        <div className="relative w-full">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
           <input
             type="text"
             placeholder="Buscar por ID jugador, orden o cliente..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-semibold text-xs sm:text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/25 transition-all"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-black p-1 rounded-md cursor-pointer"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full md:w-auto">
-          <span className="text-xs text-zinc-400 font-black uppercase mb-1 sm:mb-0">Estado:</span>
-          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-hide">
-            {(['all', 'Pendiente', 'En proceso', 'Completado', 'Cancelado'] as const).map((st) => (
-              <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all whitespace-nowrap cursor-pointer shrink-0 ${
-                  statusFilter === st
-                    ? 'bg-emerald-500 text-black shadow-sm'
-                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-700'
-                }`}
-              >
-                {st}
-              </button>
-            ))}
+        {/* Status Filter Section */}
+        <div className="space-y-1.5 pt-0.5">
+          <div className="flex items-center justify-between px-0.5">
+            <span className="text-[10px] sm:text-xs text-zinc-400 font-black uppercase tracking-wider flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-emerald-400" /> Filtrar por Estado
+            </span>
+            <span className="text-[10px] font-bold text-zinc-500">
+              {filteredOrders.length} {filteredOrders.length === 1 ? 'pedido' : 'pedidos'}
+            </span>
           </div>
+
+          {isPWA ? (
+            /* Spacious 5-column icon bar for PWA with floating count badges */
+            <div className="grid grid-cols-5 gap-2 w-full pt-1 select-none">
+              {statusConfigs.map((cfg) => {
+                const Icon = cfg.icon;
+                const isActive = statusFilter === cfg.id;
+                return (
+                  <button
+                    key={cfg.id}
+                    type="button"
+                    onClick={() => setStatusFilter(cfg.id)}
+                    title={cfg.label}
+                    aria-label={cfg.label}
+                    className={`relative flex items-center justify-center h-11 rounded-xl transition-all duration-200 cursor-pointer select-none border ${
+                      isActive
+                        ? `${cfg.activeBg} border-transparent shadow-lg scale-105 ring-1 ring-white/25`
+                        : `bg-black/50 ${cfg.inactiveText} border-white/10 hover:border-white/20 hover:bg-zinc-800/80 active:scale-95`
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+                    {cfg.count > 0 && (
+                      <span
+                        className={`absolute -top-1.5 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-black flex items-center justify-center leading-none shadow-md ${
+                          isActive
+                            ? 'bg-black text-white border border-white/30'
+                            : cfg.badgeBg || 'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                        }`}
+                      >
+                        {formatCount(cfg.count)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            /* Original text buttons for normal desktop/browser */
+            <div className="flex items-center gap-2 overflow-x-auto w-full pb-1 scrollbar-hide">
+              {(['all', 'Pendiente', 'En proceso', 'Completado', 'Cancelado'] as const).map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setStatusFilter(st)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                    statusFilter === st
+                      ? 'bg-emerald-500 text-black shadow-md'
+                      : 'bg-zinc-900/90 text-zinc-400 hover:text-white border border-zinc-700/60'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -312,21 +431,21 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
 
       {/* Pagination Controls */}
       {filteredOrders.length > 0 && (
-        <div className="p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-800 border border-zinc-700/50 shadow-lg">
+        <div className="p-4 border-t border-zinc-700/50 flex items-center justify-between bg-zinc-900/50 rounded-xl sm:rounded-2xl">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="w-full sm:w-auto px-5 py-2.5 bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
           >
             Anterior
           </button>
-          <span className="text-xs text-zinc-400 font-bold bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-700">
-            Página {page} de {totalPages} <span className="text-zinc-600">|</span> <span className="text-emerald-400">{filteredOrders.length} Resultados</span>
+          <span className="text-xs text-zinc-400 font-bold">
+            Página {page} de {totalPages}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="w-full sm:w-auto px-5 py-2.5 bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
           >
             Siguiente
           </button>

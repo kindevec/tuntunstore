@@ -13,6 +13,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
+import { copyTextToClipboard } from '../../utils/clipboard';
 
 interface PWAOrdersViewProps {
   orders: Order[];
@@ -36,11 +37,13 @@ export const PWAOrdersView: React.FC<PWAOrdersViewProps> = ({
     return true;
   });
 
-  const handleCopyCode = (orderId: string, code: string) => {
+  const handleCopyCode = async (orderId: string, code: string) => {
     triggerHaptic('success');
-    navigator.clipboard.writeText(code);
-    setCopiedCodeId(orderId);
-    setTimeout(() => setCopiedCodeId(null), 2500);
+    const ok = await copyTextToClipboard(code);
+    if (ok) {
+      setCopiedCodeId(orderId);
+      setTimeout(() => setCopiedCodeId(null), 2500);
+    }
   };
 
   const getStatusBadge = (status: OrderStatus) => {
@@ -175,13 +178,13 @@ export const PWAOrdersView: React.FC<PWAOrdersViewProps> = ({
 
                         {/* Caja del código monoespaciado */}
                         <div className="flex items-center justify-between bg-black/60 border border-emerald-500/30 rounded-xl px-3 py-2">
-                          <span className="text-xs sm:text-sm font-black font-mono text-emerald-300 tracking-wider select-all truncate pr-2">
+                          <span className="text-xs sm:text-sm font-black font-mono text-emerald-300 tracking-wider select-all break-all pr-2">
                             {order.redemptionCode}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleCopyCode(order.id, order.redemptionCode!)}
-                            className="h-7 px-2.5 rounded-lg bg-emerald-400 hover:bg-emerald-300 text-black font-black text-[11px] uppercase tracking-wider flex items-center gap-1 shrink-0 active:scale-90 transition-all shadow-sm"
+                            className="h-7 px-2.5 rounded-lg bg-emerald-400 hover:bg-emerald-300 text-black font-black text-[11px] uppercase tracking-wider flex items-center gap-1 shrink-0 active:scale-90 transition-all shadow-sm cursor-pointer"
                           >
                             <Copy className="w-3 h-3" />
                             <span>{copiedCodeId === order.id ? '¡Copiado!' : 'Copiar'}</span>
@@ -191,14 +194,37 @@ export const PWAOrdersView: React.FC<PWAOrdersViewProps> = ({
                         {/* Botón directo a Garena */}
                         <div className="mt-2 flex items-center justify-between gap-2">
                           <a
-                            href="https://redeempins.com"
+                            href="https://redeem.hype.games/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 active:scale-95 transition-all text-center"
+                            className="flex-1 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 active:scale-95 transition-all text-center cursor-pointer"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                             <span>Abrir Página de Canje (Garena)</span>
                           </a>
+                        </div>
+
+                        {/* Guía de 4 pasos de canje oficial */}
+                        <div className="mt-2.5 p-2.5 rounded-xl bg-black/40 border border-emerald-500/20 text-[10.5px] text-zinc-300 space-y-1.5">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
+                            📋 Pasos para canjear en Garena:
+                          </span>
+                          <p className="flex items-center gap-1.5 text-zinc-300">
+                            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[9px] flex items-center justify-center shrink-0">1</span>
+                            <span>Entra a <a href="https://redeem.hype.games/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 font-bold underline hover:text-emerald-300">redeem.hype.games</a></span>
+                          </p>
+                          <p className="flex items-center gap-1.5 text-zinc-300">
+                            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[9px] flex items-center justify-center shrink-0">2</span>
+                            <span>Pega tu código PIN copiado arriba</span>
+                          </p>
+                          <p className="flex items-center gap-1.5 text-zinc-300">
+                            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[9px] flex items-center justify-center shrink-0">3</span>
+                            <span>Ingresa tu ID de Free Fire y toca <strong className="text-white">"Verificar ID"</strong></span>
+                          </p>
+                          <p className="flex items-center gap-1.5 text-zinc-300">
+                            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[9px] flex items-center justify-center shrink-0">4</span>
+                            <span>Toca <strong className="text-emerald-400">"Canjear"</strong> y entra a Free Fire para ver tus diamantes</span>
+                          </p>
                         </div>
                       </div>
                     ) : (

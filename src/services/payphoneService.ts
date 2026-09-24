@@ -103,7 +103,7 @@ export const payphoneService = {
 
       const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
       const responseUrl = `${currentOrigin}/`;
-      const cancellationUrl = `${currentOrigin}/`;
+      const cancellationUrl = `${currentOrigin}/#wallet`;
 
       const config: any = {
         token,
@@ -218,7 +218,7 @@ export const payphoneService = {
         };
       }
 
-      const errMsg = invokeError?.message || 'No se pudo confirmar la transacción con PayPhone';
+      const errMsg = data?.error || invokeError?.message || 'No se pudo confirmar la transacción con PayPhone';
       return { success: false, error: errMsg };
     } catch (error: any) {
       console.error('Error confirmando pago PayPhone:', error);

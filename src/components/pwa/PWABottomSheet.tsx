@@ -49,7 +49,7 @@ export const PWABottomSheet: React.FC<PWABottomSheetProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center select-none">
+        <div className="fixed inset-0 z-[150] flex items-end justify-center select-none">
           {/* Fondo oscuro con desenfoque suave */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -67,7 +67,7 @@ export const PWABottomSheet: React.FC<PWABottomSheetProps> = ({
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             style={{ maxHeight }}
-            className="relative w-full max-w-lg bg-gradient-to-b from-[#091a14] via-[#05130e] to-[#020b08] border-t border-emerald-500/30 rounded-t-[28px] shadow-[0_-12px_40px_rgba(0,0,0,0.9),0_0_20px_rgba(16,185,129,0.12)] flex flex-col z-10 overflow-hidden"
+            className="relative w-full max-w-lg bg-gradient-to-b from-[#091a14] via-[#05130e] to-[#020b08] border-t border-emerald-500/30 rounded-t-[28px] shadow-[0_-12px_40px_rgba(0,0,0,0.9),0_0_20px_rgba(16,185,129,0.12)] flex flex-col z-10 overflow-hidden pb-[env(safe-area-inset-bottom,0px)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Barra de arrastre táctil superior */}
@@ -102,7 +102,7 @@ export const PWABottomSheet: React.FC<PWABottomSheetProps> = ({
             )}
 
             {/* Contenido scrolleable del Bottom Sheet */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 overscroll-contain pb-[calc(env(safe-area-inset-bottom,0px)+24px)]">
+            <div className="flex-1 overflow-y-auto px-5 py-4 overscroll-contain pb-[calc(env(safe-area-inset-bottom,0px)+28px)]">
               {children}
             </div>
           </motion.div>

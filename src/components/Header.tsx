@@ -28,11 +28,11 @@ interface HeaderProps {
   onLoginGoogle: (role: 'client' | 'admin') => void;
   onLogout: () => void;
   onOpenLoginModal: () => void;
-  activeTab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login';
-  adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets';
+  activeTab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login' | 'payphone-confirm';
+  adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners';
   setActiveTab: (
-    tab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
-    subTab?: 'orders' | 'catalog' | 'email' | 'wallets'
+    tab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login' | 'payphone-confirm',
+    subTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners'
   ) => void;
   pendingOrdersCount: number;
   pendingTopUps?: any[];
@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleInteractionOutside = (event: MouseEvent | TouchEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setShowAuthMenu(false);
       }
@@ -68,14 +68,25 @@ export const Header: React.FC<HeaderProps> = ({
         setShowNotifs(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+
+    const handleScroll = () => {
+      setShowAuthMenu(false);
+      setShowNotifs(false);
+    };
+
+    document.addEventListener('mousedown', handleInteractionOutside as EventListener);
+    document.addEventListener('touchstart', handleInteractionOutside as EventListener, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleInteractionOutside as EventListener);
+      document.removeEventListener('touchstart', handleInteractionOutside as EventListener);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
   return (
-    <header id="header-main" className="sticky top-0 z-50 bg-black/80 backdrop-blur-md text-white border-b border-emerald-900/40 shadow-2xl">
+    <header id="header-main" className="sticky top-0 z-50 bg-black/80 backdrop-blur-md text-white border-b border-emerald-900/40 shadow-2xl pt-[env(safe-area-inset-top,0px)]">
       {/* Barra Superior Promocional PWA — 100% Clicleable */}
       <PWATopBar visible={showPWATopBar} onTriggerInstall={onTriggerInstallPWA} />
 
@@ -185,7 +196,10 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="relative" ref={notifRef}>
                 <button
-                  onClick={() => setShowNotifs(!showNotifs)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNotifs((prev) => !prev);
+                  }}
                   className="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-950/80 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] transition-all cursor-pointer relative group"
                   title="Notificaciones"
                 >
@@ -272,7 +286,10 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* 3. Botón Perfil / Avatar — Altura exacta h-10 (40px) */}
                 <button
                   id="user-profile-menu-btn"
-                  onClick={() => setShowAuthMenu(!showAuthMenu)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAuthMenu((prev) => !prev);
+                  }}
                   className={`flex items-center gap-1.5 sm:gap-2.5 h-10 px-1.5 sm:px-2.5 sm:pl-3 rounded-xl border transition-all text-left cursor-pointer shrink-0 shadow-lg hover:shadow-xl ${
                     isAdmin 
                       ? 'bg-gradient-to-r from-amber-950/40 to-black border-amber-500/30 hover:border-amber-400/50' 

@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Product, BankAccount, Order, UserProfile, OrderStatus, ProductCategory, HeroSlide, AdminDashboardStats } from './types';
 import { supabase } from './supabaseClient';
 import { convertImageToWebp, resizeImageForProcessing } from './utils/imageOptimization';
+import { calculateFileHash, checkReceiptDuplicate } from './utils/receiptSecurity';
 
 import { Header } from './components/Header';
-import { HeroBanner } from './components/HeroBanner';
-import { ProductCatalog } from './components/ProductCatalog';
-import { OrderModal } from './components/OrderModal';
-import { MyOrders } from './components/MyOrders';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { BottomNavigation } from './components/BottomNavigation';
-import { ProfileView } from './components/ProfileView';
-import { WalletView } from './components/WalletView';
 import { Footer } from './components/Footer';
 import { HomeView } from './components/HomeView';
+import { ProductCatalog } from './components/ProductCatalog';
 import { useIsPWA } from './hooks/useIsPWA';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // 🚀 Lazy-Loaded Components: Se descargan bajo demanda solo cuando el usuario accede a esa vista
+const HeroBanner = React.lazy(() => import('./components/HeroBanner').then(m => ({ default: m.HeroBanner })));
+const OrderModal = React.lazy(() => import('./components/OrderModal').then(m => ({ default: m.OrderModal })));
+const WalletView = React.lazy(() => import('./components/WalletView').then(m => ({ default: m.WalletView })));
+const MyOrders = React.lazy(() => import('./components/MyOrders').then(m => ({ default: m.MyOrders })));
+const ProfileView = React.lazy(() => import('./components/ProfileView').then(m => ({ default: m.ProfileView })));
 const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
 const PayPhoneConfirmPage = React.lazy(() => import('./components/PayPhoneConfirmPage').then(m => ({ default: m.PayPhoneConfirmPage })));
 const LoginPage = React.lazy(() => import('./components/LoginPage').then(m => ({ default: m.LoginPage })));
@@ -44,6 +46,8 @@ export default function App() {
     }
     return null;
   });
+  const currentUserRef = useRef<UserProfile | null>(currentUser);
+  currentUserRef.current = currentUser;
 
   const [products, setProducts] = useState<Product[]>([]);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
@@ -73,13 +77,15 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         fetchUserProfile(session.user.id);
+      } else {
+        updateCurrentActiveUser(null);
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         fetchUserProfile(session.user.id);
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         updateCurrentActiveUser(null);
       }
     });
@@ -235,8 +241,16 @@ export default function App() {
       })
       .subscribe();
 
+    const handleWalletUpdated = () => {
+      if (currentUser?.uid) {
+        fetchUserProfile(currentUser.uid);
+      }
+    };
+    window.addEventListener('tuntun_wallet_updated', handleWalletUpdated);
+
     return () => {
       supabase.removeChannel(channel);
+      window.removeEventListener('tuntun_wallet_updated', handleWalletUpdated);
     };
   }, [currentUser]);
 
@@ -340,59 +354,116 @@ export default function App() {
     }
   };
 
+  const mapSupabaseOrder = (o: any): Order => ({
+    id: o.id,
+    date: o.created_at,
+    userEmail: o.profiles?.email || 'N/A',
+    userName: o.profiles?.name || 'Cliente',
+    playerId: o.player_id,
+    playerTag: o.player_tag,
+    productId: o.product_id,
+    productName: o.product_name_snapshot,
+    diamondsTotal: o.diamonds_total,
+    priceUSD: o.price_usd,
+    bankName: o.payment_method === 'wallet_balance' ? 'Saldo TunTun USD' : 'Transferencia Bancaria',
+    receiptUrl: o.receipt_storage_path ? supabase.storage.from('receipts').getPublicUrl(o.receipt_storage_path).data.publicUrl : '',
+    receiptFileName: o.receipt_storage_path ? 'Comprobante Subido' : '',
+    status: o.status,
+    paymentMethod: o.payment_method,
+    isWalletTopUp: o.is_wallet_top_up,
+    redemptionCode: o.redemption_code || null,
+    statusHistory: (o.order_status_history || []).map((h: any) => ({
+      status: h.status,
+      timestamp: h.created_at,
+      note: h.note
+    })).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+  });
+
   const fetchOrders = async (userRole: string, userId: string) => {
-    let query = supabase
-      .from('orders')
-      .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
-      .order('created_at', { ascending: false });
-      
     if (userRole !== 'admin') {
-      query = query.eq('user_id', userId).limit(50);
-    } else {
-      // Para administradores: cargar todos los pedidos sin cortes arbitrarios
-      query = query.range(0, 9999);
-    }
-    
-    const { data: ordData, error } = await query;
-    if (error) {
-      console.error("Error fetching orders:", error);
+      const { data: ordData, error } = await supabase
+        .from('orders')
+        .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
+        .order('created_at', { ascending: false })
+        .eq('user_id', userId)
+        .limit(50);
+        
+      if (error) {
+        console.error("Error fetching orders:", error);
+        return;
+      }
+      if (ordData) {
+        setOrders(ordData.map(mapSupabaseOrder));
+      }
       return;
     }
-    if (ordData) {
-      setOrders(ordData.map((o: any) => ({
-        id: o.id,
-        date: o.created_at,
-        userEmail: o.profiles?.email || 'N/A',
-        userName: o.profiles?.name || 'Cliente',
-        playerId: o.player_id,
-        playerTag: o.player_tag,
-        productId: o.product_id,
-        productName: o.product_name_snapshot,
-        diamondsTotal: o.diamonds_total,
-        priceUSD: o.price_usd,
-        bankName: o.payment_method === 'wallet_balance' ? 'Saldo TunTun USD' : 'Transferencia Bancaria',
-        receiptUrl: o.receipt_storage_path ? supabase.storage.from('receipts').getPublicUrl(o.receipt_storage_path).data.publicUrl : '',
-        receiptFileName: o.receipt_storage_path ? 'Comprobante Subido' : '',
-        status: o.status,
-        paymentMethod: o.payment_method,
-        isWalletTopUp: o.is_wallet_top_up,
-        redemptionCode: o.redemption_code || null,
-        statusHistory: (o.order_status_history || []).map((h: any) => ({
-          status: h.status,
-          timestamp: h.created_at,
-          note: h.note
-        })).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-      })));
+
+    // Para administradores: Supabase PostgREST limita las respuestas a 1000 filas por defecto.
+    // Iteramos en lotes de 1000 para cargar la totalidad de los pedidos reales existentes.
+    let allOrdData: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data: batch, error } = await supabase
+        .from('orders')
+        .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
+        .order('created_at', { ascending: false })
+        .range(from, from + pageSize - 1);
+
+      if (error) {
+        console.error("Error fetching orders batch:", error);
+        break;
+      }
+
+      if (batch && batch.length > 0) {
+        allOrdData = allOrdData.concat(batch);
+        if (batch.length < pageSize) {
+          hasMore = false;
+        } else {
+          from += pageSize;
+        }
+      } else {
+        hasMore = false;
+      }
+    }
+
+    if (allOrdData.length > 0) {
+      setOrders(allOrdData.map(mapSupabaseOrder));
     }
   };
   
   const fetchAllUsersForAdmin = async () => {
-    const { data } = await supabase
-      .rpc('get_all_users_with_balance')
-      .range(0, 9999);
+    let allUsers: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    let hasMore = true;
 
-    if (data) {
-      setRegisteredUsers(data.map((p: any) => ({
+    while (hasMore) {
+      const { data, error } = await supabase
+        .rpc('get_all_users_with_balance')
+        .range(from, from + pageSize - 1);
+
+      if (error) {
+        console.error("Error fetching users batch:", error);
+        break;
+      }
+
+      if (data && data.length > 0) {
+        allUsers = allUsers.concat(data);
+        if (data.length < pageSize) {
+          hasMore = false;
+        } else {
+          from += pageSize;
+        }
+      } else {
+        hasMore = false;
+      }
+    }
+
+    if (allUsers.length > 0) {
+      setRegisteredUsers(allUsers.map((p: any) => ({
         uid: p.id,
         name: p.name || 'Usuario',
         email: p.email,
@@ -442,14 +513,19 @@ export default function App() {
       fetchOrders(userProfile.role, userProfile.uid);
       if (userProfile.role === 'admin') fetchAllUsersForAdmin();
 
-      if (window.location.hash.includes('login')) {
-        window.location.hash = data.role === 'admin' ? '#admin' : '#catalog';
+      if (window.location.hash.includes('login') || window.location.hash === '' || window.location.hash === '#') {
+        const targetTab = data.role === 'admin' ? 'admin' : 'catalog';
+        const targetHash = data.role === 'admin' ? '#admin' : '#catalog';
+        setLoginRedirectReason(null);
+        setActiveTab(targetTab);
+        window.location.hash = targetHash;
         showToast(`👋 Bienvenid@, ${data.name || data.email}`);
       }
     }
   };
 
   const updateCurrentActiveUser = (user: UserProfile | null) => {
+    currentUserRef.current = user;
     setCurrentUser(user);
     if (user) localStorage.setItem('tuntun_current_user', JSON.stringify(user));
     else {
@@ -475,10 +551,20 @@ export default function App() {
 
       // Handle PayPhone return query params (?id=...&clientTransactionId=...)
       const searchParams = new URLSearchParams(window.location.search);
-      const isPayPhoneReturn = searchParams.has('id') && (searchParams.has('clientTransactionId') || searchParams.has('clientTxId'));
+      const hashQuery = window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '';
+      const hashParams = new URLSearchParams(hashQuery);
+      const hasId = searchParams.has('id') || hashParams.has('id');
+      const hasTxId = searchParams.has('clientTransactionId') || searchParams.has('clientTxId') || hashParams.has('clientTransactionId') || hashParams.has('clientTxId');
+      const isPayPhoneReturn = hasId && hasTxId;
 
       if (isPayPhoneReturn) {
         tab = 'payphone-confirm';
+      }
+
+      // Soporte para acceso directo por query param en PWA (?tab=catalog, etc.)
+      const tabParam = searchParams.get('tab');
+      if (!cleanHash && tabParam) {
+        tab = tabParam as any;
       }
 
       // Handle PayPhone confirm route in hash (#payphone/confirm or #payphone-confirm)
@@ -486,18 +572,30 @@ export default function App() {
         tab = 'payphone-confirm';
       }
 
-      if (currentUser?.role === 'admin') {
-        if (tab === 'orders') { tab = 'admin'; subTab = 'orders'; window.history.replaceState(null, '', '#admin/orders'); }
-        else if (tab === 'wallet') { tab = 'admin'; subTab = 'wallets'; window.history.replaceState(null, '', '#admin/wallets'); }
-        else if (tab === 'profile') { tab = 'admin'; window.history.replaceState(null, '', '#admin'); }
+      // Obtener el usuario activo más reciente (evitando closures desactualizados de React)
+      let effectiveUser = currentUserRef.current || currentUser;
+      if (!effectiveUser) {
+        try {
+          const saved = localStorage.getItem('tuntun_current_user');
+          if (saved) effectiveUser = JSON.parse(saved);
+        } catch (_) {}
+      }
+
+      if (effectiveUser?.role === 'admin') {
+        setLoginRedirectReason(null);
+        if (!isPWA && tab === 'orders') { 
+          tab = 'admin'; 
+          subTab = 'orders'; 
+          window.history.replaceState(null, '', '#admin/orders'); 
+        }
       } else {
-        if (['orders', 'wallet', 'profile', 'admin'].includes(tab) && !currentUser) {
+        if (['orders', 'profile', 'admin'].includes(tab) && !effectiveUser) {
           setLoginRedirectReason(`Inicia sesión con Google para acceder a ${tab}.`);
           tab = 'login';
           window.location.hash = '#login';
           return;
         }
-        if (tab === 'admin' && currentUser?.role !== 'admin') {
+        if (tab === 'admin') {
           setLoginRedirectReason('El Panel de Administración es exclusivo.');
           tab = 'login';
           window.location.hash = '#login';
@@ -510,7 +608,7 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     handleHashChange();
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [currentUser]);
+  }, [currentUser, isPWA]);
 
   const openLoginWithReason = (reason: string) => {
     setLoginRedirectReason(reason);
@@ -594,42 +692,6 @@ export default function App() {
     window.location.hash = '#orders';
   };
 
-  useEffect(() => {
-    // Inject a debug function to the window to clear DB easily
-    (window as any).clearDb = async () => {
-      try {
-        console.log('Borrando todos los codigos...');
-        const { error: codesError } = await supabase.from('redemption_codes').delete().not('id', 'is', null);
-        console.log('Codigos borrados', codesError);
-
-        console.log('Vaciando saldos...');
-        const { data: users } = await supabase.rpc('get_all_users_with_balance');
-        if (users) {
-          for (const user of users) {
-            if (user.email === 'mkmcmiyako@gmail.com') continue;
-            
-            const bal = Number(user.wallet_balance_usd);
-            if (bal !== 0) {
-              console.log(`Poniendo en 0 el saldo de ${user.email}...`);
-              await supabase.from('wallet_transactions').insert({
-                user_id: user.id,
-                amount: -bal,
-                status: 'Aprobado',
-                type: 'admin_adjustment',
-                admin_note: 'Ajuste exacto a 0 por admin'
-              });
-            }
-          }
-        }
-        console.log('Borrados terminados. Por favor refresca la pagina.');
-        alert('Todo borrado exitosamente. La página se recargará ahora.');
-        window.location.reload();
-      } catch (err) {
-        console.error('Error in clearDb:', err);
-        alert('Error al borrar: ' + err);
-      }
-    };
-  }, []);
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: OrderStatus, note?: string) => {
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
@@ -709,6 +771,20 @@ export default function App() {
       showToast('🚫 Tu cuenta ha sido inhabilitada por la administración. No puedes realizar recargas de saldo.');
       return;
     }
+
+    // 1. Restricción de 1 Solicitud Pendiente Activa (Lógica de Negocio)
+    const { data: activePending } = await supabase
+      .from('wallet_transactions')
+      .select('id, amount')
+      .eq('user_id', currentUser.uid)
+      .eq('type', 'top_up')
+      .eq('status', 'Pendiente')
+      .limit(1);
+
+    if (activePending && activePending.length > 0) {
+      showToast(`⏳ Ya tienes una recarga pendiente de $${Number(activePending[0].amount).toFixed(2)} USD en revisión. Espera a que sea atendida.`);
+      return;
+    }
     
     let uploadedReceiptPath = null;
     let receiptHash = null;
@@ -727,22 +803,15 @@ export default function App() {
       }
 
       try {
-        // 1. Calculate SHA-256 Hash
+        // 1. Calculate SHA-256 Hash sobre el archivo original (determinista y exacto)
         try {
-          const arrayBuffer = await processableFile.arrayBuffer();
-          const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          receiptHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          receiptHash = await calculateFileHash(receiptFile);
 
-          // 2. Check for duplicate hash
-          const { data: duplicateCheck } = await supabase
-            .from('wallet_transactions')
-            .select('id')
-            .eq('receipt_hash', receiptHash)
-            .limit(1);
-
-          if (duplicateCheck && duplicateCheck.length > 0) {
-            verificationWarnings.push('⚠️ Imagen duplicada: este comprobante ya fue subido previamente.');
+          // 2. Check for duplicate hash (La Regla de Oro: Bloqueo Inmediato Global)
+          const isDuplicate = await checkReceiptDuplicate(receiptHash);
+          if (isDuplicate) {
+            showToast('⚠️ Este comprobante ya fue registrado previamente en el sistema. No se permiten comprobantes duplicados.');
+            return;
           }
         } catch (hashErr) {
           console.warn('Hash SHA-256 omitido por contexto del navegador:', hashErr);
@@ -998,9 +1067,9 @@ export default function App() {
   const activePendingOrdersCount = orders.filter((o) => o.status === 'Pendiente' || o.status === 'En proceso').length;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black">
+    <div className={`min-h-[100dvh] bg-[#05070a] text-white flex flex-col font-sans selection:bg-emerald-500 selection:text-black ${isPWA && (activeTab === 'catalog' || activeTab === 'login') ? 'h-[100dvh] max-h-[100dvh] overflow-hidden' : ''}`}>
       <div 
-        className="relative z-10 flex-1 flex flex-col bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
+        className={`relative ${activeTab === 'home' && !isPWA ? 'z-10' : ''} flex-1 flex flex-col ${activeTab === 'login' ? 'bg-[#05070a]' : 'bg-zinc-900'} ${activeTab === 'home' ? 'shadow-[0_20px_50px_rgba(0,0,0,0.5)]' : ''} ${isPWA && (activeTab === 'catalog' || activeTab === 'login') ? 'h-full max-h-full overflow-hidden' : ''}`} 
         style={activeTab === 'home' ? { marginBottom: `${footerHeight}px` } : undefined}
       >
       {toastMessage && (
@@ -1017,7 +1086,16 @@ export default function App() {
               onOpenLogin={() => openLoginWithReason('')}
               onNavigateToWallet={() => handleSelectTab('wallet')}
               onNavigateToProfile={() => handleSelectTab('profile')}
-              onNavigateToOrders={() => handleSelectTab('orders')}
+              onNavigateToOrders={() => {
+                if (currentUser?.role === 'admin') {
+                  handleSelectTab('admin', 'orders');
+                } else {
+                  handleSelectTab('orders');
+                }
+              }}
+              onNavigateToHome={() => handleSelectTab('home')}
+              onNavigateToAdmin={() => handleSelectTab('admin')}
+              onLogout={handleLogout}
               pendingOrdersCount={activePendingOrdersCount}
               pendingTopUpsCount={pendingTopUps.length}
             />
@@ -1038,8 +1116,9 @@ export default function App() {
           />
         )
       )}
-      <main className="flex-1">
-        <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+      <main className={`flex-1 ${isPWA && (activeTab === 'catalog' || activeTab === 'login') ? 'min-h-0 flex flex-col overflow-hidden h-full' : ''}`}>
+        <ErrorBoundary fallbackTitle="Error al cargar la sección">
+          <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
         {activeTab === 'home' && (
           isPWA ? (
             <PWAHomeView
@@ -1051,6 +1130,11 @@ export default function App() {
               onNavigateToCatalog={(category) => {
                 if (category) setSelectedCatalogCategory(category as any);
                 handleSelectTab('catalog');
+              }}
+              onNavigateToAdminBanners={() => {
+                setAdminSubTab('banners');
+                setActiveTab('admin');
+                window.location.hash = '#admin/banners';
               }}
             />
           ) : (
@@ -1102,28 +1186,61 @@ export default function App() {
         )}
         {activeTab === 'login' && (
           <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
-            <LoginPage onLoginGoogle={handleLoginGoogle} onLoginSuccess={() => {}} onRegisterUser={() => {}} redirectReason={loginRedirectReason} onBackToCatalog={() => window.location.hash = '#catalog'} registeredUsers={registeredUsers} />
+            <LoginPage 
+              isPWA={isPWA}
+              onLoginGoogle={handleLoginGoogle} 
+              onLoginSuccess={(user) => {
+                if (user?.uid) fetchUserProfile(user.uid);
+              }} 
+              onDirectLoginSuccess={(userId) => {
+                fetchUserProfile(userId);
+              }}
+              onRegisterUser={() => {}} 
+              redirectReason={loginRedirectReason} 
+              onBackToCatalog={() => window.location.hash = '#catalog'} 
+              registeredUsers={registeredUsers} 
+            />
           </React.Suspense>
         )}
-        {activeTab === 'wallet' && currentUser && (
-          isPWA ? (
-            <PWAWalletView
-              currentUser={currentUser}
-              bankAccounts={bankAccounts}
-              walletHistory={walletHistory}
-              onSubmitTopUpOrder={handleSubmitTopUpOrder}
-              onNavigateToCatalog={() => handleSelectTab('catalog')}
-              onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
-            />
+        {activeTab === 'wallet' && (
+          currentUser ? (
+            isPWA ? (
+              <PWAWalletView
+                currentUser={currentUser}
+                bankAccounts={bankAccounts}
+                walletHistory={walletHistory}
+                onSubmitTopUpOrder={handleSubmitTopUpOrder}
+                onNavigateToCatalog={() => handleSelectTab('catalog')}
+                onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
+              />
+            ) : (
+              <WalletView 
+                currentUser={currentUser} 
+                bankAccounts={bankAccounts} 
+                walletHistory={walletHistory} 
+                onSubmitTopUpOrder={handleSubmitTopUpOrder} 
+                onNavigateToCatalog={() => window.location.hash = '#catalog'} 
+                onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
+              />
+            )
           ) : (
-            <WalletView 
-              currentUser={currentUser} 
-              bankAccounts={bankAccounts} 
-              walletHistory={walletHistory} 
-              onSubmitTopUpOrder={handleSubmitTopUpOrder} 
-              onNavigateToCatalog={() => window.location.hash = '#catalog'} 
-              onPayPhoneGatewayStateChange={setIsPayPhoneGatewayActive}
-            />
+            <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4">
+                <span className="text-3xl">💎</span>
+              </div>
+              <h2 className="text-lg font-black text-white uppercase tracking-wider mb-2">
+                Billetera TunTun
+              </h2>
+              <p className="text-xs text-zinc-400 max-w-xs mb-6">
+                Inicia sesión para recargar tu saldo y ver tus movimientos.
+              </p>
+              <button
+                onClick={() => openLoginWithReason('Inicia sesión para ver tu billetera')}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer active:scale-95 transition-all"
+              >
+                Iniciar Sesión
+              </button>
+            </div>
           )
         )}
         {activeTab === 'orders' && (
@@ -1174,6 +1291,7 @@ export default function App() {
               products={products} 
               registeredUsers={registeredUsers} 
               adminStats={adminStats || undefined}
+              isPWA={isPWA}
               activeSubTab={adminSubTab as any} 
               onSubTabChange={(st) => window.location.hash = `#admin/${st}`} 
               onUpdateOrderStatus={handleUpdateOrderStatus} 
@@ -1184,6 +1302,7 @@ export default function App() {
               onUpdateTopUpStatus={handleUpdateTopUpStatus} 
               onUpdateTopUpAmount={handleUpdateTopUpAmount}
               onRefreshBanners={fetchInitialData}
+              onLogout={handleLogout}
               onUpdateUserWalletBalance={async (email, amount, isSetExact) => {
                 const user = registeredUsers.find(u => u.email === email);
                 if (user) {
@@ -1216,19 +1335,24 @@ export default function App() {
           </React.Suspense>
         )}
         </React.Suspense>
+        </ErrorBoundary>
       </main>
       </div>
-      <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
-      {currentUser?.role !== 'admin' && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
+      {selectedProductForOrder && (
+        <React.Suspense fallback={null}>
+          <OrderModal product={selectedProductForOrder} bankAccounts={bankAccounts} currentUser={currentUser} onClose={() => setSelectedProductForOrder(null)} onSubmitOrder={handleCreateOrder} onOpenWalletModal={() => { setSelectedProductForOrder(null); handleSelectTab('wallet'); }} />
+        </React.Suspense>
+      )}
+      {currentUser?.role !== 'admin' && activeTab === 'home' && (
         <WhatsAppButton 
-          hasBottomNav={(isPWA || !!currentUser) && activeTab !== 'login' && !isPayPhoneGatewayActive} 
+          hasBottomNav={(isPWA || !!currentUser) && !isPayPhoneGatewayActive} 
           visible={!isInstallPromptActive}
         />
       )}
       {!isPWA && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
         <Footer onSelectTab={handleSelectTab} activeTab={activeTab} />
       )}
-      {!isPayPhoneGatewayActive && (isPWA || currentUser) && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
+      {!isPayPhoneGatewayActive && !selectedProductForOrder && (isPWA || currentUser) && activeTab !== 'login' && activeTab !== 'payphone-confirm' && (
         <BottomNavigation 
           activeTab={activeTab} 
           adminSubTab={adminSubTab} 

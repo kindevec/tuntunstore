@@ -2,7 +2,8 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
     <link rel="icon" type="image/webp" href="/logo-transparent.webp" />
@@ -10,12 +11,17 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- Apple PWA Support -->
+    <!-- PWA Mobile Support (iOS / Android Standalone) -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="TunTun Store" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
     <title>TunTun Store | Recargas de Diamantes Free Fire en Ecuador</title>
+
+    <!-- Preload crítico del activo principal (LCP) -->
+    <link rel="preload" as="image" href="/logo-transparent.webp" type="image/webp" fetchpriority="high" />
 
     <!-- Preconnect a servicios críticos -->
     <link rel="preconnect" href="https://tkfpmmjnyzmulxkmtesf.supabase.co" crossorigin />
@@ -30,23 +36,33 @@
     <meta name="keywords" content="recargas free fire, diamantes free fire, recargas ecuador, pases free fire, membresias free fire, tuntun store, tienda gaming ecuador, recargar diamantes id, deuna, pichincha" />
     <meta name="author" content="TunTun Store" />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="#05070a" />
 
-    <!-- Open Graph / Redes Sociales (WhatsApp, Facebook, Instagram) -->
+    <!-- Open Graph / Redes Sociales (WhatsApp, Facebook, Instagram) — Estándar Kindev Oficial -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TunTun Store" />
     <meta property="og:url" content="https://tuntunstore-ec.web.app/" />
     <meta property="og:title" content="TunTun Store | Recargas de Diamantes Free Fire" />
     <meta property="og:description" content="Recargas de diamantes, pases y membresías para Free Fire con entrega rápida en Ecuador. Pagos seguros por transferencia y depósito." />
-    <meta property="og:image" content="https://tuntunstore-ec.web.app/logo.webp" />
-    <meta property="og:image:alt" content="TunTun Store Logo" />
+    <meta property="og:image" content="https://tuntunstore-ec.web.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://tuntunstore-ec.web.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="TunTun Store Logo Oficial" />
+    <!-- Formato cuadrado 1:1 optimizado para WhatsApp Preview -->
+    <meta property="og:image" content="https://tuntunstore-ec.web.app/og-image-square.png" />
+    <meta property="og:image:secure_url" content="https://tuntunstore-ec.web.app/og-image-square.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="800" />
     <meta property="og:locale" content="es_EC" />
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="TunTun Store | Recargas de Diamantes Free Fire" />
     <meta name="twitter:description" content="Recargas de diamantes, pases y membresías para Free Fire con entrega inmediata en Ecuador. Pagos 100% seguros." />
-    <meta name="twitter:image" content="https://tuntunstore-ec.web.app/logo.webp" />
+    <meta name="twitter:image" content="https://tuntunstore-ec.web.app/og-image.png" />
 
     <!-- Datos Estructurados Schema.org / JSON-LD para Google Search & Site Name -->
     <script type="application/ld+json">
@@ -106,13 +122,21 @@
       html, :root {
         font-size: 16px !important;
         line-height: 1.5 !important;
+        background-color: #05070a !important;
+      }
+      body {
+        background-color: #05070a !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overscroll-behavior-y: none;
       }
       #root {
         max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
-        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        background-color: #05070a !important;
       }
       /* Estilos fluidos y limpios para la pasarela PayPhone (Móvil y PC) */
       #pp-button,

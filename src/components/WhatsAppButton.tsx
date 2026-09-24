@@ -46,12 +46,16 @@ export const WhatsAppButton: React.FC<WhatsAppButtonProps> = ({
           animate={{ opacity: 1, scale: 1, x: 0 }}
           exit={{ opacity: 0, scale: 0.8, x: 20 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className={`fixed ${hasBottomNav ? 'bottom-20' : 'bottom-6'} right-0 z-[100] transition-[bottom] duration-300 flex flex-col items-end`}
+          className={`fixed ${
+            hasBottomNav
+              ? 'bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))]'
+              : 'bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))]'
+          } right-0 z-[45] transition-[bottom] duration-300 flex flex-col items-end`}
         >
       
       {/* Expanded Quick Chat Drawer */}
       {isOpen && (
-        <div className="mb-3 mr-4 w-80 bg-zinc-950 border border-emerald-500/30 text-white rounded-2xl shadow-2xl p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2">
+        <div className="mb-3 mr-4 w-80 max-h-[calc(100vh-150px)] overflow-y-auto bg-zinc-950 border border-emerald-500/30 text-white rounded-2xl shadow-2xl p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2">
           
           <div className="flex items-center justify-between border-b border-white/10 pb-2">
             <div className="flex items-center gap-2">

@@ -12,6 +12,7 @@ export interface AdminWalletsTabProps {
   onUpdateTopUpAmount?: (id: string, newAmount: number) => void;
   setSelectedReceiptUrl: (url: string) => void;
   handleViewUserHistory: (uid: string, name: string) => void;
+  isPWA?: boolean;
 }
 
 export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
@@ -21,7 +22,8 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   onUpdateTopUpStatus,
   onUpdateTopUpAmount,
   setSelectedReceiptUrl,
-  handleViewUserHistory
+  handleViewUserHistory,
+  isPWA = false,
 }) => {
   const [selectedProfileUser, setSelectedProfileUser] = useState<UserProfile | null>(null);
   const [showAutoApproveConfirm, setShowAutoApproveConfirm] = useState(false);
@@ -32,7 +34,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   const [page, setPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const USERS_PER_PAGE = 20;
+  const USERS_PER_PAGE = 10;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');

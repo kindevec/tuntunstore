@@ -5,10 +5,10 @@ import { UserProfile } from '../types';
 
 interface BottomNavigationProps {
   activeTab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login';
-  adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes';
+  adminSubTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners';
   setActiveTab: (
     tab: 'home' | 'catalog' | 'wallet' | 'orders' | 'profile' | 'admin' | 'login',
-    subTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes'
+    subTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners'
   ) => void;
   pendingOrdersCount: number;
   lowStockCodesCount?: number;
@@ -22,6 +22,7 @@ interface BottomNavigationProps {
 // ════════════════════════════════════════════════════════════════════════════
 const SCOOP_HALF_W = 50; // Ancho del hueco
 const SCOOP_DEPTH = 40;  // Profundidad del hueco hacia abajo
+const TOTAL_NAV_H = 160; // Altura generosa para cubrir safe-area-inset-bottom en cualquier dispositivo
 
 const getBorderPath = (cx: number, w: number) => {
   const leftX = cx - SCOOP_HALF_W;
@@ -29,7 +30,7 @@ const getBorderPath = (cx: number, w: number) => {
   return `M 0,1.5 L ${Math.max(0, leftX)},1.5 C ${cx - 28},1.5 ${cx - 16},${SCOOP_DEPTH} ${cx},${SCOOP_DEPTH} C ${cx + 16},${SCOOP_DEPTH} ${cx + 28},1.5 ${Math.min(w, rightX)},1.5 L ${w},1.5`;
 };
 
-const getBgPath = (cx: number, w: number, totalH: number) => {
+const getBgPath = (cx: number, w: number, totalH: number = TOTAL_NAV_H) => {
   const leftX = cx - SCOOP_HALF_W;
   const rightX = cx + SCOOP_HALF_W;
   return `M 0,1.5 L ${Math.max(0, leftX)},1.5 C ${cx - 28},1.5 ${cx - 16},${SCOOP_DEPTH} ${cx},${SCOOP_DEPTH} C ${cx + 16},${SCOOP_DEPTH} ${cx + 28},1.5 ${Math.min(w, rightX)},1.5 L ${w},1.5 L ${w},${totalH} L 0,${totalH} Z`;
@@ -77,10 +78,12 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   const getActiveIndex = useCallback((): number => {
     if (isAdmin) {
       if (activeTab === 'catalog') return 0;
-      if (activeTab === 'admin' && adminSubTab === 'orders') return 1;
-      if (activeTab === 'admin' && adminSubTab === 'wallets') return 2;
-      if (activeTab === 'admin' && adminSubTab === 'catalog') return 3;
-      if (activeTab === 'admin' && adminSubTab === 'codes') return 4;
+      if (activeTab === 'admin') {
+        if (adminSubTab === 'wallets') return 2;
+        if (adminSubTab === 'catalog') return 3;
+        if (adminSubTab === 'codes') return 4;
+        return 1; // Default a Pedidos
+      }
       return 0;
     }
     if (activeTab === 'catalog') return 0;
@@ -111,9 +114,8 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
       if (borderPathRef.current && bgPathRef.current) {
         const w = navWidthRef.current;
-        const totalH = 90;
         borderPathRef.current.setAttribute('d', getBorderPath(centerX, w));
-        bgPathRef.current.setAttribute('d', getBgPath(centerX, w, totalH));
+        bgPathRef.current.setAttribute('d', getBgPath(centerX, w, TOTAL_NAV_H));
       }
     }
   }, [activeIndex, rawX]);
@@ -140,12 +142,11 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     if (!isPWA) return;
     return springX.on('change', (cx) => {
       const w = navWidthRef.current;
-      const totalH = 90;
       if (borderPathRef.current) {
         borderPathRef.current.setAttribute('d', getBorderPath(cx, w));
       }
       if (bgPathRef.current) {
-        bgPathRef.current.setAttribute('d', getBgPath(cx, w, totalH));
+        bgPathRef.current.setAttribute('d', getBgPath(cx, w, TOTAL_NAV_H));
       }
     });
   }, [springX, isPWA]);
@@ -157,7 +158,6 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   if (isPWA) {
     const initialW = typeof window !== 'undefined' ? window.innerWidth : 390;
     const initialCx = initialW / 2;
-    const totalH = 90;
 
     return (
       <nav
@@ -167,7 +167,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       >
         {/* FONDO Y LÍNEA SUPERIOR SVG CON HUECO ONDULADO (MUTABLE DIRECTO POR SPRING, SIN FILTERS) */}
         <svg
-          className="absolute inset-0 w-full h-[calc(54px+env(safe-area-inset-bottom,0px)+30px)] pointer-events-none overflow-visible"
+          className="absolute inset-0 w-full h-[calc(54px+env(safe-area-inset-bottom,0px)+60px)] pointer-events-none overflow-visible"
         >
           <defs>
             <linearGradient id="tuntun-pwa-border-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -190,7 +190,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           {/* Fondo oscuro con hueco ondulado hacia abajo */}
           <path
             ref={bgPathRef}
-            d={getBgPath(initialCx, initialW, totalH)}
+            d={getBgPath(initialCx, initialW, TOTAL_NAV_H)}
             fill="#07090e"
             fillOpacity="0.98"
           />

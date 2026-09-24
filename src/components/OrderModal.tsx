@@ -68,10 +68,10 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   };
 
   return (
-    <div id="order-modal-backdrop" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md animate-in fade-in">
+    <div id="order-modal-backdrop" className="fixed inset-0 z-[150] flex items-center justify-center p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:pb-4 bg-black/90 backdrop-blur-md animate-in fade-in select-none">
       <div 
         id="order-modal-container"
-        className="relative w-full max-w-lg bg-zinc-950 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.2)] overflow-hidden border border-emerald-500/30 text-white flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-lg bg-zinc-950 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.2)] overflow-hidden border border-emerald-500/30 text-white flex flex-col max-h-[86vh] sm:max-h-[92vh]"
       >
         {/* Modal Header */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-emerald-900/40 bg-black flex items-center justify-between">

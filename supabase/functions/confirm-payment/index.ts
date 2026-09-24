@@ -68,7 +68,17 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify(rpcData), { 
+    const responsePayload = {
+      ...rpcData,
+      amount_usd: rpcData?.amount_usd ?? (confirmData?.amount ? confirmData.amount / 100 : undefined),
+      authorization_code: confirmData?.authorizationCode || rpcData?.authorization_code,
+      card_type: confirmData?.cardType || rpcData?.card_type || 'Tarjeta',
+      last_four_digits: confirmData?.lastDigits || rpcData?.last_four_digits || '••••',
+      transaction_id: confirmData?.transactionId || id,
+      error: rpcData?.error || confirmData?.message
+    };
+
+    return new Response(JSON.stringify(responsePayload), { 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
 

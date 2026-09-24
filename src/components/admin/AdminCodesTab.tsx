@@ -24,6 +24,7 @@ export interface AdminCodesTabProps {
   handleUploadCodes: (codes?: string[]) => Promise<{ success: boolean; error?: string; count?: number; blockedDuplicates?: string[] } | void>;
   isUploadingCodes: boolean;
   codesStats: CodeStat[];
+  isPWA?: boolean;
 }
 
 // Sanitize and parse raw text into unique, cleaned codes
@@ -55,6 +56,7 @@ export const AdminCodesTab: React.FC<AdminCodesTabProps> = ({
   handleUploadCodes,
   isUploadingCodes,
   codesStats,
+  isPWA = false,
 }) => {
   const [chips, setChips] = useState<string[]>([]);
   const [duplicatesFound, setDuplicatesFound] = useState<string[]>([]);

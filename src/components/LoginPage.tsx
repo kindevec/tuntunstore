@@ -3,26 +3,30 @@ import { supabase } from '../supabaseClient';
 import { 
   User, Lock, Mail, ShieldCheck, Sparkles, Gamepad2,
   Eye, EyeOff, ArrowLeft, LogIn, AlertCircle, Zap,
-  CreditCard, Headphones, Gem, CheckCircle2, Diamond
+  CreditCard, Headphones, Gem, CheckCircle2, Diamond, Loader2
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface LoginPageProps {
   onLoginGoogle: (role: 'client' | 'admin') => void;
   onLoginSuccess: (user: UserProfile) => void;
+  onDirectLoginSuccess?: (userId: string) => void;
   onRegisterUser: (name: string, email: string, playerId?: string) => void;
   redirectReason?: string | null;
   onBackToCatalog: () => void;
   registeredUsers: UserProfile[];
+  isPWA?: boolean;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
   onLoginGoogle,
   onLoginSuccess,
+  onDirectLoginSuccess,
   onRegisterUser,
   redirectReason,
   onBackToCatalog,
   registeredUsers,
+  isPWA = false,
 }) => {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,6 +38,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [playerId, setPlayerId] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Translate Supabase auth errors to friendly Spanish messages
   const translateAuthError = (errorMsg: string): string => {
@@ -74,15 +79,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password.trim(),
-    });
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
 
-    if (error) {
-      setErrorMessage(translateAuthError(error.message));
-    } else if (data.user) {
-      // The onAuthStateChange listener in App.tsx will pick this up automatically
+      if (error) {
+        setIsSubmitting(false);
+        setErrorMessage(translateAuthError(error.message));
+      } else if (data.user) {
+        if (onDirectLoginSuccess) {
+          onDirectLoginSuccess(data.user.id);
+        }
+      }
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setErrorMessage(err.message || 'Error inesperado al iniciar sesión.');
     }
   };
 
@@ -121,42 +135,64 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 lg:static lg:h-[100dvh] w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden">
+    <div className={`${isPWA ? 'h-full min-h-[100dvh] overscroll-none' : 'fixed inset-0 lg:static lg:h-[100dvh]'} w-full bg-[#05070a] text-white flex flex-col lg:flex-row overflow-hidden`}>
       
       {/* LEFT COLUMN: Clean Form Panel */}
-      <div className="w-full lg:w-1/2 flex flex-col p-3 sm:p-6 lg:p-16 relative z-10 h-full overflow-hidden">
+      <div className={`w-full lg:w-1/2 flex flex-col p-3.5 sm:p-6 lg:p-16 relative z-10 h-full ${isPWA ? 'min-h-full overflow-y-auto overscroll-contain pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)]' : 'overflow-hidden'}`}>
         
         {/* Subtle ambient glow for mobile */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-emerald-500/8 rounded-full blur-[100px] pointer-events-none lg:hidden" />
         <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-emerald-900/20 to-transparent pointer-events-none lg:hidden" />
 
-
         {/* Center: Logo + Brand + Form */}
-        <div className="flex-1 flex flex-col justify-center items-center w-full max-w-md mx-auto relative z-10">
+        <div className={`flex-1 ${isPWA ? 'my-auto' : ''} flex flex-col justify-center items-center w-full max-w-md mx-auto relative z-10`}>
           
-          {/* ----------------- MOBILE LOGO (Premium Animated) ----------------- */}
-          <div className={`relative flex justify-center w-full lg:hidden shrink-0 transition-all duration-500 ${authMode === 'login' ? 'mb-4 pt-2' : 'mb-2 pt-1'}`}>
-            {/* Outer Glow / Halo */}
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500/30 rounded-full animate-pulse pointer-events-none transition-all duration-500 ${authMode === 'login' ? 'w-52 h-52 sm:w-64 sm:h-64 blur-[50px]' : 'w-40 h-40 sm:w-48 sm:h-48 blur-[40px]'}`} />
-            {/* Animated Rotating Rings */}
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin transition-all duration-500 ${authMode === 'login' ? 'w-40 h-40 sm:w-48 sm:h-48' : 'w-28 h-28 sm:w-36 sm:h-36'}`} style={{ animationDuration: '4s' }} />
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin transition-all duration-500 ${authMode === 'login' ? 'w-[176px] h-[176px] sm:w-[208px] sm:h-[208px]' : 'w-[130px] h-[130px] sm:w-[160px] sm:h-[160px]'}`} style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
-            
-            {/* The Logo Itself */}
-            <div className={`relative z-10 rounded-full p-1.5 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_30px_rgba(16,185,129,0.3)] ring-2 ring-black/50 transition-all duration-500 ${authMode === 'login' ? 'w-32 h-32 sm:w-40 sm:h-40' : 'w-24 h-24 sm:w-32 sm:h-32'}`}>
-              <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
-                <img
-                  src="/logo.webp"
-                  alt="TunTun Store"
-                  className="w-full h-full object-cover rounded-full border-2 border-black"
-                />
-              </div>
-              {/* Micro-badge on logo */}
-              <div className={`absolute bg-emerald-500 text-black rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] border-2 border-black transition-all duration-500 ${authMode === 'login' ? '-bottom-1 -right-1 p-1.5' : '-bottom-0.5 -right-0.5 p-1'}`}>
-                <ShieldCheck className={authMode === 'login' ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+          {/* ----------------- MOBILE LOGO: PWA VS BROWSER ----------------- */}
+          {isPWA ? (
+            /* 📱 MODO PWA: Emblema Grandioso 2x que ocupa el espacio superior */
+            <div className="relative flex flex-col items-center justify-center w-full lg:hidden shrink-0 transition-all duration-300 py-4 sm:py-6 mb-4 sm:mb-6 overflow-visible">
+              {/* Outer Glow / Halo */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] min-[380px]:w-[360px] min-[380px]:h-[360px] sm:w-[420px] sm:h-[420px] bg-emerald-500/20 rounded-full blur-[60px] pointer-events-none" />
+              
+              {/* Animated Rotating Rings */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[290px] h-[290px] min-[380px]:w-[330px] min-[380px]:h-[330px] sm:w-[380px] sm:h-[380px] rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin pointer-events-none" style={{ animationDuration: '9s', animationDirection: 'reverse' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[265px] h-[265px] min-[380px]:w-[300px] min-[380px]:h-[300px] sm:w-[345px] sm:h-[345px] rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin pointer-events-none" style={{ animationDuration: '6s' }} />
+              
+              {/* The Logo Itself (2x size: 240px - 256px on mobile, 288px on sm) */}
+              <div className="relative z-10 rounded-full p-2 sm:p-2.5 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_50px_rgba(16,185,129,0.4)] ring-4 ring-black/70 w-56 h-56 min-[380px]:w-64 min-[380px]:h-64 sm:w-72 sm:h-72 shrink-0">
+                <div className="w-full h-full rounded-full p-[3px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900 shadow-inner">
+                  <img
+                    src="/logo.webp"
+                    alt="TunTun Store"
+                    className="w-full h-full object-cover rounded-full border-2 border-black"
+                  />
+                </div>
+                {/* Micro-badge on logo */}
+                <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 p-2 sm:p-2.5 bg-gradient-to-br from-emerald-400 to-emerald-600 text-black rounded-full shadow-[0_0_20px_rgba(16,185,129,0.7)] border-2 border-black">
+                  <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" />
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            /* 🌐 MODO NAVEGADOR NORMAL: 100% Original e Intacto */
+            <div className={`relative flex justify-center w-full lg:hidden shrink-0 transition-all duration-500 ${authMode === 'login' ? 'mb-4 pt-2' : 'mb-2 pt-1'}`}>
+              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500/30 rounded-full animate-pulse pointer-events-none transition-all duration-500 ${authMode === 'login' ? 'w-52 h-52 sm:w-64 sm:h-64 blur-[50px]' : 'w-40 h-40 sm:w-48 sm:h-48 blur-[40px]'}`} />
+              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-t-2 border-r-2 border-emerald-400/50 animate-spin transition-all duration-500 ${authMode === 'login' ? 'w-40 h-40 sm:w-48 sm:h-48' : 'w-28 h-28 sm:w-36 sm:h-36'}`} style={{ animationDuration: '4s' }} />
+              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-b-2 border-l-2 border-emerald-500/30 animate-spin transition-all duration-500 ${authMode === 'login' ? 'w-[176px] h-[176px] sm:w-[208px] sm:h-[208px]' : 'w-[130px] h-[130px] sm:w-[160px] sm:h-[160px]'}`} style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+              <div className={`relative z-10 rounded-full p-1.5 bg-gradient-to-b from-zinc-800 via-zinc-950 to-black shadow-[0_0_30px_rgba(16,185,129,0.3)] ring-2 ring-black/50 transition-all duration-500 ${authMode === 'login' ? 'w-32 h-32 sm:w-40 sm:h-40' : 'w-24 h-24 sm:w-32 sm:h-32'}`}>
+                <div className="w-full h-full rounded-full p-[2px] bg-gradient-to-tr from-emerald-600 via-emerald-400 to-emerald-900">
+                  <img
+                    src="/logo.webp"
+                    alt="TunTun Store"
+                    className="w-full h-full object-cover rounded-full border-2 border-black"
+                  />
+                </div>
+                <div className={`absolute bg-emerald-500 text-black rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] border-2 border-black transition-all duration-500 ${authMode === 'login' ? '-bottom-1 -right-1 p-1.5' : '-bottom-0.5 -right-0.5 p-1'}`}>
+                  <ShieldCheck className={authMode === 'login' ? 'w-4 h-4' : 'w-3.5 h-3.5'} />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ----------------- DESKTOP LOGO (Original) ----------------- */}
           <div className="hidden lg:flex items-center gap-3.5 mb-6 self-start">
@@ -285,9 +321,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 sm:py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer active:scale-[0.98] !mt-4 lg:!mt-3"
+                  disabled={isSubmitting}
+                  className="w-full py-2.5 sm:py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-black font-black text-sm uppercase tracking-wider rounded-xl shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-all cursor-pointer active:scale-[0.98] !mt-4 lg:!mt-3 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Iniciar Sesión
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Ingresando...</span>
+                    </>
+                  ) : (
+                    <span>Iniciar Sesión</span>
+                  )}
                 </button>
 
                 <div className="flex items-center gap-3 !mt-4 lg:!mt-3">
@@ -365,8 +409,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     <Gamepad2 className="w-4 h-4 text-zinc-500 lg:text-zinc-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={playerId}
-                      onChange={(e) => setPlayerId(e.target.value)}
+                      onChange={(e) => setPlayerId(e.target.value.replace(/\D/g, ''))}
                       placeholder="Ej. 748920193"
                       className="w-full bg-zinc-900/80 lg:bg-zinc-950/80 border border-zinc-800/80 rounded-xl pl-10 pr-4 py-2.5 sm:py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
                     />

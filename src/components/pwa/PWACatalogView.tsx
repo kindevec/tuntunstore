@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { Product, UserProfile, ProductCategory } from '../../types';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Product, UserProfile } from '../../types';
 import { PWAProductCard } from './PWAProductCard';
 import { PWABottomSheet } from './PWABottomSheet';
-import { Search, Wallet, CheckCircle2, AlertCircle, ShoppingBag, X, ArrowRight, User } from 'lucide-react';
+import { Wallet, CheckCircle2, AlertCircle, ShoppingBag, ArrowRight, Zap } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
 
 interface PWACatalogViewProps {
@@ -20,40 +20,43 @@ export const PWACatalogView: React.FC<PWACatalogViewProps> = ({
   onNavigateToWallet,
   onOpenLogin,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [playerId, setPlayerId] = useState(currentUser?.playerIdDefault || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Sincronizar ID de jugador si cambia el usuario
-  React.useEffect(() => {
-    if (currentUser?.playerIdDefault && !playerId) {
-      setPlayerId(currentUser.playerIdDefault);
+
+  // Lista única sin filtros ni buscador (los 6 productos directos ordenados por diamantes de menor a mayor)
+  const displayProducts = useMemo(() => {
+    const activeList = products.filter((p) => p.active !== false);
+    const list = activeList.length > 0 ? activeList : products;
+    return [...list].sort((a, b) => (a.diamonds || a.priceUSD || 0) - (b.diamonds || b.priceUSD || 0));
+  }, [products]);
+
+  // Estado y tracking de "pasar el dedo por encima" en móvil
+  const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const lastActiveIdRef = useRef<string | null>(null);
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const card = el?.closest('[data-product-card-id]');
+    const cardId = card?.getAttribute('data-product-card-id') || null;
+
+    if (cardId && cardId !== lastActiveIdRef.current) {
+      lastActiveIdRef.current = cardId;
+      setActiveCardId(cardId);
+      triggerHaptic('light');
+    } else if (!cardId && lastActiveIdRef.current) {
+      lastActiveIdRef.current = null;
+      setActiveCardId(null);
     }
-  }, [currentUser, playerId]);
+  };
 
-  // Categorías con íconos gamer
-  const categories: { id: string; label: string; icon: string }[] = [
-    { id: 'all', label: 'Todos', icon: '💎' },
-    { id: 'diamonds', label: 'Diamantes', icon: '⚡' },
-    { id: 'passes', label: 'Pases', icon: '👑' },
-    { id: 'memberships', label: 'Membresías', icon: '🎟️' },
-    { id: 'promos', label: 'Promos', icon: '🔥' },
-  ];
-
-  // Filtrado reactivo en tiempo real
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
-      const matchSearch =
-        !searchQuery.trim() ||
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCat && matchSearch;
-    });
-  }, [products, selectedCategory, searchQuery]);
+  const handleTouchEnd = () => {
+    lastActiveIdRef.current = null;
+    setActiveCardId(null);
+  };
 
   const handleOpenProduct = (product: Product) => {
     setSelectedProduct(product);
@@ -62,17 +65,12 @@ export const PWACatalogView: React.FC<PWACatalogViewProps> = ({
 
   const handleConfirmPurchase = async () => {
     if (!selectedProduct) return;
-    if (!playerId.trim()) {
-      setErrorMsg('Ingresa tu ID de jugador Free Fire');
-      triggerHaptic('error');
-      return;
-    }
 
     setIsSubmitting(true);
     setErrorMsg('');
 
     try {
-      await onPurchaseProduct(selectedProduct, playerId.trim());
+      await onPurchaseProduct(selectedProduct, currentUser?.playerIdDefault || 'N/A');
       triggerHaptic('success');
       setSelectedProduct(null);
     } catch (err: any) {
@@ -87,86 +85,57 @@ export const PWACatalogView: React.FC<PWACatalogViewProps> = ({
   const hasEnoughBalance = selectedProduct ? walletBalance >= selectedProduct.priceUSD : false;
 
   return (
-    <div className="min-h-screen bg-[#020b08] text-white pb-24">
-      {/* Buscador Rápido Fijo */}
-      <div className="px-3.5 pt-3 pb-2">
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar recarga, diamantes, pase..."
-            className="w-full pl-10 pr-9 py-2.5 bg-[#071711] border border-emerald-500/25 rounded-2xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400/60 transition-colors"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => {
-                triggerHaptic('light');
-                setSearchQuery('');
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          )}
+    <div className="h-full w-full max-h-full bg-[#020b08] text-white flex flex-col justify-between overflow-hidden px-2.5 sm:px-3 pt-1 sm:pt-1.5 pb-[calc(56px+env(safe-area-inset-bottom,0px)+8px)] select-none">
+      {/* Cabecera Gamer Compacta (shrink-0) */}
+      <div className="shrink-0 flex items-center justify-between px-1 py-0.5 mb-1">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399] shrink-0" />
+          <div className="leading-tight">
+            <span className="text-[8.5px] font-black uppercase tracking-widest text-emerald-400 block">
+              Catálogo Oficial
+            </span>
+            <h2 className="text-xs sm:text-sm font-black uppercase italic tracking-tight text-white leading-none">
+              PACKS Y <span className="text-amber-400">DIAMANTES</span>
+            </h2>
+          </div>
         </div>
-      </div>
 
-      {/* Chips de Categorías Horizontales con Scroll Táctil */}
-      <div className="flex items-center gap-2 px-3.5 pb-3 overflow-x-auto no-scrollbar select-none">
-        {categories.map((cat) => {
-          const isActive = selectedCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => {
-                triggerHaptic('light');
-                setSelectedCategory(cat.id);
-              }}
-              className={`h-8 px-3.5 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 transition-all cursor-pointer active:scale-95 ${
-                isActive
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-black shadow-[0_0_12px_rgba(16,185,129,0.4)]'
-                  : 'bg-[#071a13] border border-emerald-500/20 text-zinc-300 hover:text-white hover:border-emerald-500/40'
-              }`}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Resumen de Productos Encontrados */}
-      <div className="px-3.5 pb-2 flex items-center justify-between text-[11px] text-zinc-400">
-        <span>{filteredProducts.length} productos disponibles</span>
-        {currentUser && (
-          <span className="font-mono text-emerald-400 font-bold">
-            Tu saldo: ${walletBalance.toFixed(2)}
-          </span>
+        {currentUser?.role === 'admin' ? (
+          <a
+            href="#admin/catalog"
+            onClick={() => triggerHaptic('light')}
+            className="text-[9px] font-black text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 active:scale-95 transition-transform shrink-0"
+          >
+            <span>⚙️ CRUD</span>
+          </a>
+        ) : (
+          <div className="flex items-center gap-1.5 bg-[#051810]/90 border border-emerald-500/25 px-2.5 py-0.5 rounded-full shrink-0">
+            <span className="text-[8.5px] font-bold text-zinc-400 uppercase">Garena</span>
+            <span className="text-[8.5px] font-black text-emerald-400">⚡ PIN Directo</span>
+          </div>
         )}
       </div>
 
-      {/* Grid de 2 Columnas Móvil Gamer */}
-      {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-2 gap-2.5 px-3.5">
-          {filteredProducts.map((product) => (
-            <PWAProductCard key={product.id} product={product} onSelect={handleOpenProduct} />
+      {/* Grid de los 6 Productos en 3 filas proporcionales exactas (flex-1 min-h-0) */}
+      {displayProducts.length > 0 ? (
+        <div
+          className="flex-1 min-h-0 grid grid-cols-2 grid-rows-3 gap-2 touch-pan-y"
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+        >
+          {displayProducts.map((product) => (
+            <PWAProductCard
+              key={product.id}
+              product={product}
+              isExternalActive={activeCardId === product.id}
+              onSelect={handleOpenProduct}
+            />
           ))}
         </div>
       ) : (
-        <div className="py-16 text-center px-4">
-          <p className="text-zinc-400 text-sm">No encontramos productos con ese filtro.</p>
-          <button
-            onClick={() => {
-              triggerHaptic('light');
-              setSelectedCategory('all');
-              setSearchQuery('');
-            }}
-            className="mt-3 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold"
-          >
-            Ver todos los productos
-          </button>
+        <div className="flex-1 flex items-center justify-center text-center px-4">
+          <p className="text-zinc-400 text-xs">No hay productos disponibles en este momento.</p>
         </div>
       )}
 
@@ -184,9 +153,9 @@ export const PWACatalogView: React.FC<PWACatalogViewProps> = ({
               <div className="w-12 h-12 rounded-xl bg-[#03130d] border border-emerald-500/20 flex items-center justify-center shrink-0">
                 <img
                   src={
-                    selectedProduct.diamonds >= 1000
+                    selectedProduct.imageType === 'diamond-large' || (!selectedProduct.imageType && selectedProduct.diamonds >= 2000)
                       ? '/coofre.webp'
-                      : selectedProduct.diamonds >= 300
+                      : selectedProduct.imageType === 'diamond-medium' || (!selectedProduct.imageType && selectedProduct.diamonds >= 500 && selectedProduct.diamonds < 2000)
                       ? '/cofresito.webp'
                       : '/diamante.webp'
                   }
@@ -233,22 +202,19 @@ export const PWACatalogView: React.FC<PWACatalogViewProps> = ({
               </div>
             ) : (
               <>
-                {/* Input de ID de Free Fire */}
-                <div>
-                  <label className="text-[11px] font-bold text-zinc-300 mb-1 flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-emerald-400" />
-                    ID de Jugador Free Fire (Opcional para códigos PIN):
-                  </label>
-                  <input
-                    type="text"
-                    value={playerId}
-                    onChange={(e) => setPlayerId(e.target.value)}
-                    placeholder="Ej. 1234567890"
-                    className="w-full px-3.5 py-2.5 bg-[#03130d] border border-emerald-500/30 rounded-xl text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-400"
-                  />
-                  <span className="text-[10px] text-zinc-400 mt-1 block">
-                    ⚡ Se te entregará un código de canje oficial para canjear en Garena.
-                  </span>
+                {/* Info de Entrega Inmediata de Código Oficial Garena */}
+                <div className="p-3 rounded-2xl bg-[#03140e] border border-emerald-500/25 flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0 text-emerald-400">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[11px] font-black uppercase text-white block leading-tight">
+                      Entrega Automática e Inmediata
+                    </span>
+                    <span className="text-[10px] text-zinc-400 block mt-0.5 leading-snug">
+                      Recibirás tu código oficial de Garena listo para canjear en Mis Pedidos.
+                    </span>
+                  </div>
                 </div>
 
                 {/* Comprobación de Saldo de Billetera */}

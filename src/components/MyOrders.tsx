@@ -190,7 +190,7 @@ export const MyOrders: React.FC<MyOrdersProps> = ({
                       Instrucciones de Canje
                     </span>
 
-                    <p>1. Ingresa al sitio oficial de Free Fire <a href="https://redeempins.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300">https://redeempins.com/</a></p>
+                    <p>1. Ingresa al sitio oficial de Free Fire <a href="https://redeem.hype.games/" target="_blank" rel="noopener noreferrer" className="text-emerald-400 underline hover:text-emerald-300">https://redeem.hype.games/</a></p>
                     
                     <div className="bg-zinc-900 border border-zinc-700 p-4 rounded-xl shadow-inner flex flex-col gap-3">
                       <p className="text-zinc-400">2. Copia este código:</p>

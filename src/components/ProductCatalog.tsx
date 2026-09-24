@@ -643,7 +643,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
       {/* ADMIN EDIT / CREATE PRODUCT MODAL */}
       {(editingProduct || isCreatingProduct) && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
+        <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:pb-4 overflow-y-auto animate-in fade-in">
           <div className="bg-zinc-900 border-2 border-amber-500/50 rounded-2xl w-full max-w-xl p-4 sm:p-6 space-y-4 sm:space-y-5 text-white shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <h3 className="text-base font-black text-amber-300 flex items-center gap-2">

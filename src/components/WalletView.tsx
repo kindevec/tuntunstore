@@ -23,6 +23,8 @@ import { usePayPhone } from '../hooks/usePayPhone';
 import { payphoneService } from '../services/payphoneService';
 import { supabase } from '../supabaseClient';
 import { UserProfile, BankAccount, WalletTransaction } from '../types';
+import { copyTextToClipboard } from '../utils/clipboard';
+import { calculateFileHash, checkReceiptDuplicate } from '../utils/receiptSecurity';
 
 interface WalletViewProps {
   currentUser: UserProfile;
@@ -127,27 +129,48 @@ export const WalletView: React.FC<WalletViewProps> = ({
     };
   }, [mostrarCajita, onPayPhoneGatewayStateChange]);
 
-  const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(label);
-    setTimeout(() => setCopiedField(null), 2000);
+  const handleCopy = async (text: string, label: string) => {
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      setCopiedField(label);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setErrorMessage('Por favor sube una imagen válida (JPG, PNG, WEBP).');
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('Por favor sube una imagen válida (JPG, PNG, WEBP).');
+      return;
+    }
+
+    setErrorMessage(null);
+
+    // Validación de duplicados por Hash SHA-256
+    try {
+      const fileHash = await calculateFileHash(file);
+      const isDuplicate = await checkReceiptDuplicate(fileHash);
+
+      if (isDuplicate) {
+        setErrorMessage('⚠️ Este comprobante ya fue registrado previamente en el sistema. Por favor no subas imágenes duplicadas.');
+        setReceiptFile(undefined);
+        setReceiptImage(null);
+        setReceiptFileName('');
+        e.target.value = '';
         return;
       }
-      setErrorMessage(null);
-      setReceiptFileName(file.name);
-      setReceiptFile(file);
-      if (receiptImage && receiptImage.startsWith('blob:')) {
-        URL.revokeObjectURL(receiptImage);
-      }
-      setReceiptImage(URL.createObjectURL(file));
+    } catch (err) {
+      console.warn('Hash SHA-256 omitido en navegador:', err);
     }
+
+    setReceiptFileName(file.name);
+    setReceiptFile(file);
+    if (receiptImage && receiptImage.startsWith('blob:')) {
+      URL.revokeObjectURL(receiptImage);
+    }
+    setReceiptImage(URL.createObjectURL(file));
   };
 
   const isDeployingCajitaRef = React.useRef(false);
@@ -228,6 +251,13 @@ export const WalletView: React.FC<WalletViewProps> = ({
     e.preventDefault();
     if (currentUser.isBlocked) {
       setErrorMessage('🚫 Tu cuenta se encuentra inhabilitada para recargas de saldo. Contacta a soporte.');
+      return;
+    }
+    const hasPending = walletHistory.some(
+      (tx) => tx.type === 'top_up' && tx.status === 'Pendiente'
+    );
+    if (hasPending) {
+      setErrorMessage('⏳ Ya tienes una recarga bancaria en revisión. Espera a que concluya antes de solicitar otra.');
       return;
     }
     if (finalAmount < 5) {
@@ -744,43 +774,38 @@ export const WalletView: React.FC<WalletViewProps> = ({
 
                     {/* En Móvil: Pantalla Completa Estática (< lg / Teléfonos móviles) */}
                     {mostrarCajita && (
-                      <div className="lg:hidden fixed inset-0 z-[99999] w-screen h-[100dvh] bg-[#09090b] flex flex-col justify-between overflow-hidden touch-none select-none p-2 animate-in fade-in duration-150">
-                        
-                        {/* Barra Superior Móvil */}
-                        <header className="h-11 w-full max-w-md mx-auto px-2 flex items-center justify-between z-30 shrink-0">
+                      <div className="lg:hidden fixed inset-0 z-[99999] w-screen h-[100dvh] bg-white text-slate-900 flex flex-col overflow-hidden select-none animate-in fade-in duration-150">
+                        {/* Barra Superior Minimalista */}
+                        <header className="h-12 sm:h-13 w-full px-4 flex items-center justify-between z-30 shrink-0 border-b border-gray-100 bg-white pt-[env(safe-area-inset-top,0px)]">
                           <button
                             type="button"
                             onClick={() => setMostrarCajita(false)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white text-xs font-black uppercase transition-all cursor-pointer border border-white/15 shadow-sm"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-700 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
                           >
-                            <ArrowLeft className="w-4 h-4 text-orange-400" />
+                            <ArrowLeft className="w-4 h-4 text-gray-700" />
                             <span>Volver</span>
                           </button>
 
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 bg-[#FF6A00] text-white font-black text-[11px] rounded tracking-wider shadow">
-                              PayPhone
-                            </span>
-                            <span className="text-xs font-black font-mono text-orange-400">
+                          <div className="flex items-center gap-1.5 font-mono">
+                            <span className="text-xs font-semibold text-gray-400">Total:</span>
+                            <span className="text-sm font-black text-orange-600">
                               ${finalAmount.toFixed(2)} USD
                             </span>
                           </div>
                         </header>
 
-                        {/* Área Central Estática Móvil */}
-                        <main className="flex-1 w-full max-w-md mx-auto flex items-center justify-center relative overflow-hidden my-auto">
+                        {/* Área Central Móvil: 100% limpia sin contenedores artificiales */}
+                        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center justify-start bg-white pt-2 pb-12 pb-[env(safe-area-inset-bottom,0px)]">
                           {cargandoCajita && (
-                            <div className="absolute inset-0 bg-[#09090b]/95 z-20 flex flex-col items-center justify-center gap-2.5 text-zinc-400">
-                              <div className="w-10 h-10 animate-spin rounded-full border-4 border-[#FF6A00] border-t-transparent shadow-[0_0_20px_#FF6A00]" />
-                              <span className="text-xs font-bold text-white">Cargando Pasarela PayPhone...</span>
+                            <div className="w-full py-24 flex flex-col items-center justify-center gap-3 text-gray-500">
+                              <div className="w-9 h-9 animate-spin rounded-full border-3 border-orange-500 border-t-transparent" />
+                              <span className="text-xs font-medium text-gray-600">Cargando pasarela de pago...</span>
                             </div>
                           )}
 
                           {/* Contenedor DOM oficial Móvil */}
-                          <div id="pp-button-mobile" className="w-full flex justify-center items-center overflow-hidden" />
+                          <div id="pp-button-mobile" className={`w-full max-w-lg transition-opacity duration-200 ${cargandoCajita ? 'opacity-0' : 'opacity-100'}`} />
                         </main>
-
-                        <div className="h-2 shrink-0" />
                       </div>
                     )}
                   </div>
