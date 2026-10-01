@@ -4,6 +4,10 @@ import { Order, OrderStatus, AdminDashboardStats } from '../../types';
 
 interface AdminOrdersTabProps {
   orders?: Order[];
+  isLoadingOrders?: boolean;
+  hasMoreOrders?: boolean;
+  onLoadMoreOrders?: () => void;
+  onServerSearchOrders?: (query: string) => void;
   searchQuery: string;
   setSearchQuery: (val: string) => void;
   statusFilter: string;
@@ -25,6 +29,10 @@ const formatCount = (n: number): string => {
 
 export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
   orders,
+  isLoadingOrders = false,
+  hasMoreOrders = false,
+  onLoadMoreOrders,
+  onServerSearchOrders,
   searchQuery,
   setSearchQuery,
   statusFilter,
@@ -100,22 +108,41 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
       {/* Controls Bar: Amplio, limpio y ergonómico */}
       <div className="bg-gradient-to-b from-zinc-900/95 via-zinc-900/80 to-[#040c09] p-3 sm:p-4 rounded-2xl border border-white/10 shadow-xl space-y-3">
         {/* Search input */}
-        <div className="relative w-full">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Buscar por ID jugador, orden o cliente..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-semibold text-xs sm:text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/25 transition-all"
-          />
-          {searchQuery && (
+        <div className="relative w-full flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Buscar por ID jugador, orden o cliente (Enter para buscar en BD)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchQuery.trim() && onServerSearchOrders) {
+                  onServerSearchOrders(searchQuery.trim());
+                }
+              }}
+              className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-semibold text-xs sm:text-sm placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/25 transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-black p-1 rounded-md cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          {onServerSearchOrders && searchQuery.trim().length >= 3 && (
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-black p-1 rounded-md cursor-pointer"
+              onClick={() => onServerSearchOrders(searchQuery.trim())}
+              disabled={isLoadingOrders}
+              className="px-3.5 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase transition-all whitespace-nowrap cursor-pointer active:scale-95 disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+              title="Buscar en base de datos remota"
             >
-              ✕
+              <Search className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Buscar en BD</span>
             </button>
           )}
         </div>
@@ -189,7 +216,20 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
 
       {/* Mobile Card List (Visible on mobile/tablet) */}
       <div className="grid grid-cols-1 gap-3.5 lg:hidden">
-        {paginatedOrders.length > 0 ? (
+        {isLoadingOrders && filteredOrders.length === 0 ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-zinc-800/60 rounded-2xl border border-zinc-700/40 p-4 space-y-3 animate-pulse">
+                <div className="flex justify-between items-center">
+                  <div className="h-5 w-28 bg-zinc-700/60 rounded-md"></div>
+                  <div className="h-5 w-20 bg-zinc-700/60 rounded-full"></div>
+                </div>
+                <div className="h-12 bg-zinc-900/60 rounded-xl"></div>
+                <div className="h-8 bg-zinc-700/40 rounded-xl"></div>
+              </div>
+            ))}
+          </div>
+        ) : paginatedOrders.length > 0 ? (
           paginatedOrders.map((order) => (
             <div key={order.id} className="bg-zinc-800 rounded-2xl border border-zinc-700/50 p-4 space-y-3 shadow-lg flex flex-col">
               {/* Top bar: Order ID, Status, Date */}
@@ -297,9 +337,19 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
             </div>
           ))
         ) : (
-          <div className="bg-zinc-900/60 p-6 sm:p-8 rounded-2xl border border-white/10 text-center text-zinc-500 font-bold uppercase text-xs sm:text-sm flex flex-col items-center justify-center gap-2">
-            <Search className="w-6 h-6 sm:w-8 sm:h-8 opacity-50 mb-2" />
-            No hay pedidos que coincidan con la búsqueda.
+          <div className="bg-zinc-900/60 p-6 sm:p-8 rounded-2xl border border-white/10 text-center text-zinc-400 font-bold uppercase text-xs sm:text-sm flex flex-col items-center justify-center gap-3">
+            <Search className="w-8 h-8 opacity-40 text-emerald-400" />
+            <p className="text-zinc-500">No hay pedidos que coincidan con la búsqueda local.</p>
+            {onServerSearchOrders && searchQuery.trim().length >= 3 && (
+              <button
+                type="button"
+                onClick={() => onServerSearchOrders(searchQuery.trim())}
+                className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-black rounded-xl uppercase transition-all cursor-pointer active:scale-95 flex items-center gap-2"
+              >
+                <Search className="w-3.5 h-3.5" />
+                Buscar "{searchQuery.trim()}" en el servidor
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -319,7 +369,18 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-700/50">
-              {paginatedOrders.length > 0 ? (
+              {isLoadingOrders && filteredOrders.length === 0 ? (
+                [1, 2, 3, 4, 5].map((n) => (
+                  <tr key={n} className="animate-pulse border-b border-zinc-700/30">
+                    <td className="p-4"><div className="h-5 w-28 bg-zinc-700/50 rounded"></div></td>
+                    <td className="p-4"><div className="h-5 w-32 bg-zinc-700/50 rounded"></div></td>
+                    <td className="p-4"><div className="h-5 w-40 bg-zinc-700/50 rounded"></div></td>
+                    <td className="p-4"><div className="h-5 w-24 bg-zinc-700/50 rounded"></div></td>
+                    <td className="p-4"><div className="h-6 w-24 bg-zinc-700/50 rounded-full"></div></td>
+                    <td className="p-4"><div className="h-8 w-32 bg-zinc-700/50 rounded-xl ml-auto"></div></td>
+                  </tr>
+                ))
+              ) : paginatedOrders.length > 0 ? (
                 paginatedOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-zinc-700/30 transition-colors">
                     {/* Order ID & Date */}
@@ -419,8 +480,18 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-zinc-500 font-bold uppercase">
-                    No hay pedidos que coincidan con la búsqueda.
+                  <td colSpan={6} className="p-10 text-center text-zinc-400 font-bold uppercase space-y-3">
+                    <p className="text-zinc-500 text-xs">No hay pedidos que coincidan con la búsqueda local.</p>
+                    {onServerSearchOrders && searchQuery.trim().length >= 3 && (
+                      <button
+                        type="button"
+                        onClick={() => onServerSearchOrders(searchQuery.trim())}
+                        className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-black rounded-xl uppercase transition-all cursor-pointer inline-flex items-center gap-2 mt-2 active:scale-95"
+                      >
+                        <Search className="w-3.5 h-3.5" />
+                        Buscar "{searchQuery.trim()}" en el servidor
+                      </button>
+                    )}
                   </td>
                 </tr>
               )}
@@ -429,28 +500,58 @@ export const AdminOrdersTab: React.FC<AdminOrdersTabProps> = ({
         </div>
       </div>
 
-      {/* Pagination Controls */}
-      {filteredOrders.length > 0 && (
-        <div className="p-4 border-t border-zinc-700/50 flex items-center justify-between bg-zinc-900/50 rounded-xl sm:rounded-2xl">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
-          >
-            Anterior
-          </button>
-          <span className="text-xs text-zinc-400 font-bold">
-            Página {page} de {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
-          >
-            Siguiente
-          </button>
+      {/* Pagination & Load More Controls */}
+      <div className="p-3 sm:p-4 border-t border-zinc-700/50 flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-900/50 rounded-xl sm:rounded-2xl">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+          {hasMoreOrders && onLoadMoreOrders && (
+            <button
+              type="button"
+              onClick={onLoadMoreOrders}
+              disabled={isLoadingOrders}
+              className="px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-black rounded-xl uppercase transition-all flex items-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+            >
+              {isLoadingOrders ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Layers className="w-3.5 h-3.5" />
+              )}
+              <span>Cargar +50 Pedidos</span>
+              {orders && (
+                <span className="text-[10px] text-zinc-400 font-bold">
+                  ({orders.length}{adminStats?.total_orders ? ` / ${adminStats.total_orders}` : ''})
+                </span>
+              )}
+            </button>
+          )}
+          {isLoadingOrders && filteredOrders.length > 0 && (
+            <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1.5 animate-pulse">
+              <RefreshCw className="w-3 h-3 animate-spin" /> Sincronizando...
+            </span>
+          )}
         </div>
-      )}
+
+        {filteredOrders.length > 0 && (
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+            >
+              Anterior
+            </button>
+            <span className="text-xs text-zinc-400 font-bold whitespace-nowrap">
+              Página {page} de {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 text-xs font-black rounded-xl uppercase transition-colors cursor-pointer"
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

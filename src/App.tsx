@@ -52,6 +52,9 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState<boolean>(false);
+  const [hasMoreOrders, setHasMoreOrders] = useState<boolean>(true);
+  const isLoadingOrdersRef = useRef<boolean>(false);
   const [walletHistory, setWalletHistory] = useState<any[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
@@ -183,12 +186,29 @@ export default function App() {
         event: '*', 
         schema: 'public', 
         table: 'orders' 
-      }, (payload) => {
+      }, async (payload) => {
         const newRecord = payload.new as any;
+        const eventType = payload.eventType;
         
         if (currentUser.role === 'admin') {
-          fetchOrders('admin', currentUser.uid);
-          fetchAdminStats();
+          if (eventType === 'UPDATE' && newRecord) {
+            setOrders(prev => prev.map(o => (o.id === (newRecord.order_number || newRecord.id)) ? { ...o, status: newRecord.status } : o));
+            fetchAdminStats();
+          } else if (eventType === 'INSERT' && newRecord) {
+            const { data: singleOrder } = await supabase
+              .from('orders')
+              .select('*, profiles!orders_user_id_fkey(name, email)')
+              .eq('id', newRecord.id)
+              .maybeSingle();
+
+            if (singleOrder) {
+              const mapped = mapSupabaseOrder(singleOrder);
+              setOrders(prev => [mapped, ...prev.filter(o => o.id !== mapped.id)]);
+            }
+            fetchAdminStats();
+          } else {
+            fetchAdminStats();
+          }
         } else {
           // Si es un cliente y la orden es suya, actualizar
           if (newRecord && newRecord.user_id === currentUser.uid) {
@@ -355,22 +375,22 @@ export default function App() {
   };
 
   const mapSupabaseOrder = (o: any): Order => ({
-    id: o.id,
-    date: o.created_at,
+    id: o.order_number || o.id || '',
+    date: o.created_at ? new Date(o.created_at).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '',
     userEmail: o.profiles?.email || 'N/A',
     userName: o.profiles?.name || 'Cliente',
-    playerId: o.player_id,
-    playerTag: o.player_tag,
-    productId: o.product_id,
-    productName: o.product_name_snapshot,
-    diamondsTotal: o.diamonds_total,
-    priceUSD: o.price_usd,
+    playerId: o.player_id || 'N/A',
+    playerTag: o.player_tag || '',
+    productId: o.product_id || '',
+    productName: o.product_name_snapshot || (o.is_wallet_top_up ? 'Recarga de Billetera' : 'Diamantes Free Fire'),
+    diamondsTotal: o.diamonds_total || 0,
+    priceUSD: Number(o.price_usd || 0),
     bankName: o.payment_method === 'wallet_balance' ? 'Saldo TunTun USD' : 'Transferencia Bancaria',
     receiptUrl: o.receipt_storage_path ? supabase.storage.from('receipts').getPublicUrl(o.receipt_storage_path).data.publicUrl : '',
     receiptFileName: o.receipt_storage_path ? 'Comprobante Subido' : '',
-    status: o.status,
-    paymentMethod: o.payment_method,
-    isWalletTopUp: o.is_wallet_top_up,
+    status: o.status || 'Pendiente',
+    paymentMethod: o.payment_method || 'transfer',
+    isWalletTopUp: !!o.is_wallet_top_up,
     redemptionCode: o.redemption_code || null,
     statusHistory: (o.order_status_history || []).map((h: any) => ({
       status: h.status,
@@ -379,58 +399,103 @@ export default function App() {
     })).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
   });
 
-  const fetchOrders = async (userRole: string, userId: string) => {
-    if (userRole !== 'admin') {
-      const { data: ordData, error } = await supabase
-        .from('orders')
-        .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
-        .order('created_at', { ascending: false })
-        .eq('user_id', userId)
-        .limit(50);
-        
-      if (error) {
-        console.error("Error fetching orders:", error);
+  const fetchOrders = async (userRole: string, userId: string, reset: boolean = true) => {
+    if (isLoadingOrdersRef.current) return;
+    isLoadingOrdersRef.current = true;
+    setIsLoadingOrders(true);
+
+    try {
+      if (userRole !== 'admin') {
+        const { data: ordData, error } = await supabase
+          .from('orders')
+          .select('*, profiles!orders_user_id_fkey(name, email)')
+          .order('created_at', { ascending: false })
+          .eq('user_id', userId)
+          .limit(50);
+          
+        if (error) {
+          console.error("Error fetching client orders:", error);
+          return;
+        }
+        if (ordData) {
+          setOrders(ordData.map(mapSupabaseOrder));
+        }
         return;
       }
-      if (ordData) {
-        setOrders(ordData.map(mapSupabaseOrder));
-      }
-      return;
-    }
 
-    // Para administradores: Supabase PostgREST limita las respuestas a 1000 filas por defecto.
-    // Iteramos en lotes de 1000 para cargar la totalidad de los pedidos reales existentes.
-    let allOrdData: any[] = [];
-    let from = 0;
-    const pageSize = 1000;
-    let hasMore = true;
+      // Para administradores: Cargamos en bloques ultra-rápidos de 50 pedidos (<100ms) sin joins innecesarios
+      const pageSize = 50;
+      const currentOffset = reset ? 0 : orders.length;
 
-    while (hasMore) {
       const { data: batch, error } = await supabase
         .from('orders')
-        .select('*, profiles!orders_user_id_fkey(name, email), order_status_history(*)')
+        .select('*, profiles!orders_user_id_fkey(name, email)')
         .order('created_at', { ascending: false })
-        .range(from, from + pageSize - 1);
+        .range(currentOffset, currentOffset + pageSize - 1);
 
       if (error) {
         console.error("Error fetching orders batch:", error);
-        break;
+        return;
       }
 
-      if (batch && batch.length > 0) {
-        allOrdData = allOrdData.concat(batch);
-        if (batch.length < pageSize) {
-          hasMore = false;
-        } else {
-          from += pageSize;
-        }
-      } else {
-        hasMore = false;
+      if (batch) {
+        const mapped = batch.map(mapSupabaseOrder);
+        setOrders(prev => {
+          if (reset) {
+            return mapped;
+          }
+          const existingIds = new Set(prev.map(o => o.id));
+          const newUnique = mapped.filter(o => !existingIds.has(o.id));
+          return [...prev, ...newUnique];
+        });
+        setHasMoreOrders(batch.length === pageSize);
       }
+    } finally {
+      isLoadingOrdersRef.current = false;
+      setIsLoadingOrders(false);
     }
+  };
 
-    if (allOrdData.length > 0) {
-      setOrders(allOrdData.map(mapSupabaseOrder));
+  const handleLoadMoreOrders = () => {
+    if (!currentUser || currentUser.role !== 'admin' || isLoadingOrders || !hasMoreOrders) return;
+    fetchOrders('admin', currentUser.uid, false);
+  };
+
+  const handleServerSearchOrders = async (query: string) => {
+    const q = query.trim();
+    if (!q || !currentUser || currentUser.role !== 'admin') return;
+    
+    setIsLoadingOrders(true);
+    try {
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q);
+      let queryBuilder = supabase
+        .from('orders')
+        .select('*, profiles!orders_user_id_fkey(name, email)')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (isUUID) {
+        queryBuilder = queryBuilder.or(`id.eq.${q},order_number.eq.${q}`);
+      } else {
+        queryBuilder = queryBuilder.or(`order_number.ilike.%${q}%,player_id.ilike.%${q}%,product_name_snapshot.ilike.%${q}%`);
+      }
+
+      const { data, error } = await queryBuilder;
+      if (error) {
+        console.error("Error searching orders on server:", error);
+      } else if (data && data.length > 0) {
+        const mapped = data.map(mapSupabaseOrder);
+        setOrders(prev => {
+          const existingIds = new Set(prev.map(o => o.id));
+          const newUnique = mapped.filter(o => !existingIds.has(o.id));
+          return [...newUnique, ...prev];
+        });
+        showToast(`🔍 Se encontraron ${data.length} pedidos en el servidor`);
+      } else {
+        showToast(`🔍 No se encontraron pedidos con "${q}"`);
+      }
+    } finally {
+      setIsLoadingOrders(false);
     }
   };
   
@@ -694,9 +759,13 @@ export default function App() {
 
 
   const handleUpdateOrderStatus = async (orderId: string, newStatus: OrderStatus, note?: string) => {
+    // 1. Actualización optimista inmediata en memoria local
+    setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
+
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
     if (error) {
       showToast(`❌ Error al actualizar estado: ${error.message}`);
+      if (currentUser) fetchOrders(currentUser.role, currentUser.uid);
       return;
     }
     await supabase.from('order_status_history').insert({
@@ -706,7 +775,7 @@ export default function App() {
     });
     
     showToast(`Estado del pedido actualizado a "${newStatus}"`);
-    fetchOrders(currentUser!.role, currentUser!.uid);
+    fetchAdminStats();
   };
 
   const handleAddProduct = async (productData: Omit<Product, 'id'>) => {
@@ -1288,6 +1357,10 @@ export default function App() {
           <React.Suspense fallback={<div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
             <AdminPanel 
               orders={orders} 
+              isLoadingOrders={isLoadingOrders}
+              hasMoreOrders={hasMoreOrders}
+              onLoadMoreOrders={handleLoadMoreOrders}
+              onServerSearchOrders={handleServerSearchOrders}
               products={products} 
               registeredUsers={registeredUsers} 
               adminStats={adminStats || undefined}

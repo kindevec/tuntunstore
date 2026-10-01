@@ -52,6 +52,10 @@ const formatCompactNumber = (num: number): string => {
 
 interface AdminPanelProps {
   orders: Order[];
+  isLoadingOrders?: boolean;
+  hasMoreOrders?: boolean;
+  onLoadMoreOrders?: () => void;
+  onServerSearchOrders?: (query: string) => void;
   products: Product[];
   emailConfig?: EmailAlertConfig;
   registeredUsers?: UserProfile[];
@@ -73,6 +77,10 @@ interface AdminPanelProps {
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
   orders,
+  isLoadingOrders = false,
+  hasMoreOrders = false,
+  onLoadMoreOrders,
+  onServerSearchOrders,
   products,
   emailConfig,
   registeredUsers = [],
@@ -335,14 +343,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const totalOrdersCount = adminStats?.total_orders ?? orders.length;
   const totalUsersCount = adminStats?.total_users ?? registeredUsers.length;
 
-  // Filtered Orders
+  // Filtered Orders (100% Null-safe contra compras sin ID o campos vacíos)
   const filteredOrders = orders.filter((o) => {
     const matchesStatus = statusFilter === 'all' ? true : o.status === statusFilter;
+    const q = (searchQuery || '').trim().toLowerCase();
+    if (!q) return matchesStatus;
+
     const matchesQuery =
-      o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.playerId.includes(searchQuery) ||
-      o.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.productName.toLowerCase().includes(searchQuery.toLowerCase());
+      String(o.id || '').toLowerCase().includes(q) ||
+      String(o.playerId || '').toLowerCase().includes(q) ||
+      String(o.userName || '').toLowerCase().includes(q) ||
+      String(o.productName || '').toLowerCase().includes(q);
     return matchesStatus && matchesQuery;
   });
 
@@ -622,6 +633,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       {activeTab === 'orders' && (
         <AdminOrdersTab
           orders={orders}
+          isLoadingOrders={isLoadingOrders}
+          hasMoreOrders={hasMoreOrders}
+          onLoadMoreOrders={onLoadMoreOrders}
+          onServerSearchOrders={onServerSearchOrders}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           statusFilter={statusFilter}
