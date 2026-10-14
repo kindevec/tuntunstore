@@ -58,6 +58,9 @@ export const resizeImageForProcessing = (file: File, maxDimension = 1200): Promi
 
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
+        const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
+        const targetFormat = isPng ? 'image/jpeg' : (file.type || 'image/jpeg');
+
         canvas.toBlob(
           (blob) => {
             clearTimeout(timeoutId);
@@ -65,14 +68,15 @@ export const resizeImageForProcessing = (file: File, maxDimension = 1200): Promi
               return resolve(file); // Fallback
             }
 
-            const resizedFile = new File([blob], file.name, {
-              type: file.type || 'image/jpeg',
+            const cleanName = isPng ? file.name.replace(/\.png$/i, '.jpg') : file.name;
+            const resizedFile = new File([blob], cleanName, {
+              type: targetFormat,
               lastModified: Date.now(),
             });
 
             resolve(resizedFile);
           },
-          file.type || 'image/jpeg',
+          targetFormat,
           0.85
         );
       };
@@ -92,10 +96,15 @@ export const resizeImageForProcessing = (file: File, maxDimension = 1200): Promi
   });
 };
 
-export const convertImageToWebp = (file: File, quality = 0.8): Promise<File> => {
+export const convertImageToWebp = (
+  file: File,
+  quality = 0.78,
+  maxSizeBytes = 120 * 1024,
+  maxDimension = 1200
+): Promise<File> => {
   return new Promise((resolve) => {
-    // Si la imagen ya es webp o es un gif (no soporta animación por canvas fácilmente), se devuelve original
-    if (file.type === 'image/webp' || file.type === 'image/gif') {
+    // Solo omitir si ya es WebP y ya cumple el presupuesto estricto (< 120 KB), o si es GIF
+    if ((file.type === 'image/webp' && file.size <= maxSizeBytes) || file.type === 'image/gif') {
       return resolve(file);
     }
 
@@ -112,9 +121,20 @@ export const convertImageToWebp = (file: File, quality = 0.8): Promise<File> => 
       img.src = event.target?.result as string;
       
       img.onload = () => {
+        let targetWidth = img.width;
+        let targetHeight = img.height;
+
+        if (targetWidth > targetHeight && targetWidth > maxDimension) {
+          targetHeight = Math.round((targetHeight * maxDimension) / targetWidth);
+          targetWidth = maxDimension;
+        } else if (targetHeight >= targetWidth && targetHeight > maxDimension) {
+          targetWidth = Math.round((targetWidth * maxDimension) / targetHeight);
+          targetHeight = maxDimension;
+        }
+
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
         
         const ctx = canvas.getContext('2d');
         if (!ctx) {
@@ -122,29 +142,52 @@ export const convertImageToWebp = (file: File, quality = 0.8): Promise<File> => 
           return resolve(file); // Fallback: si falla el canvas, sube la original
         }
         
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
         
-        canvas.toBlob(
-          (blob) => {
-            clearTimeout(timeoutId);
-            if (!blob) {
-              return resolve(file); // Fallback
-            }
-            
-            // Extrae el nombre base sin extensión y añade .webp
-            const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            const fileName = `${baseName}.webp`;
-            
-            const webpFile = new File([blob], fileName, {
-              type: 'image/webp',
-              lastModified: Date.now(),
-            });
-            
-            resolve(webpFile);
-          },
-          'image/webp',
-          quality
-        );
+        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+
+        const attemptEncode = (currentQuality: number, targetMime: 'image/webp' | 'image/jpeg' = 'image/webp') => {
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                if (targetMime === 'image/webp') {
+                  return attemptEncode(0.8, 'image/jpeg');
+                }
+                clearTimeout(timeoutId);
+                return resolve(file);
+              }
+
+              // Si el navegador no soporta webp (retorna image/png sin comprimir), cambiar a jpeg
+              if (targetMime === 'image/webp' && blob.type === 'image/png') {
+                return attemptEncode(0.8, 'image/jpeg');
+              }
+
+              // Si supera el presupuesto estricto y podemos reducir calidad
+              if (blob.size > maxSizeBytes && currentQuality > 0.45) {
+                const nextQuality = Math.max(0.4, Number((currentQuality - 0.15).toFixed(2)));
+                return attemptEncode(nextQuality, targetMime);
+              }
+
+              // Si en webp supera los 350 KB, fallback a JPEG que comprime eficientemente en Safari/iOS
+              if (targetMime === 'image/webp' && blob.size > 350 * 1024) {
+                return attemptEncode(0.75, 'image/jpeg');
+              }
+
+              clearTimeout(timeoutId);
+              const ext = targetMime === 'image/webp' ? 'webp' : 'jpg';
+              const fileName = `${baseName}.${ext}`;
+              const optimizedFile = new File([blob], fileName, {
+                type: targetMime,
+                lastModified: Date.now(),
+              });
+              resolve(optimizedFile);
+            },
+            targetMime,
+            currentQuality
+          );
+        };
+
+        attemptEncode(quality);
       };
       
       // Si la imagen no se puede cargar (HEIC, formatos raros), devolver original

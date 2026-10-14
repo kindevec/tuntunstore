@@ -1058,16 +1058,22 @@ export default function App() {
 
       // --- SUBIDA DEL COMPROBANTE (siempre se ejecuta, protegida con try/catch) ---
       try {
-        // Optimizar comprobante a WebP para reducir almacenamiento
+        // Optimizar comprobante a WebP (< 120 KB) para reducir almacenamiento
         let fileToUpload: File;
         let contentType = 'image/webp';
         try {
-          fileToUpload = await convertImageToWebp(processableFile, 0.8);
+          fileToUpload = await convertImageToWebp(processableFile, 0.78, 120 * 1024, 1100);
+          contentType = fileToUpload.type || 'image/webp';
         } catch {
           // Si la conversión WebP falla (formatos HEIC, imágenes corruptas), subir original
           console.warn('Conversión WebP falló, subiendo imagen original.');
           fileToUpload = processableFile;
           contentType = processableFile.type || 'image/jpeg';
+        }
+
+        if (fileToUpload.size > 5242880) {
+          showToast('⚠️ La imagen del comprobante es demasiado pesada (> 5 MB). Por favor selecciona una captura más ligera.');
+          return;
         }
 
         const fileExt = fileToUpload.name.split('.').pop() || 'webp';
