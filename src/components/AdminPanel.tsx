@@ -759,7 +759,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     {t.receipt_url && (
                       <button
                         onClick={() => {
-                          const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co';
+                          const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://iehlzsbbjhtwmjkyestf.supabase.co';
                           setSelectedReceiptUrl(`${baseUrl}/storage/v1/object/public/receipts/${t.receipt_url}`);
                         }}
                         className="w-full sm:w-auto px-4 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-black uppercase flex items-center justify-center gap-2 border border-blue-500/30 transition-colors"

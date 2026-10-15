@@ -12,6 +12,8 @@ import { HomeView } from './components/HomeView';
 import { ProductCatalog } from './components/ProductCatalog';
 import { useIsPWA } from './hooks/useIsPWA';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { MaintenanceBanner } from './components/MaintenanceBanner';
+import { MAINTENANCE_CONFIG } from './config/maintenance';
 
 // 🚀 Lazy-Loaded Components: Se descargan bajo demanda solo cuando el usuario accede a esa vista
 const HeroBanner = React.lazy(() => import('./components/HeroBanner').then(m => ({ default: m.HeroBanner })));
@@ -216,14 +218,6 @@ export default function App() {
           }
         }
       })
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'products' 
-      }, () => {
-        // Al actualizar, crear o borrar productos, refrescar el catálogo
-        fetchInitialData();
-      })
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -255,7 +249,6 @@ export default function App() {
           fetchUserProfile(currentUser.uid);
         }
         if (currentUser?.role === 'admin') {
-          fetchAllUsersForAdmin();
           fetchAdminStats();
         }
       })
@@ -618,6 +611,11 @@ export default function App() {
       const searchParams = new URLSearchParams(window.location.search);
       const hashQuery = window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '';
       const hashParams = new URLSearchParams(hashQuery);
+      const oauthError = searchParams.get('error_description') || hashParams.get('error_description');
+      if (oauthError) {
+        showToast('⚠️ No se pudo completar el acceso con Google. Intenta de nuevo.');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
       const hasId = searchParams.has('id') || hashParams.has('id');
       const hasTxId = searchParams.has('clientTransactionId') || searchParams.has('clientTxId') || hashParams.has('clientTransactionId') || hashParams.has('clientTxId');
       const isPayPhoneReturn = hasId && hasTxId;
@@ -686,7 +684,11 @@ export default function App() {
     await supabase.auth.signInWithOAuth({ 
       provider: 'google',
       options: {
-        redirectTo: `${currentOrigin}/`
+        redirectTo: `${currentOrigin}/`,
+        queryParams: {
+          prompt: 'select_account',
+          access_type: 'offline'
+        }
       }
     });
   };
@@ -717,12 +719,21 @@ export default function App() {
   };
 
   const handleSelectProductForPurchase = (product: Product) => {
+    if (MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin') {
+      showToast('🚧 Estamos en mantenimiento ahorita: Las compras están pausadas temporalmente.');
+      return;
+    }
     if (!currentUser) return openLoginWithReason('Para realizar tu compra de diamantes, inicia sesión con Google primero.');
     setSelectedProductForOrder(product);
   };
 
   const handleCreateOrder = async (newOrderData: Omit<Order, 'id' | 'date' | 'status' | 'statusHistory'>) => {
     if (!currentUser) return;
+
+    if (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin') {
+      showToast('🚧 Estamos en mantenimiento ahorita: Las compras están pausadas temporalmente.');
+      return;
+    }
 
     if (currentUser.isBlocked) {
       showToast('🚫 Tu cuenta ha sido inhabilitada por la administración. No puedes realizar compras.');
@@ -835,6 +846,11 @@ export default function App() {
 
   const handleSubmitTopUpOrder = async (amount: number, bankName: string, receiptFile: File) => {
     if (!currentUser) return;
+
+    if (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin') {
+      showToast('🚧 Estamos en mantenimiento ahorita: Las recargas de saldo están pausadas temporalmente.');
+      return;
+    }
 
     if (currentUser.isBlocked) {
       showToast('🚫 Tu cuenta ha sido inhabilitada por la administración. No puedes realizar recargas de saldo.');
@@ -1113,12 +1129,21 @@ export default function App() {
   };
 
   const handleUpdateTopUpStatus = async (transactionId: string, newStatus: 'Aprobado' | 'Rechazado') => {
+    // 1. Actualización optimista inmediata en memoria local
+    setPendingTopUps(prev => prev.filter(t => t.id !== transactionId));
+
     const { error } = await supabase.from('wallet_transactions').update({ status: newStatus }).eq('id', transactionId);
     if (error) {
       showToast(`❌ Error al actualizar recarga: ${error.message}`);
+      if (currentUser?.role === 'admin') {
+        const { data } = await supabase.from('wallet_transactions').select('*').eq('type', 'top_up').eq('status', 'Pendiente').order('created_at', { ascending: false });
+        if (data) setPendingTopUps(data);
+      }
       return;
     }
-    showToast(`Recarga actualizada a "${newStatus}"`);
+    showToast(`✅ Recarga ${newStatus.toLowerCase()} exitosamente`);
+    fetchAdminStats();
+    window.dispatchEvent(new CustomEvent('tuntun_wallet_updated'));
   };
 
   const handleUpdateTopUpAmount = async (transactionId: string, newAmount: number) => {
@@ -1153,6 +1178,7 @@ export default function App() {
           <p className="text-xs font-black uppercase tracking-wide text-emerald-300">{toastMessage}</p>
         </div>
       )}
+      <MaintenanceBanner isAdmin={currentUser?.role === 'admin'} />
       {activeTab !== 'login' && (
         isPWA ? (
           <React.Suspense fallback={<div className="h-14 bg-[#05140f] border-b border-emerald-500/20" />}>

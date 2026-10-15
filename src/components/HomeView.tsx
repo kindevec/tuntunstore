@@ -26,6 +26,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -414,13 +415,31 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {/* TikTok Video — iframe directo, solo el video */}
               <div className="relative p-[3px] rounded-3xl bg-gradient-to-tr from-emerald-500/40 via-transparent to-amber-500/40 shadow-[0_0_50px_rgba(16,185,129,0.15)] max-w-[340px] w-full">
                   <div className="relative w-full rounded-[22px] overflow-hidden bg-black" style={{ aspectRatio: '9/16' }}>
-                    <iframe
-                      src="https://www.tiktok.com/player/v1/7675461351858244882?music_info=1&description=1"
-                      loading="lazy"
-                      style={{ width: '100%', height: '100%', border: 'none' }}
-                      allow="fullscreen"
-                      title="TunTun Store — Video Oficial"
-                    />
+                    {isVideoPlaying ? (
+                      <iframe
+                        src="https://www.tiktok.com/player/v1/7675461351858244882?music_info=1&description=1"
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                        allow="accelerometer; autoplay; encrypted-media; fullscreen"
+                        title="TunTun Store — Video Oficial"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setIsVideoPlaying(true)}
+                        className="w-full h-full flex flex-col items-center justify-center p-6 text-center group cursor-pointer bg-gradient-to-b from-neutral-900 via-neutral-950 to-black relative overflow-hidden transition-all duration-300 hover:brightness-110"
+                        aria-label="Reproducir video tutorial de canje"
+                      >
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.18),transparent_70%)] pointer-events-none" />
+                        <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400/50 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:border-emerald-400 group-hover:bg-emerald-500/30 transition-all duration-300 shadow-[0_0_25px_rgba(16,185,129,0.35)]">
+                          <Play className="w-7 h-7 text-emerald-400 fill-emerald-400 ml-1 transition-transform group-hover:scale-105" />
+                        </div>
+                        <span className="text-white font-black text-sm uppercase tracking-wider mb-1">
+                          Ver Tutorial de Canje
+                        </span>
+                        <span className="text-neutral-400 text-xs font-medium">
+                          Toca para reproducir el video oficial
+                        </span>
+                      </button>
+                    )}
                   </div>
               </div>
           </div>

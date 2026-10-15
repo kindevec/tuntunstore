@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Ban
 } from 'lucide-react';
+import { MAINTENANCE_CONFIG } from '../config/maintenance';
 
 interface OrderModalProps {
   product: Product | null;
@@ -39,6 +40,10 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin') {
+      setErrorMessage('🚧 Estamos en mantenimiento ahorita: Las compras están pausadas temporalmente.');
+      return;
+    }
     if (isBlocked) {
       setErrorMessage('Tu cuenta ha sido inhabilitada por administración para realizar compras.');
       return;
@@ -223,15 +228,22 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
           <button
             id="btn-submit-order-final"
-            disabled={!hasEnoughBalance || isSubmitting || isBlocked}
+            disabled={(!hasEnoughBalance && !MAINTENANCE_CONFIG.enabled) || isSubmitting || isBlocked || (MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin')}
             onClick={handleSubmit}
-            className={`w-full sm:w-auto px-6 py-3.5 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all min-h-[44px] ${
-              hasEnoughBalance && !isSubmitting && !isBlocked
-                ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer'
+            className={`w-full sm:w-auto px-6 py-3.5 rounded-xl font-black text-xs uppercase flex items-center justify-center gap-2 transition-all min-h-[44px] cursor-pointer active:scale-95 ${
+              MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin'
+                ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                : hasEnoughBalance && !isSubmitting && !isBlocked
+                ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]'
                 : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
             }`}
           >
-            {isBlocked ? (
+            {MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin' ? (
+              <>
+                <Ban className="w-4 h-4 text-amber-400" />
+                <span>En Mantenimiento (Compras Pausadas)</span>
+              </>
+            ) : isBlocked ? (
               <>
                 <Ban className="w-4 h-4" />
                 <span>Cuenta Inhabilitada</span>

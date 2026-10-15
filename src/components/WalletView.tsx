@@ -25,6 +25,7 @@ import { supabase } from '../supabaseClient';
 import { UserProfile, BankAccount, WalletTransaction } from '../types';
 import { copyTextToClipboard } from '../utils/clipboard';
 import { calculateFileHash, checkReceiptDuplicate } from '../utils/receiptSecurity';
+import { MAINTENANCE_CONFIG } from '../config/maintenance';
 
 interface WalletViewProps {
   currentUser: UserProfile;
@@ -179,6 +180,10 @@ export const WalletView: React.FC<WalletViewProps> = ({
   const handleDesplegarCajita = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (isDeployingCajitaRef.current || cargandoCajita) return;
+    if (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin') {
+      setErrorMessage('🚧 Estamos en mantenimiento ahorita: Las recargas con PayPhone y tarjeta están temporalmente pausadas.');
+      return;
+    }
     if (currentUser.isBlocked) {
       setErrorMessage('🚫 Tu cuenta se encuentra inhabilitada para recargas de saldo.');
       return;
@@ -249,6 +254,10 @@ export const WalletView: React.FC<WalletViewProps> = ({
   // Enviar recarga vía Transferencia Bancaria
   const handleBankTopUp = (e: React.FormEvent) => {
     e.preventDefault();
+    if (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin') {
+      setErrorMessage('🚧 Estamos en mantenimiento ahorita: Las recargas de saldo están pausadas temporalmente.');
+      return;
+    }
     if (currentUser.isBlocked) {
       setErrorMessage('🚫 Tu cuenta se encuentra inhabilitada para recargas de saldo. Contacta a soporte.');
       return;
@@ -739,10 +748,19 @@ export const WalletView: React.FC<WalletViewProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDesplegarCajita()}
-                        disabled={finalAmount < 1 || payphoneLiveLoading}
-                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:to-amber-400 text-black font-black text-sm uppercase flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(249,115,22,0.4)] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
+                        disabled={finalAmount < 1 || payphoneLiveLoading || (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin')}
+                        className={`w-full py-4 rounded-2xl font-black text-sm uppercase flex items-center justify-center gap-2 transition-all tracking-wide cursor-pointer active:scale-95 ${
+                          MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin'
+                            ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
+                            : 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 hover:from-orange-400 hover:to-amber-400 text-black shadow-[0_0_25px_rgba(249,115,22,0.4)] disabled:opacity-50 disabled:cursor-not-allowed'
+                        }`}
                       >
-                        {payphoneLiveLoading ? (
+                        {MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin' ? (
+                          <>
+                            <Ban className="w-5 h-5 text-amber-400" />
+                            <span>Recargas en Mantenimiento 🚧</span>
+                          </>
+                        ) : payphoneLiveLoading ? (
                           <>
                             <Loader2 className="w-5 h-5 animate-spin" />
                             <span>Iniciando Pasarela PayPhone...</span>
@@ -910,10 +928,24 @@ export const WalletView: React.FC<WalletViewProps> = ({
                 ) : (
                   <button
                     type="submit"
-                    className="w-full py-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-sm uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all cursor-pointer"
+                    disabled={MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin'}
+                    className={`w-full py-4 rounded-xl font-black text-sm uppercase flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 ${
+                      MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin'
+                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
+                        : 'bg-amber-400 hover:bg-amber-300 text-black shadow-[0_0_20px_rgba(251,191,36,0.4)]'
+                    }`}
                   >
-                    <span>Enviar Recarga de ${finalAmount.toFixed(2)} a Verificación</span>
-                    <ArrowUpRight className="w-4 h-4" />
+                    {MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin' ? (
+                      <>
+                        <Ban className="w-4 h-4 text-amber-400" />
+                        <span>Recargas en Mantenimiento 🚧</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Enviar Recarga de ${finalAmount.toFixed(2)} a Verificación</span>
+                        <ArrowUpRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 )}
               </form>

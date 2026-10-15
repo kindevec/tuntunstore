@@ -64,6 +64,13 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
   useEffect(() => {
     fetchPaginatedUsers(page, debouncedSearchQuery);
     fetchPayphoneStats();
+
+    const handleWalletUpdated = () => {
+      fetchPaginatedUsers(page, debouncedSearchQuery);
+      fetchPayphoneStats();
+    };
+    window.addEventListener('tuntun_wallet_updated', handleWalletUpdated);
+    return () => window.removeEventListener('tuntun_wallet_updated', handleWalletUpdated);
   }, [page, debouncedSearchQuery, registeredUsers]);
 
   const fetchPayphoneStats = async () => {
@@ -324,11 +331,11 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 shrink-0 overflow-hidden">
                         {topUp.receipt_url ? (
                           <img 
-                            src={`${import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co'}/storage/v1/object/public/receipts/${topUp.receipt_url}`} 
+                            src={`${import.meta.env.VITE_SUPABASE_URL || 'https://iehlzsbbjhtwmjkyestf.supabase.co'}/storage/v1/object/public/receipts/${topUp.receipt_url}`} 
                             alt="Baucher miniatura" 
                             className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => {
-                              const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co';
+                              const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://iehlzsbbjhtwmjkyestf.supabase.co';
                               setSelectedReceiptUrl(`${baseUrl}/storage/v1/object/public/receipts/${topUp.receipt_url}`);
                             }}
                             title="Clic para ampliar"
@@ -387,7 +394,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                       {topUp.receipt_url && (
                         <button
                           onClick={() => {
-                            const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://tkfpmmjnyzmulxkmtesf.supabase.co';
+                            const baseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://iehlzsbbjhtwmjkyestf.supabase.co';
                             setSelectedReceiptUrl(`${baseUrl}/storage/v1/object/public/receipts/${topUp.receipt_url}`);
                           }}
                           className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-black rounded-xl uppercase flex items-center justify-center gap-2 border border-blue-500/30 transition-colors cursor-pointer"

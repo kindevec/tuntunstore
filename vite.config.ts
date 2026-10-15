@@ -33,7 +33,7 @@ export default defineConfig(() => {
           runtimeCaching: [
             {
               // Cache Supabase API responses (products, slides, etc.) con NetworkFirst rápido
-              urlPattern: /^https:\/\/tkfpmmjnyzmulxkmtesf\.supabase\.co\/rest\/v1\/.*/i,
+              urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'supabase-api-cache',
@@ -49,7 +49,7 @@ export default defineConfig(() => {
             },
             {
               // Cache Supabase Storage images (fotos de productos, banners)
-              urlPattern: /^https:\/\/tkfpmmjnyzmulxkmtesf\.supabase\.co\/storage\/.*/i,
+              urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
               handler: 'CacheFirst',
               options: {
                 cacheName: 'supabase-storage-cache',

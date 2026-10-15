@@ -33,6 +33,7 @@ import { UserProfile, BankAccount, WalletTransaction } from '../../types';
 import { triggerHaptic } from '../../utils/haptics';
 import { copyTextToClipboard } from '../../utils/clipboard';
 import { calculateFileHash, checkReceiptDuplicate } from '../../utils/receiptSecurity';
+import { MAINTENANCE_CONFIG } from '../../config/maintenance';
 
 interface PWAWalletViewProps {
   currentUser: UserProfile;
@@ -213,6 +214,11 @@ export const PWAWalletView: React.FC<PWAWalletViewProps> = ({
 
   const handleTopUpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin') {
+      triggerHaptic('error');
+      setErrorMsg('🚧 Estamos en mantenimiento ahorita: Las recargas de saldo están pausadas temporalmente.');
+      return;
+    }
     if (currentUser.isBlocked) {
       triggerHaptic('error');
       setErrorMsg('🚫 Tu cuenta se encuentra inhabilitada para recargas de saldo.');
@@ -243,6 +249,11 @@ export const PWAWalletView: React.FC<PWAWalletViewProps> = ({
   };
 
   const handleInitPayPhone = async () => {
+    if (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin') {
+      triggerHaptic('error');
+      setPayPhoneInitError('🚧 Estamos en mantenimiento ahorita: Las recargas con PayPhone y tarjeta están temporalmente pausadas.');
+      return;
+    }
     if (finalAmount < 1) {
       triggerHaptic('error');
       setPayPhoneInitError('El monto mínimo para recargar con PayPhone es $1.00 USD');
@@ -951,10 +962,19 @@ export const PWAWalletView: React.FC<PWAWalletViewProps> = ({
                   <button
                     type="button"
                     onClick={handleInitPayPhone}
-                    disabled={payPhoneInitLoading || finalAmount < 1}
-                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_4px_20px_rgba(255,106,0,0.4)] active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                    disabled={payPhoneInitLoading || finalAmount < 1 || (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin')}
+                    className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+                      MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin'
+                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
+                        : 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 text-black shadow-[0_4px_20px_rgba(255,106,0,0.4)] disabled:opacity-50'
+                    }`}
                   >
-                    {payPhoneInitLoading ? (
+                    {MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin' ? (
+                      <>
+                        <Ban className="w-4 h-4 text-amber-400" />
+                        <span>Recargas en Mantenimiento 🚧</span>
+                      </>
+                    ) : payPhoneInitLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Conectando con PayPhone...</span>
@@ -1023,10 +1043,19 @@ export const PWAWalletView: React.FC<PWAWalletViewProps> = ({
 
                   <button
                     type="submit"
-                    disabled={isSubmitting || !receiptFile || isVerifyingHash}
-                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_4px_20px_rgba(16,185,129,0.4)] active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                    disabled={isSubmitting || (!receiptFile && !MAINTENANCE_CONFIG.enabled) || isVerifyingHash || (MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin')}
+                    className={`w-full py-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${
+                      MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin'
+                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
+                        : 'bg-gradient-to-r from-emerald-500 to-teal-400 text-black shadow-[0_4px_20px_rgba(16,185,129,0.4)] disabled:opacity-50'
+                    }`}
                   >
-                    {isSubmitting ? (
+                    {MAINTENANCE_CONFIG.enabled && currentUser.role !== 'admin' ? (
+                      <>
+                        <Ban className="w-4 h-4 text-amber-400" />
+                        <span>Recargas en Mantenimiento 🚧</span>
+                      </>
+                    ) : isSubmitting ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Enviando comprobante...</span>

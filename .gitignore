@@ -33,3 +33,4 @@ supabase/.temp/
 
 # Firebase & Deployment Caches
 .firebase/
+supabase_migration_package/

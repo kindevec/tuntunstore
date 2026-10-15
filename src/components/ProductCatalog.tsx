@@ -4,6 +4,7 @@ import { DiamondIcon } from './DiamondIcon';
 import { DiamondChestGraphic } from './DiamondChestGraphic';
 import { Sparkles, Trophy, Flame, ShoppingCart, Check, Zap, HelpCircle, Wallet, Plus, Edit, Trash2, ShieldCheck, X, Save, DollarSign } from 'lucide-react';
 import { AdminConfirmModal } from './admin/AdminConfirmModal';
+import { MAINTENANCE_CONFIG } from '../config/maintenance';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -257,11 +258,16 @@ export const CyanProductCard: React.FC<{
         ) : (
           <button
             id={`btn-buy-${product.id}`}
+            disabled={MAINTENANCE_CONFIG.enabled && !isAdmin}
             onClick={() => onSelectProduct(product)}
-            className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase text-xs rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer relative z-20"
+            className={`w-full py-2.5 font-black uppercase text-xs rounded-xl transition-all flex items-center justify-center gap-2 relative z-20 cursor-pointer active:scale-95 ${
+              MAINTENANCE_CONFIG.enabled && !isAdmin
+                ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+            }`}
           >
-            <ShoppingCart className="w-4 h-4 text-black" />
-            <span>Comprar</span>
+            <ShoppingCart className="w-4 h-4 text-current" />
+            <span>{MAINTENANCE_CONFIG.enabled && !isAdmin ? 'En Mantenimiento 🚧' : 'Comprar'}</span>
           </button>
         )}
       </div>
@@ -590,11 +596,16 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     ) : (
                       <button
                         id={`btn-buy-${product.id}`}
+                        disabled={MAINTENANCE_CONFIG.enabled && !isAdmin}
                         onClick={() => onSelectProduct(product)}
-                        className="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(251,191,36,0.4)] transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                        className={`w-full py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+                          MAINTENANCE_CONFIG.enabled && !isAdmin
+                            ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                            : 'bg-amber-400 hover:bg-amber-300 text-black shadow-[0_0_15px_rgba(251,191,36,0.4)]'
+                        }`}
                       >
-                        <ShoppingCart className="w-4 h-4 text-black" />
-                        <span>Comprar Membresía</span>
+                        <ShoppingCart className="w-4 h-4 text-current" />
+                        <span>{MAINTENANCE_CONFIG.enabled && !isAdmin ? 'En Mantenimiento 🚧' : 'Comprar Membresía'}</span>
                       </button>
                     )}
                   </div>

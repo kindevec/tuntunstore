@@ -2,8 +2,9 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Product, UserProfile } from '../../types';
 import { PWAProductCard } from './PWAProductCard';
 import { PWABottomSheet } from './PWABottomSheet';
-import { Wallet, CheckCircle2, AlertCircle, ShoppingBag, ArrowRight, Zap } from 'lucide-react';
+import { Wallet, CheckCircle2, AlertCircle, ShoppingBag, ArrowRight, Zap, Ban } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
+import { MAINTENANCE_CONFIG } from '../../config/maintenance';
 
 interface PWACatalogViewProps {
   products: Product[];
@@ -65,6 +66,12 @@ export const PWACatalogView: React.FC<PWACatalogViewProps> = ({
 
   const handleConfirmPurchase = async () => {
     if (!selectedProduct) return;
+
+    if (MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin') {
+      triggerHaptic('error');
+      setErrorMsg('🚧 Estamos en mantenimiento ahorita: Las compras están pausadas temporalmente.');
+      return;
+    }
 
     setIsSubmitting(true);
     setErrorMsg('');
@@ -250,15 +257,28 @@ export const PWACatalogView: React.FC<PWACatalogViewProps> = ({
                 {hasEnoughBalance ? (
                   <button
                     onClick={handleConfirmPurchase}
-                    disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_4px_20px_rgba(16,185,129,0.5)] active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                    disabled={isSubmitting || (MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin')}
+                    className={`w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 ${
+                      MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin'
+                        ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                        : 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black shadow-[0_4px_20px_rgba(16,185,129,0.5)] disabled:opacity-50'
+                    }`}
                   >
-                    <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
-                    <span>
-                      {isSubmitting
-                        ? 'Procesando entrega...'
-                        : `Pagar $${selectedProduct.priceUSD.toFixed(2)} y Recibir Código`}
-                    </span>
+                    {MAINTENANCE_CONFIG.enabled && currentUser?.role !== 'admin' ? (
+                      <>
+                        <Ban className="w-4 h-4 text-amber-400" />
+                        <span>En Mantenimiento (Compras Pausadas)</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
+                        <span>
+                          {isSubmitting
+                            ? 'Procesando entrega...'
+                            : `Pagar $${selectedProduct.priceUSD.toFixed(2)} y Recibir Código`}
+                        </span>
+                      </>
+                    )}
                   </button>
                 ) : (
                   <div className="space-y-2">
