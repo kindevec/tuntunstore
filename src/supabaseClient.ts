@@ -16,7 +16,7 @@ export const uploadBannerImage = async (file: File): Promise<{ success: boolean;
 
     const { error: uploadError } = await supabase.storage
       .from('banners')
-      .upload(filePath, optimizedFile);
+      .upload(filePath, optimizedFile, { cacheControl: '31536000', upsert: true });
 
     if (uploadError) {
       throw uploadError;

@@ -164,10 +164,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isUploadingCodes, setIsUploadingCodes] = useState(false);
 
   const fetchCodesStats = async () => {
+    // 1. Intentar primero RPC agregada (ultra liviano, ~1 KB vs ~800 KB)
+    try {
+      const { data: rpcData, error: rpcErr } = await supabase.rpc('get_redemption_codes_summary');
+      if (!rpcErr && Array.isArray(rpcData)) {
+        const statsMap: Record<string, {product_id: string, product_name: string, total: number, available: number, used: number}> = {};
+        products.forEach(p => {
+          statsMap[p.id] = { product_id: p.id, product_name: p.name, total: 0, available: 0, used: 0 };
+        });
+        rpcData.forEach((row: any) => {
+          const pid = String(row.product_id);
+          const matchedProduct = products.find(p => p.id === pid);
+          statsMap[pid] = {
+            product_id: pid,
+            product_name: matchedProduct ? matchedProduct.name : 'Producto',
+            total: Number(row.total || 0),
+            available: Number(row.available || 0),
+            used: Number(row.used || 0)
+          };
+        });
+        setCodesStats(Object.values(statsMap));
+        return;
+      }
+    } catch {
+      // Fallback silencioso si la RPC aún no está creada en DB
+    }
+
+    // 2. Fallback optimizado: select quirúrgico sin JOIN a products ni ORDER BY costoso
     const { data: statsData, error } = await supabase
       .from('redemption_codes')
-      .select('product_id, is_used, products(name)')
-      .order('created_at', { ascending: false });
+      .select('product_id, is_used');
     
     if (error) {
       console.error("Error fetching codes stats:", error.message);
@@ -183,9 +209,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
     if (statsData) {
       statsData.forEach((code: any) => {
-        const pid = code.product_id;
+        const pid = String(code.product_id);
         if (!statsMap[pid]) {
-          statsMap[pid] = { product_id: pid, product_name: code.products?.name || 'Producto', total: 0, available: 0, used: 0 };
+          const matchedProduct = products.find(p => p.id === pid);
+          statsMap[pid] = { product_id: pid, product_name: matchedProduct ? matchedProduct.name : 'Producto', total: 0, available: 0, used: 0 };
         }
         statsMap[pid].total++;
         if (code.is_used) statsMap[pid].used++;
@@ -288,7 +315,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             .select('id, code')
             .eq('product_id', codesProductId)
             .eq('is_used', false)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: true })
+            .limit(pendingOrders.length);
             
           if (codesFetchError) throw codesFetchError;
           
@@ -303,12 +331,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 status: 'Completado',
                 redemption_code: codeToAssign.code
               }).eq('id', order.id);
-              
-              await supabase.from('order_status_history').insert({
-                order_id: order.id,
-                status: 'Completado',
-                note: 'Código asignado automáticamente (Ingreso de stock)'
-              });
             }
           }
         }

@@ -57,6 +57,8 @@ export default function App() {
   const [isLoadingOrders, setIsLoadingOrders] = useState<boolean>(false);
   const [hasMoreOrders, setHasMoreOrders] = useState<boolean>(true);
   const isLoadingOrdersRef = useRef<boolean>(false);
+  const inFlightProfilePromiseRef = useRef<Promise<void> | null>(null);
+  const queuedProfileFetchRef = useRef<string | null>(null);
   const [walletHistory, setWalletHistory] = useState<any[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
@@ -78,40 +80,16 @@ export default function App() {
 
   useEffect(() => {
     fetchInitialData();
-    
-    supabase.auth.getSession().then(({ data: { session } }) => {
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        if (event !== 'TOKEN_REFRESHED') {
+          fetchUserProfile(session.user.id);
+        }
       } else {
         updateCurrentActiveUser(null);
       }
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else if (event === 'SIGNED_OUT') {
-        updateCurrentActiveUser(null);
-      }
-    });
-
-    // Realtime channel for public data (hero_slides & products) - active for ALL users
-    const publicChannel = supabase.channel('tuntun_public_realtime')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'hero_slides' 
-      }, () => {
-        fetchInitialData();
-      })
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'products' 
-      }, () => {
-        fetchInitialData();
-      })
-      .subscribe();
 
     const handleLocalBannersUpdated = () => {
       fetchInitialData();
@@ -120,13 +98,12 @@ export default function App() {
 
     return () => {
       subscription.unsubscribe();
-      supabase.removeChannel(publicChannel);
       window.removeEventListener('tuntun_banners_updated', handleLocalBannersUpdated);
     };
   }, []);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser?.uid) return;
 
     if (currentUser.role === 'admin') {
       supabase.from('wallet_transactions')
@@ -148,9 +125,11 @@ export default function App() {
       }, (payload) => {
         const newRecord = payload.new as any;
         const oldRecord = payload.old as any;
+        const current = currentUserRef.current;
+        if (!current) return;
         
         // Admin Top-up Badge Logic
-        if (currentUser.role === 'admin') {
+        if (current.role === 'admin') {
           fetchAdminStats();
           if (newRecord && newRecord.type === 'top_up' && newRecord.status === 'Pendiente') {
             setPendingTopUps(prev => {
@@ -172,7 +151,7 @@ export default function App() {
         } 
         
         // Client Logic
-        if (newRecord && newRecord.user_id === currentUser.uid) {
+        if (newRecord && newRecord.user_id === current.uid) {
           // If a top-up was approved, show a toast
           if (payload.eventType === 'UPDATE' && 
               newRecord.type === 'top_up' && 
@@ -181,7 +160,7 @@ export default function App() {
             showToast(`✅ ¡Tu recarga ha sido Aprobada! Tu saldo ha sido acreditado.`);
           }
           // Refresh user profile to get new balance and history
-          fetchUserProfile(currentUser.uid);
+          fetchUserProfile(current.uid);
         }
       })
       .on('postgres_changes', { 
@@ -191,8 +170,10 @@ export default function App() {
       }, async (payload) => {
         const newRecord = payload.new as any;
         const eventType = payload.eventType;
+        const current = currentUserRef.current;
+        if (!current) return;
         
-        if (currentUser.role === 'admin') {
+        if (current.role === 'admin') {
           if (eventType === 'UPDATE' && newRecord) {
             setOrders(prev => prev.map(o => (o.id === (newRecord.order_number || newRecord.id)) ? { ...o, status: newRecord.status } : o));
             fetchAdminStats();
@@ -213,8 +194,8 @@ export default function App() {
           }
         } else {
           // Si es un cliente y la orden es suya, actualizar
-          if (newRecord && newRecord.user_id === currentUser.uid) {
-             fetchOrders('client', currentUser.uid);
+          if (newRecord && newRecord.user_id === current.uid) {
+             fetchOrders('client', current.uid);
           }
         }
       })
@@ -225,10 +206,12 @@ export default function App() {
       }, (payload) => {
         const newProfile = payload.new as any;
         const oldProfile = payload.old as any;
+        const current = currentUserRef.current;
+        if (!current) return;
 
-        if (currentUser && (newProfile?.id === currentUser.uid || oldProfile?.id === currentUser.uid)) {
+        if (newProfile?.id === current.uid || oldProfile?.id === current.uid) {
           if (newProfile && typeof newProfile.is_blocked === 'boolean') {
-            const wasBlocked = !!currentUser.isBlocked;
+            const wasBlocked = !!current.isBlocked;
             const nowBlocked = !!newProfile.is_blocked;
             if (!wasBlocked && nowBlocked) {
               showToast('⚠️ Tu cuenta ha sido inhabilitada por la administración.');
@@ -236,27 +219,28 @@ export default function App() {
               showToast('✅ Tu cuenta ha sido reactivada por la administración.');
             }
             updateCurrentActiveUser({
-              ...currentUser,
+              ...current,
               isBlocked: nowBlocked,
-              role: newProfile.role || currentUser.role,
-              name: newProfile.name || currentUser.name,
-              gamerTag: newProfile.gamer_tag !== undefined ? newProfile.gamer_tag : currentUser.gamerTag,
-              playerIdDefault: newProfile.player_id_default !== undefined ? newProfile.player_id_default : currentUser.playerIdDefault,
-              phone: newProfile.phone !== undefined ? newProfile.phone : currentUser.phone,
-              preferredBank: newProfile.preferred_bank !== undefined ? newProfile.preferred_bank : currentUser.preferredBank,
+              role: newProfile.role || current.role,
+              name: newProfile.name || current.name,
+              gamerTag: newProfile.gamer_tag !== undefined ? newProfile.gamer_tag : current.gamerTag,
+              playerIdDefault: newProfile.player_id_default !== undefined ? newProfile.player_id_default : current.playerIdDefault,
+              phone: newProfile.phone !== undefined ? newProfile.phone : current.phone,
+              preferredBank: newProfile.preferred_bank !== undefined ? newProfile.preferred_bank : current.preferredBank,
             });
           }
-          fetchUserProfile(currentUser.uid);
+          fetchUserProfile(current.uid);
         }
-        if (currentUser?.role === 'admin') {
+        if (current.role === 'admin') {
           fetchAdminStats();
         }
       })
       .subscribe();
 
     const handleWalletUpdated = () => {
-      if (currentUser?.uid) {
-        fetchUserProfile(currentUser.uid);
+      const current = currentUserRef.current;
+      if (current?.uid) {
+        fetchUserProfile(current.uid);
       }
     };
     window.addEventListener('tuntun_wallet_updated', handleWalletUpdated);
@@ -265,7 +249,7 @@ export default function App() {
       supabase.removeChannel(channel);
       window.removeEventListener('tuntun_wallet_updated', handleWalletUpdated);
     };
-  }, [currentUser]);
+  }, [currentUser?.uid, currentUser?.role]);
 
   const [footerHeight, setFooterHeight] = useState(0);
 
@@ -537,49 +521,74 @@ export default function App() {
     }
   };
 
-  const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (error) {
-      showToast(`❌ Error cargando perfil: ${error.message}`);
-      return;
+  const fetchUserProfile = (userId: string): Promise<void> => {
+    if (inFlightProfilePromiseRef.current) {
+      queuedProfileFetchRef.current = userId;
+      return inFlightProfilePromiseRef.current;
     }
 
-    // Fetch computed balance
-    const { data: balanceData, error: balanceError } = await supabase.rpc('get_wallet_balance', { p_user_id: userId });
-    const computedBalance = balanceError ? 0 : Number(balanceData || 0);
+    const runFetch = async (targetId: string): Promise<void> => {
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', targetId).single();
+        if (error) {
+          showToast(`❌ Error cargando perfil: ${error.message}`);
+          return;
+        }
 
-    // Fetch wallet history
-    const { data: historyData } = await supabase.from('wallet_transactions').select('*').eq('user_id', userId);
-    if (historyData) setWalletHistory(historyData);
+        // Fetch computed balance
+        const { data: balanceData, error: balanceError } = await supabase.rpc('get_wallet_balance', { p_user_id: targetId });
+        const computedBalance = balanceError ? 0 : Number(balanceData || 0);
 
-    if (data) {
-      const userProfile: UserProfile = {
-        uid: data.id,
-        name: data.name || 'Usuario',
-        email: data.email,
-        avatar: data.avatar_url || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
-        role: data.role as 'client' | 'admin',
-        walletBalanceUSD: computedBalance,
-        playerIdDefault: data.player_id_default,
-        gamerTag: data.gamer_tag,
-        phone: data.phone,
-        preferredBank: data.preferred_bank,
-        isBlocked: !!data.is_blocked,
-      };
-      updateCurrentActiveUser(userProfile);
-      
-      fetchOrders(userProfile.role, userProfile.uid);
-      if (userProfile.role === 'admin') fetchAllUsersForAdmin();
+        // Fetch wallet history (limit to 50 latest transactions to prevent runaway egress)
+        const { data: historyData } = await supabase
+          .from('wallet_transactions')
+          .select('*')
+          .eq('user_id', targetId)
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (historyData) setWalletHistory(historyData);
 
-      if (window.location.hash.includes('login') || window.location.hash === '' || window.location.hash === '#') {
-        const targetTab = data.role === 'admin' ? 'admin' : 'catalog';
-        const targetHash = data.role === 'admin' ? '#admin' : '#catalog';
-        setLoginRedirectReason(null);
-        setActiveTab(targetTab);
-        window.location.hash = targetHash;
-        showToast(`👋 Bienvenid@, ${data.name || data.email}`);
+        if (data) {
+          const userProfile: UserProfile = {
+            uid: data.id,
+            name: data.name || 'Usuario',
+            email: data.email,
+            avatar: data.avatar_url || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=150&q=80',
+            role: data.role as 'client' | 'admin',
+            walletBalanceUSD: computedBalance,
+            playerIdDefault: data.player_id_default,
+            gamerTag: data.gamer_tag,
+            phone: data.phone,
+            preferredBank: data.preferred_bank,
+            isBlocked: !!data.is_blocked,
+          };
+          updateCurrentActiveUser(userProfile);
+          
+          fetchOrders(userProfile.role, userProfile.uid);
+          if (userProfile.role === 'admin') fetchAllUsersForAdmin();
+
+          if (window.location.hash.includes('login') || window.location.hash === '' || window.location.hash === '#') {
+            const targetTab = data.role === 'admin' ? 'admin' : 'catalog';
+            const targetHash = data.role === 'admin' ? '#admin' : '#catalog';
+            setLoginRedirectReason(null);
+            setActiveTab(targetTab);
+            window.location.hash = targetHash;
+            showToast(`👋 Bienvenid@, ${data.name || data.email}`);
+          }
+        }
+      } finally {
+        inFlightProfilePromiseRef.current = null;
+        if (queuedProfileFetchRef.current) {
+          const nextUserId = queuedProfileFetchRef.current;
+          queuedProfileFetchRef.current = null;
+          fetchUserProfile(nextUserId);
+        }
       }
-    }
+    };
+
+    const promise = runFetch(userId);
+    inFlightProfilePromiseRef.current = promise;
+    return promise;
   };
 
   const updateCurrentActiveUser = (user: UserProfile | null) => {
@@ -779,11 +788,6 @@ export default function App() {
       if (currentUser) fetchOrders(currentUser.role, currentUser.uid);
       return;
     }
-    await supabase.from('order_status_history').insert({
-      order_id: orderId,
-      status: newStatus,
-      note: note || `Estado actualizado a ${newStatus}.`
-    });
     
     showToast(`Estado del pedido actualizado a "${newStatus}"`);
     fetchAdminStats();
