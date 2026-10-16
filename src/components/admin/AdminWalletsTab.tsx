@@ -59,6 +59,43 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  const [newlyArrivedIds, setNewlyArrivedIds] = useState<Set<string>>(new Set());
+  const [extraProfiles, setExtraProfiles] = useState<Record<string, { name: string; email: string }>>({});
+
+  useEffect(() => {
+    const handleNewTopUp = (e: any) => {
+      const topUp = e.detail;
+      if (topUp?.id) {
+        setNewlyArrivedIds(prev => new Set([...prev, topUp.id]));
+        setTimeout(() => {
+          setNewlyArrivedIds(prev => {
+            const next = new Set(prev);
+            next.delete(topUp.id);
+            return next;
+          });
+        }, 8000);
+      }
+    };
+
+    window.addEventListener('tuntun_new_topup_received', handleNewTopUp as EventListener);
+    return () => window.removeEventListener('tuntun_new_topup_received', handleNewTopUp as EventListener);
+  }, []);
+
+  useEffect(() => {
+    pendingTopUps.forEach(t => {
+      if (!t.user_id) return;
+      const found = registeredUsers.find(u => u.uid === t.user_id) || localUsers.find(u => u.uid === t.user_id) || extraProfiles[t.user_id];
+      if (!found) {
+        supabase.from('profiles').select('id, name, email').eq('id', t.user_id).single()
+          .then(({ data }) => {
+            if (data) {
+              setExtraProfiles(prev => ({ ...prev, [data.id]: { name: data.name || 'Usuario', email: data.email || 'N/A' } }));
+            }
+          });
+      }
+    });
+  }, [pendingTopUps, registeredUsers, localUsers]);
+
   const [payphoneStats, setPayphoneStats] = useState<{ totalUSD: number; count: number }>({ totalUSD: 0, count: 0 });
 
   useEffect(() => {
@@ -303,6 +340,9 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
               <Clock className="w-4 h-4" /> Solicitudes de Recarga Pendientes
             </h3>
             <span className="text-xs text-amber-400 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full">{pendingTopUps.length} Pendientes</span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> En vivo
+            </span>
           </div>
           {pendingTopUps.some(t => t.auto_verified) && (
             <button
@@ -324,9 +364,14 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
           ) : (
             <div className="space-y-4">
               {pendingTopUps.map(topUp => {
-                const user = registeredUsers.find(u => u.uid === topUp.user_id);
+                const user = registeredUsers.find(u => u.uid === topUp.user_id) || localUsers.find(u => u.uid === topUp.user_id) || (extraProfiles[topUp.user_id] ? { uid: topUp.user_id, ...extraProfiles[topUp.user_id] } as any : undefined);
+                const isNewlyArrived = newlyArrivedIds.has(topUp.id);
                 return (
-                  <div key={topUp.id} className="bg-zinc-900 border border-amber-500/30 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-lg">
+                  <div key={topUp.id} className={`bg-zinc-900 border rounded-xl p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between shadow-lg transition-all duration-500 ${
+                    isNewlyArrived
+                      ? 'border-amber-400 ring-2 ring-amber-400/50 shadow-[0_0_25px_rgba(251,191,36,0.35)] animate-pulse'
+                      : 'border-amber-500/30'
+                  }`}>
                     <div className="flex items-start sm:items-center gap-4 w-full md:w-auto">
                       <div className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 shrink-0 overflow-hidden">
                         {topUp.receipt_url ? (
@@ -345,7 +390,14 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-black text-white text-sm sm:text-base truncate">Recarga de ${topUp.amount.toFixed(2)} USD</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-black text-white text-sm sm:text-base">Recarga de ${Number(topUp.amount || 0).toFixed(2)} USD</p>
+                          {isNewlyArrived && (
+                            <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-amber-400 text-black rounded-full animate-bounce shadow">
+                              ⚡ ¡Recién llegada!
+                            </span>
+                          )}
+                        </div>
                         <div className="text-[11px] sm:text-xs text-zinc-400 flex flex-col gap-0.5 mt-1">
                           <span className="truncate"><strong className="text-zinc-300">Cliente:</strong> {user?.name || 'Desconocido'} ({user?.email || 'N/A'})</span>
                           <span><strong className="text-zinc-300">Fecha:</strong> {new Date(topUp.created_at).toLocaleString()}</span>
@@ -372,7 +424,7 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                                       <button
                                         onClick={() => onUpdateTopUpAmount(topUp.id, detectedVal)}
                                         className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-black text-[10px] font-black rounded-lg uppercase flex items-center gap-1 shadow-[0_0_12px_rgba(245,158,11,0.3)] transition-all cursor-pointer"
-                                        title={`Aplicar corrección automática de $${topUp.amount.toFixed(2)} USD a $${detectedVal.toFixed(2)} USD`}
+                                        title={`Aplicar corrección automática de $${Number(topUp.amount || 0).toFixed(2)} USD a $${detectedVal.toFixed(2)} USD`}
                                       >
                                         <Zap className="w-3.5 h-3.5 fill-black shrink-0" /> Corrección Automática (${detectedVal.toFixed(2)})
                                       </button>
@@ -404,8 +456,9 @@ export const AdminWalletsTab: React.FC<AdminWalletsTabProps> = ({
                       )}
                       <button
                         onClick={() => {
-                          setEditingTopUp({ id: topUp.id, amount: topUp.amount, userEmail: user?.email });
-                          setNewTopUpAmountInput(topUp.amount.toString());
+                          const numAmt = Number(topUp.amount || 0);
+                          setEditingTopUp({ id: topUp.id, amount: numAmt, userEmail: user?.email });
+                          setNewTopUpAmountInput(numAmt.toString());
                         }}
                         className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-black rounded-xl uppercase flex items-center justify-center gap-1.5 border border-amber-500/30 transition-colors cursor-pointer"
                         title="Editar el valor de esta recarga"

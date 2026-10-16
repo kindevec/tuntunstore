@@ -11,6 +11,7 @@ interface BottomNavigationProps {
     subTab?: 'orders' | 'catalog' | 'email' | 'wallets' | 'codes' | 'banners'
   ) => void;
   pendingOrdersCount: number;
+  pendingTopUpsCount?: number;
   lowStockCodesCount?: number;
   currentUser: UserProfile | null;
   isPWA?: boolean;
@@ -41,6 +42,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   adminSubTab = 'orders',
   setActiveTab,
   pendingOrdersCount,
+  pendingTopUpsCount = 0,
   lowStockCodesCount = 0,
   currentUser,
   isPWA = false,
@@ -347,13 +349,20 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         {/* Admin Tab 3: Billeteras USD & Usuarios */}
         <button
           onClick={() => setActiveTab('admin', 'wallets')}
-          className={`flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer px-1 ${
+          className={`flex flex-col items-center justify-center flex-1 min-w-0 h-11 rounded-xl transition-all cursor-pointer px-1 relative ${
             activeTab === 'admin' && adminSubTab === 'wallets'
               ? 'text-amber-400 bg-amber-400/10 border border-amber-400/30 shadow-[0_0_12px_rgba(251,191,36,0.3)]'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <Wallet className={`w-4 h-4 ${activeTab === 'admin' && adminSubTab === 'wallets' ? 'text-amber-400 stroke-[2.5]' : ''}`} />
+          <div className="relative flex items-center justify-center">
+            <Wallet className={`w-4 h-4 ${activeTab === 'admin' && adminSubTab === 'wallets' ? 'text-amber-400 stroke-[2.5]' : ''}`} />
+            {pendingTopUpsCount > 0 && (
+              <span className="absolute -top-1.5 -right-2 px-1 min-w-[14px] h-[14px] bg-amber-500 text-black font-black text-[9px] rounded-full flex items-center justify-center animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.6)]">
+                {pendingTopUpsCount}
+              </span>
+            )}
+          </div>
           <span className="text-[8px] xs:text-[9.5px] font-black uppercase tracking-tight mt-0.5 truncate max-w-full">Saldos</span>
         </button>
 

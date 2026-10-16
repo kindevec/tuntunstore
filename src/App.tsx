@@ -3,6 +3,7 @@ import { Product, BankAccount, Order, UserProfile, OrderStatus, ProductCategory,
 import { supabase } from './supabaseClient';
 import { convertImageToWebp, resizeImageForProcessing } from './utils/imageOptimization';
 import { calculateFileHash, checkReceiptDuplicate } from './utils/receiptSecurity';
+import { playTopUpAlertChime } from './utils/audioAlert';
 
 import { Header } from './components/Header';
 import { WhatsAppButton } from './components/WhatsAppButton';
@@ -62,6 +63,8 @@ export default function App() {
   const [walletHistory, setWalletHistory] = useState<any[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [registeredUsers, setRegisteredUsers] = useState<UserProfile[]>([]);
+  const registeredUsersRef = useRef<UserProfile[]>(registeredUsers);
+  registeredUsersRef.current = registeredUsers;
   const [adminStats, setAdminStats] = useState<AdminDashboardStats | null>(null);
 
   const [loginRedirectReason, setLoginRedirectReason] = useState<string | null>(null);
@@ -131,22 +134,68 @@ export default function App() {
         // Admin Top-up Badge Logic
         if (current.role === 'admin') {
           fetchAdminStats();
-          if (newRecord && newRecord.type === 'top_up' && newRecord.status === 'Pendiente') {
-            setPendingTopUps(prev => {
-              if (prev.find(t => t.id === newRecord.id)) return prev;
-              return [...prev, newRecord];
-            });
+
+          if (newRecord && newRecord.type === 'top_up') {
+            const sanitizedRecord = {
+              ...newRecord,
+              amount: Number(newRecord.amount || 0)
+            };
+
+            if (newRecord.status === 'Pendiente') {
+              setPendingTopUps(prev => {
+                const exists = prev.some(t => t.id === newRecord.id);
+                if (exists) {
+                  return prev.map(t => t.id === newRecord.id ? { ...t, ...sanitizedRecord } : t);
+                }
+                return [sanitizedRecord, ...prev];
+              });
+
+              // Si es una nueva recarga entrante o recién creada
+              if (payload.eventType === 'INSERT') {
+                playTopUpAlertChime();
+                const amt = sanitizedRecord.amount.toFixed(2);
+                showToast(`🔔 ¡Nueva solicitud de recarga recibida por $${amt} USD!`);
+                window.dispatchEvent(new CustomEvent('tuntun_new_topup_received', { detail: sanitizedRecord }));
+                window.dispatchEvent(new CustomEvent('tuntun_wallet_updated'));
+
+                // Si el usuario que envió la recarga no está cargado en memoria, traer únicamente su perfil
+                if (newRecord.user_id && !registeredUsersRef.current.some(u => u.uid === newRecord.user_id)) {
+                  supabase.from('profiles').select('*').eq('id', newRecord.user_id).single().then(({ data: singleProfile }) => {
+                    if (singleProfile) {
+                      setRegisteredUsers(prev => [{
+                        uid: singleProfile.id,
+                        name: singleProfile.name || 'Usuario',
+                        email: singleProfile.email,
+                        avatar: singleProfile.avatar_url,
+                        role: singleProfile.role as any,
+                        walletBalanceUSD: Number(singleProfile.wallet_balance_usd || 0),
+                        playerIdDefault: singleProfile.player_id_default,
+                        gamerTag: singleProfile.gamer_tag,
+                        phone: singleProfile.phone,
+                        preferredBank: singleProfile.preferred_bank,
+                        isBlocked: !!singleProfile.is_blocked,
+                      }, ...prev]);
+                    }
+                  });
+                }
+              } else if (payload.eventType === 'UPDATE') {
+                window.dispatchEvent(new CustomEvent('tuntun_wallet_updated'));
+              }
+            } else {
+              // Status no es Pendiente (Aprobado o Rechazado)
+              setPendingTopUps(prev => prev.filter(t => t.id !== newRecord.id));
+              window.dispatchEvent(new CustomEvent('tuntun_wallet_updated'));
+            }
           }
-          if (newRecord && newRecord.type === 'top_up' && newRecord.status !== 'Pendiente') {
-             setPendingTopUps(prev => prev.filter(t => t.id !== newRecord.id));
-          }
+
           if (payload.eventType === 'DELETE' && oldRecord) {
-             setPendingTopUps(prev => prev.filter(t => t.id !== oldRecord.id));
+            setPendingTopUps(prev => prev.filter(t => t.id !== oldRecord.id));
+            window.dispatchEvent(new CustomEvent('tuntun_wallet_updated'));
           }
           
           // Refresh user list for admin if a transaction goes through
           if (newRecord && newRecord.status === 'Aprobado') {
-             fetchAllUsersForAdmin();
+            fetchAllUsersForAdmin();
           }
         } 
         
@@ -235,19 +284,69 @@ export default function App() {
           fetchAdminStats();
         }
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          const current = currentUserRef.current;
+          if (current?.role === 'admin') {
+            supabase.from('wallet_transactions')
+              .select('*')
+              .eq('type', 'top_up')
+              .eq('status', 'Pendiente')
+              .order('created_at', { ascending: false })
+              .then(({ data }) => {
+                if (data) setPendingTopUps(data);
+              });
+            fetchAdminStats();
+          }
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Realtime channel error in global_realtime_changes:', err);
+        }
+      });
 
     const handleWalletUpdated = () => {
       const current = currentUserRef.current;
       if (current?.uid) {
         fetchUserProfile(current.uid);
       }
+      if (current?.role === 'admin') {
+        supabase.from('wallet_transactions')
+          .select('*')
+          .eq('type', 'top_up')
+          .eq('status', 'Pendiente')
+          .order('created_at', { ascending: false })
+          .then(({ data }) => {
+            if (data) setPendingTopUps(data);
+          });
+        fetchAdminStats();
+      }
     };
     window.addEventListener('tuntun_wallet_updated', handleWalletUpdated);
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        const current = currentUserRef.current;
+        if (current?.role === 'admin') {
+          supabase.from('wallet_transactions')
+            .select('*')
+            .eq('type', 'top_up')
+            .eq('status', 'Pendiente')
+            .order('created_at', { ascending: false })
+            .then(({ data }) => {
+              if (data) setPendingTopUps(data);
+            });
+          fetchAdminStats();
+        }
+      }
+    };
+    window.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
 
     return () => {
       supabase.removeChannel(channel);
       window.removeEventListener('tuntun_wallet_updated', handleWalletUpdated);
+      window.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
     };
   }, [currentUser?.uid, currentUser?.role]);
 
@@ -1467,6 +1566,7 @@ export default function App() {
           adminSubTab={adminSubTab} 
           setActiveTab={handleSelectTab} 
           pendingOrdersCount={activePendingOrdersCount} 
+          pendingTopUpsCount={pendingTopUps.length}
           currentUser={currentUser} 
           isPWA={isPWA} 
         />

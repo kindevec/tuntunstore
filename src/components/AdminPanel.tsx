@@ -598,8 +598,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
         <button
           onClick={() => handleTabChange('wallets')}
-          title={`${totalUsersCount.toLocaleString()} Usuarios Registrados`}
-          className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] ${
+          title={`${totalUsersCount.toLocaleString()} Usuarios Registrados${pendingTopUps.length > 0 ? ` - ${pendingTopUps.length} recarga(s) pendiente(s)` : ''}`}
+          className={`px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0 min-h-[42px] relative ${
             activeTab === 'wallets'
               ? 'bg-amber-400 text-black shadow-[0_0_15px_rgba(251,191,36,0.3)]'
               : 'bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-700'
@@ -607,6 +607,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         >
           <DollarSign className="w-4 h-4" />
           <span>Saldos USD ({formatCompactNumber(totalUsersCount)})</span>
+          {pendingTopUps.length > 0 && (
+            <span className={`px-2 py-0.5 text-[10px] font-black rounded-full animate-bounce shadow-sm ${
+              activeTab === 'wallets' ? 'bg-black text-amber-400' : 'bg-amber-400 text-black'
+            }`}>
+              {pendingTopUps.length} recarga{pendingTopUps.length > 1 ? 's' : ''}
+            </span>
+          )}
         </button>
 
         <button
