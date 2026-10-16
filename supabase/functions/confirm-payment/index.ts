@@ -39,8 +39,8 @@ serve(async (req) => {
     const DEFAULT_PAYPHONE_TOKEN = "QhXEetZ_0_2fx3pW5vgDRhTLovnxsXUNsfeS4C-Rn-rkrS8R9etvc9RZZHpnZnwpWLXb9nCaUMUJzHuzuHGWo6b7jOR8MpqZRa_5AA5W37ZVaPPP0kgHlgRavJzoJa7qHxEHYiy1dsfTItavocOkSv2ntf3E8_RmdsaZ5FkO-gBMdpz5lI84uKajbLvpNxgLLSYnn0nMuAJBFPjbrBlxzO2wogDqIctKDOdQh2yuz3hrsM57l167jlsp0Pf_yJYQuK_iw5ao3iSHAGTAbkCfi4kE8DT510X_wd1TUZPT3x4Aqovp53VOC7bI0l1W6Cg0YbdGtzVBs68vwu2djIu3X3W2Uxg";
     const payphoneToken = (Deno.env.get('PAYPHONE_TOKEN') || DEFAULT_PAYPHONE_TOKEN).trim();
 
-    // Confirmar con PayPhone
-    const confirmRes = await fetch('https://pay.payphonetodoesposible.com/api/button/Confirm', {
+    // Confirmar con PayPhone V2
+    const confirmRes = await fetch('https://pay.payphonetodoesposible.com/api/button/V2/Confirm', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${payphoneToken}`,

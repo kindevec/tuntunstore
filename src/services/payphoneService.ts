@@ -168,19 +168,18 @@ export const payphoneService = {
         };
       }
 
-      // 2. Fallback: Proxy local o directo a la API de PayPhone
+      // 2. Fallback: Llamada directa a los endpoints oficiales de PayPhone
       const token = getPayphoneToken();
       let response: Response | null = null;
       
       const endpoints = [
-        '/api/payphone/button/V2/Confirm',
-        '/api/payphone/button/Confirm',
+        'https://pay.payphonetodoesposible.com/api/button/V2/Confirm',
         'https://pay.payphonetodoesposible.com/api/button/Confirm'
       ];
 
       for (const endpoint of endpoints) {
         try {
-          response = await fetch(endpoint, {
+          const res = await fetch(endpoint, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -191,7 +190,13 @@ export const payphoneService = {
               clientTxId: String(clientTxId)
             })
           });
-          if (response.ok) break;
+
+          // Solo aceptar si la respuesta es JSON válido y no HTML
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            response = res;
+            if (res.ok) break;
+          }
         } catch (_) {
           // Continuar al siguiente endpoint de respaldo
         }
@@ -214,11 +219,12 @@ export const payphoneService = {
           authorization_code: directData.authorizationCode,
           card_type: directData.cardType,
           last_four_digits: directData.lastDigits,
+          error: isApproved ? undefined : (directData.message || 'Pago no aprobado por el emisor'),
           data: directData
         };
       }
 
-      const errMsg = data?.error || invokeError?.message || 'No se pudo confirmar la transacción con PayPhone';
+      const errMsg = data?.error || invokeError?.message || 'No se pudo confirmar la transacción con PayPhone.';
       return { success: false, error: errMsg };
     } catch (error: any) {
       console.error('Error confirmando pago PayPhone:', error);

@@ -131,14 +131,19 @@ export const PayPhoneConfirmPage: React.FC<Props> = ({ currentUser }) => {
         lastError = err.message || 'Error de conexión con la pasarela.';
       }
 
-      // Si falló por red o latencia y aún quedan intentos, esperar con backoff
       if (attempt < maxRetries) {
         await new Promise(resolve => setTimeout(resolve, 1800 * attempt));
       }
     }
 
+    // Sanitizar mensaje técnico para evitar mostrar "Unexpected token '<'" al cliente
+    let finalError = lastError || 'No se pudo verificar el pago tras varios intentos.';
+    if (finalError.includes('Unexpected token') || finalError.includes('<!doctype') || finalError.includes('is not valid JSON')) {
+      finalError = 'Error de comunicación temporal con la pasarela de pagos. Por favor verifica tu estado de cuenta o reintenta en unos momentos.';
+    }
+
     setStatus('error');
-    setErrorMessage(lastError || 'No se pudo verificar el pago tras varios intentos.');
+    setErrorMessage(finalError);
   };
 
   useEffect(() => {
